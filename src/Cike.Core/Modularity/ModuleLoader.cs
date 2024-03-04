@@ -1,0 +1,35 @@
+﻿
+namespace Cike.Core.Modularity
+{
+    public class ModuleLoader : IModuleLoader
+    {
+        public CikeModuleContainer LoadCikeModules(Type startupType)
+        {
+            var cikeModules= new HashSet<Type>();
+            ForModuleTypeTree(cikeModules, startupType);
+            var moduleContainer = new CikeModuleContainer(cikeModules.ToList());
+            return moduleContainer;
+        }
+
+        public void ForModuleTypeTree(HashSet<Type> cikeModules, Type type)
+        {
+            var dependsOnAttries = type.GetCustomAttributes<DependsOnAttribute>();
+            if (!dependsOnAttries.Any())
+            {
+                return;
+            }
+
+            foreach (var attr in dependsOnAttries)
+            {
+                foreach (var dependModuleType in attr.GetDependedTypes())
+                {
+                    if (!cikeModules.Contains(dependModuleType))
+                    {
+                        cikeModules.Add(dependModuleType);
+                        ForModuleTypeTree(cikeModules, dependModuleType);
+                    }
+                }
+            }
+        }
+    }
+}
