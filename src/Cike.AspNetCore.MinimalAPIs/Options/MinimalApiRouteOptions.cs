@@ -18,8 +18,6 @@
             {"Create","Post" },
             {"Add","Post" },
             {"Upsert","Post" },
-            {"Save","Post" },
-            {"Set","Post" },
             {"Put","Put" },
             {"Update","Put" },
             {"Modify","Put" },

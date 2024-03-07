@@ -29,4 +29,43 @@ public class UserAppService : MinimalApiServiceBase
         return TypedResults.Ok(name);
     }
 
+    public async Task<Results<Ok<string>, NotFound, BadRequest>> UpdateAsync([FromServices] IConfiguration configuration, string name)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            return TypedResults.BadRequest();
+        }
+
+        return TypedResults.Ok(name);
+    }
+
+    [MinimalApiRoute("api/v1/users/save", ["Post"])]
+    public async Task<Results<Ok<string>, NotFound, BadRequest>> SaveAsync([FromServices] IConfiguration configuration, string name)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            return TypedResults.BadRequest();
+        }
+
+        return TypedResults.Ok(name);
+    }
+    public async Task<Results<Ok<string>, NotFound, BadRequest>> DeleteAsync([FromServices] IConfiguration configuration, string name)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            return TypedResults.BadRequest();
+        }
+
+        return TypedResults.Ok(name);
+    }
+    public async Task<Results<Ok<string>, NotFound, BadRequest>> GetListAsync([FromServices] IConfiguration configuration, string name)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            return TypedResults.BadRequest();
+        }
+
+        return TypedResults.Ok(name);
+    }
+
 }
