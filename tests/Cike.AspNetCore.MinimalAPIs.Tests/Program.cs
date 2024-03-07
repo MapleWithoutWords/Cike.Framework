@@ -1,18 +1,17 @@
-using Microsoft.AspNetCore.Mvc.ApplicationParts;
+
+using Cike.AspNetCore.MinimalAPIs.Extensions;
+using Cike.AspNetCore.MinimalAPIs.Tests;
+using Cike.Core.Extensions;
+using Cike.Core.ObjectAccessor;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+await builder.Services.AddApplicationAsync<TestModule>();
 
+// Add services to the container.
 var app = builder.Build();
 
-app.MapMethods("/api/users/{id}", ["get"], async (context) =>
-{
-    await context.Response.WriteAsync($"hello,{context.Request.Path.Value}");
-});
-
-app.Services.GetRequiredService<ApplicationPart>();
-
-app.Map("/api/users/{id}",Delegate.CreateDelegate());
+await app.InitializeApplicationAsync();
+//app.AddCikeMinimalAPIs();
 
 app.Run();

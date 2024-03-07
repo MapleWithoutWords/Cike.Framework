@@ -7,6 +7,7 @@ namespace Cike.Core.Modularity
         {
             var cikeModules= new HashSet<Type>();
             ForModuleTypeTree(cikeModules, startupType);
+            cikeModules.Add(startupType);
             var moduleContainer = new CikeModuleContainer(cikeModules.ToList());
             return moduleContainer;
         }

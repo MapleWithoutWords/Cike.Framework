@@ -3,16 +3,20 @@
 public abstract class CikeModule
 {
 
-    public virtual void ConfigureServices(ServiceConfigurationContext context)
+    public virtual async Task ConfigureServicesAsync(ServiceConfigurationContext context)
     {
     }
 
+    public virtual void Dispose()
+    {
 
-    public virtual void Initialize(ApplicationInitializationContext context)
+    }
+
+    public virtual async Task InitializeAsync(ApplicationInitializationContext context)
     {
     }
 
-    public virtual void Shutdown(ApplicationShutdownContext context)
+    public virtual async Task ShutdownAsync(ApplicationShutdownContext context)
     {
     }
 }

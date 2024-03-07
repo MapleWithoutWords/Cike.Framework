@@ -1,4 +1,4 @@
-﻿namespace Cike.Core;
+﻿namespace Cike.Core.Modularity;
 
 public class ApplicationShutdownContext
 {

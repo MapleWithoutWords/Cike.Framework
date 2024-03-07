@@ -9,7 +9,7 @@ public class CikeModuleContainer
 
         foreach (var item in moduleTypes)
         {
-            var cikeModule = (CikeModule)Activator.CreateInstance(item);
+            var cikeModule = (CikeModule)Activator.CreateInstance(item)!;
             CikeModules.Add(cikeModule);
         }
     }

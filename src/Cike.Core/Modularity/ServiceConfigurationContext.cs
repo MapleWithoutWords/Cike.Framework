@@ -2,13 +2,10 @@
 
 public class ServiceConfigurationContext
 {
-    public ServiceConfigurationContext(IServiceCollection services, IConfiguration configuration)
+    public ServiceConfigurationContext(IServiceCollection services)
     {
         Services = services;
-        Configuration = configuration;
     }
 
     public IServiceCollection Services { get; }
-
-    public IConfiguration Configuration { get; }
 }

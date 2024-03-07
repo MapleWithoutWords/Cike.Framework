@@ -1,4 +1,4 @@
-﻿namespace Cike.AspNetCore.MinimalAPIs
+﻿namespace Cike.AspNetCore.MinimalAPIs.Options
 {
     public class MinimalApiRouteOptions
     {
@@ -8,14 +8,31 @@
 
         public bool DisablePluralizeServiceName { get; set; } = false;
 
-        public string[] IgnoredUrlSuffixesInServiceNames { get; set; } = ["Service", "AppService"];
+        public List<string> IgnoredUrlSuffixesInServiceNames { get; set; } = ["AppService", "Service"];
 
-        public List<string> GetPrefixes { get; set; } = ["Get","Find"];
+        public Dictionary<string, string> HttpMethodPrefixMapDic { get; set; } = new Dictionary<string, string>
+        {
+            {"Get","Get" },
+            {"Find","Get" },
+            {"Post","Post" },
+            {"Create","Post" },
+            {"Add","Post" },
+            {"Upsert","Post" },
+            {"Save","Post" },
+            {"Set","Post" },
+            {"Put","Put" },
+            {"Update","Put" },
+            {"Modify","Put" },
+            {"Delete","Delete" },
+            {"Remove","Delete" },
+        };
 
-        public List<string> PostPrefixes { get; set; } = ["Post", "Create", "Add", "Upsert", "Save", "Set"];
-
-        public List<string> PutPrefixes { get; set; } = ["Put", "Update", "Modify"];
-
-        public List<string> DeletePrefixes { get; set; } = ["Delete", "Remove"];
+        public string RootUrl
+        {
+            get
+            {
+                return $"{Prefix}{(Version.IsNullOrEmpty() ? "" : $"/{Version}")}";
+            }
+        }
     }
 }
