@@ -12,7 +12,7 @@ namespace Cike.Core.Modularity
             return moduleContainer;
         }
 
-        public void ForModuleTypeTree(HashSet<Type> cikeModules, Type type)
+        private void ForModuleTypeTree(HashSet<Type> cikeModules, Type type)
         {
             var dependsOnAttries = type.GetCustomAttributes<DependsOnAttribute>();
             if (!dependsOnAttries.Any())

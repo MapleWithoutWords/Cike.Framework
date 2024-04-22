@@ -14,6 +14,6 @@ public class CikeModuleContainer
         }
     }
 
-    public List<Type> ModuleTypes { get; set; }
-    public List<CikeModule> CikeModules { get; set; }
+    public List<Type> ModuleTypes { get; }
+    public List<CikeModule> CikeModules { get; }
 }

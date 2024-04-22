@@ -1,4 +1,6 @@
-﻿namespace Cike.EventBus.LocalEvent;
+﻿using System.Reflection;
+
+namespace Cike.EventBus.LocalEvent;
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
 public class LocalEventHandlerAttribute : Attribute
@@ -13,4 +15,8 @@ public class LocalEventHandlerAttribute : Attribute
     {
         Order = order;
     }
+
+    internal Type InstanceType { get; set; }
+    internal MethodInfo EventHandlerMethod { get; set; }
+    internal Type[] ParameterTypes { get; set; } = default!;
 }

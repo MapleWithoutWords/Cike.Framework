@@ -8,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 await builder.Services.AddApplicationAsync<TestModule>();
 
+var assemblyList = AppDomain.CurrentDomain.GetAssemblies();
+
 // Add services to the container.
 var app = builder.Build();
 

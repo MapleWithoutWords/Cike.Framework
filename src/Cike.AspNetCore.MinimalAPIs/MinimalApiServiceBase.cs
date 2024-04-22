@@ -11,14 +11,8 @@ public abstract class MinimalApiServiceBase : ISingletonDependency
     public string? Prefix { get; set; }
     public string? Version { get; set; }
     public string? ServiceName { get; set; }
-    private GlobalMinimalApiRouteOptions _routeOptions;
 
     public MinimalApiServiceBase() { }
-
-    public MinimalApiServiceBase(GlobalMinimalApiRouteOptions routeOptions)
-    {
-        _routeOptions = routeOptions;
-    }
 
 
 }
