@@ -1,9 +1,13 @@
 ﻿using Cike.Core.Modularity;
+using Cike.EventBus.Local;
 using Microsoft.OpenApi.Models;
 
 namespace Cike.AspNetCore.MinimalAPIs.Tests;
 
-[DependsOn(typeof(CikeAspNetCoreMinimalApiModule))]
+[DependsOn([
+    typeof(CikeAspNetCoreMinimalApiModule),
+    typeof(CikeEventBusLocalModule),
+    ])]
 public class TestModule : CikeModule
 {
 

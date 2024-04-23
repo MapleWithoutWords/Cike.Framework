@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Cike.AspNetCore.MinimalAPIs\Cike.AspNetCore.MinimalAPIs.csproj" />
+    <ProjectReference Include="..\..\src\Cike.EventBus.Local\Cike.EventBus.Local.csproj" />
   </ItemGroup>
 
 </Project>
