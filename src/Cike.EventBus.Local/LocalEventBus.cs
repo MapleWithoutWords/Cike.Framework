@@ -2,6 +2,7 @@
 using Cike.Core.DependencyInjection;
 using Cike.EventBus.Local;
 using Cike.EventBus.Local.Enums;
+using Cike.EventBus.Local.LocalEventMiddlewares;
 using Cike.EventBus.Local.Strategies;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -15,7 +16,8 @@ public class LocalEventBus(IServiceProvider _serviceProvider,
     IStrategyExecutor _strategyExecutor,
     ILocalEventExecutor _localEventExecutor,
     LocalEventHandlerRelationContainer _localEventHandlerRelationContainer,
-    ILogger<LocalEventBus> _logger) : ILocalEventBus, IScopedDependency
+    ILogger<LocalEventBus> _logger,
+    ILocalEventMiddlewareProvider _eventMiddlewareProvider) : ILocalEventBus, IScopedDependency
 {
     public async Task PublishAsync<TEvent>(TEvent @event, CancellationToken cancellationToken = default) where TEvent : IEvent
     {
@@ -24,6 +26,16 @@ public class LocalEventBus(IServiceProvider _serviceProvider,
             return;
         }
 
+        var eventMiddlewares = _eventMiddlewareProvider.GetEventMiddlewares<TEvent>();
+
+        EventHandlerDelegate eventHandlerDelegate = async () =>
+        {
+            await ExecuteHandlerAsync(@event, cancellationToken);
+        };
+        await eventMiddlewares.Reverse().Aggregate(eventHandlerDelegate, (next, middleware) => () => middleware.HandleAsync(@event, next))();
+    }
+    public async Task ExecuteHandlerAsync<TEvent>(TEvent @event, CancellationToken cancellationToken = default) where TEvent : IEvent
+    {
         var eventHanlderDto = _localEventHandlerRelationContainer.EventHanlderRelations[@event.GetType()];
         var isCancel = false;
         foreach (var item in eventHanlderDto.Handlers)
@@ -35,51 +47,70 @@ public class LocalEventBus(IServiceProvider _serviceProvider,
                 var instance = _serviceProvider.GetRequiredService(item.InstanceType);
                 var paramList = GetParameters(item, @event, cancellationToken);
                 await item.MethodDelegate(instance, paramList);
-              }, async (handlerException, failureLevel) =>
-              {
-                  if (failureLevel != FailureLevelEnum.Ignore)
-                  {
-                      isCancel = true;
-                      _localEventExecutor.Exception = handlerException;
+            }, async (handlerException, failureLevel) =>
+            {
+                if (failureLevel != FailureLevelEnum.Ignore)
+                {
+                    isCancel = true;
+                    _localEventExecutor.Exception = handlerException;
 
-                      (bool IsSucceed, Exception? CancelException)? cancelHandlerResult = null;
-                      if (eventHanlderDto.CancelHandlers.Any())
-                      {
-                          cancelHandlerResult = await ExecuteCancelHandlerAsync(
-                              item.ComputeCancelList(eventHanlderDto.CancelHandlers),
-                              @event,
-                              cancellationToken);
-                      }
+                    (bool IsSucceed, Exception? CancelException)? cancelHandlerResult = null;
+                    if (eventHanlderDto.CancelHandlers.Any())
+                    {
+                        cancelHandlerResult = await ExecuteCancelHandlerAsync(
+                            item.ComputeCancelList(eventHanlderDto.CancelHandlers),
+                            @event,
+                            cancellationToken);
+                    }
 
-                      switch (cancelHandlerResult)
-                      {
-                          case { IsSucceed: false }:
-                              _localEventExecutor.Exception.Data.Add("cancel handler exception", cancelHandlerResult.Value.CancelException);
-                              _localEventExecutor.Status = ExecutorStatusEnum.RollbackFailed;
-                              break;
-                          case { IsSucceed: true }:
-                              _localEventExecutor.Status = ExecutorStatusEnum.RollbackSucceeded;
-                              break;
-                          default:
-                              _localEventExecutor.Status = ExecutorStatusEnum.Failed;
-                              break;
-                      }
-                  }
-                  else
-                  {
-                      _logger?.LogError(
-                          "Publishing event error is ignored, event id: {EventId}, instance: {InstanceName}, method: {MethodName}, event: {@Event}",
-                          @event.GetEventId(),
-                          item.InstanceType.FullName ?? item.InstanceType.Name,
-                          item.EventHandlerMethod.Name,
-                          @event);
-                  }
-              });
+                    switch (cancelHandlerResult)
+                    {
+                        case { IsSucceed: false }:
+                            _localEventExecutor.Exception.Data.Add("cancel handler exception", cancelHandlerResult.Value.CancelException);
+                            _localEventExecutor.Status = ExecutorStatusEnum.RollbackFailed;
+                            break;
+                        case { IsSucceed: true }:
+                            _localEventExecutor.Status = ExecutorStatusEnum.RollbackSucceeded;
+                            break;
+                        default:
+                            _localEventExecutor.Status = ExecutorStatusEnum.Failed;
+                            break;
+                    }
+                }
+                else
+                {
+                    _logger?.LogError(
+                        "Publishing event error is ignored, event id: {EventId}, instance: {InstanceName}, method: {MethodName}, event: {@Event}",
+                        @event.GetEventId(),
+                        item.InstanceType.FullName ?? item.InstanceType.Name,
+                        item.EventHandlerMethod.Name,
+                        @event);
+                }
+            });
 
             if (_localEventExecutor.Exception is not null)
                 ExceptionDispatchInfo.Capture(_localEventExecutor.Exception).Throw();
 
             if (isCancel) return;
+        }
+    }
+
+
+    public async Task CancelAsync<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : IEvent
+    {
+        var eventHandlers = _localEventHandlerRelationContainer.EventHanlderRelations[@event.GetType()];
+
+        var cancelHandlerResult = await ExecuteCancelHandlerAsync(eventHandlers.CancelHandlers, @event, cancellationToken);
+        if (cancelHandlerResult.IsSucceed)
+        {
+            _localEventExecutor.Status = ExecutorStatusEnum.RollbackSucceeded;
+        }
+        else
+        {
+            ArgumentNullException.ThrowIfNull(_localEventExecutor.Exception);
+
+            _localEventExecutor.Exception.Data.Add("Cancel handler exception", cancelHandlerResult.CancelException);
+            _localEventExecutor.Status = ExecutorStatusEnum.RollbackFailed;
         }
     }
     async Task<(bool IsSucceed, Exception? CancelException)> ExecuteCancelHandlerAsync<TEvent>(
