@@ -1,4 +1,5 @@
-﻿using Cike.EventBus.Local.Enums;
+﻿using Cike.Core.DependencyInjection;
+using Cike.EventBus.Local.Enums;
 using Cike.EventBus.Local.LocalEventMiddlewares;
 using Cike.EventBus.LocalEvent;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,7 +7,7 @@ using System.Runtime.ExceptionServices;
 
 namespace Cike.EventBus.Local.Middlewares;
 
-public class ExceptionLocalEventMiddleware<TEvent> : ILocalEventMiddleware<TEvent>
+public class ExceptionLocalEventMiddleware<TEvent> : ILocalEventMiddleware<TEvent>,ITransientDependency
     where TEvent : IEvent
 {
     private readonly Lazy<ILocalEventExecutor> _executeProviderLazy;

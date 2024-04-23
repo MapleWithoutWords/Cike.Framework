@@ -1,8 +1,9 @@
-﻿using Cike.EventBus.Local.LocalEventMiddlewares;
+﻿using Cike.Core.DependencyInjection;
+using Cike.EventBus.Local.LocalEventMiddlewares;
 
 namespace Cike.EventBus.Local.Middlewares;
 
-public class PreventRecursiveMiddleware<TEvent> : ILocalEventMiddleware<TEvent>
+public class PreventRecursiveMiddleware<TEvent> : ILocalEventMiddleware<TEvent>, ITransientDependency
 where TEvent : IEvent
 {
     public bool PreventRecursive => true;
