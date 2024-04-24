@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Cike.Core\Cike.Core.csproj" />
+  </ItemGroup>
+
 </Project>
