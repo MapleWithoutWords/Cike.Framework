@@ -57,6 +57,7 @@ namespace Cike.Core.Modularity
 
                 await item.ConfigureServicesAsync(new ServiceConfigurationContext(services));
             }
+            ModuleLoader.Services = services;
         }
     }
 }
