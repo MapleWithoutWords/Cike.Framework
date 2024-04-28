@@ -1,6 +1,6 @@
 ﻿namespace Cike.Data;
 
-public interface IAuditedEntity<TKey,TUserId>:IEntity<TKey>
+public interface IAuditedEntity<TUserId>
 {
     DateTime CreateTime { get; set; }
     TUserId CreateUserId { get; set; }
