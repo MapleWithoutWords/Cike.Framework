@@ -1,5 +1,7 @@
-﻿using Cike.Core.DependencyInjection;
+﻿using Cike.Core;
+using Cike.Core.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 
 namespace Cike.Data.DataFilters;
@@ -55,11 +57,11 @@ public class DataFilter<TFilter> : IDataFilter<TFilter>
         }
     }
 
-    private readonly AbpDataFilterOptions _options;
+    private readonly CikeDataFilterOptions _options;
 
     private readonly AsyncLocal<DataFilterState> _filter;
 
-    public DataFilter(IOptions<AbpDataFilterOptions> options)
+    public DataFilter(IOptions<CikeDataFilterOptions> options)
     {
         _options = options.Value;
         _filter = new AsyncLocal<DataFilterState>();

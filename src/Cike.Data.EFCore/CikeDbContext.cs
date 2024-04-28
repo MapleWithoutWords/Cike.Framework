@@ -1,4 +1,5 @@
 ﻿using Cike.Auth;
+using Cike.Core.DependencyInjection;
 using Cike.Core.Modularity;
 using Cike.Data.DataFilters;
 using Cike.Data.EFCore.Extensions;
@@ -12,11 +13,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Security.Principal;
 
 namespace Cike.Data.EFCore;
 
-public abstract class CikeDbContext<TDbContext> : DbContext where TDbContext : DbContext
+public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency where TDbContext : DbContext
 {
     private static IServiceProvider? _rootServiceProvider;
 
@@ -117,7 +117,6 @@ public abstract class CikeDbContext<TDbContext> : DbContext where TDbContext : D
                 .Invoke(this, new object[] { modelBuilder, entityType });
         }
     }
-
     protected virtual void ConfigureBaseProperties<TEntity>(ModelBuilder modelBuilder, IMutableEntityType mutableEntityType)
         where TEntity : class
     {

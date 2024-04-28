@@ -1,4 +1,4 @@
-﻿namespace Cike.Data;
+﻿namespace Cike.Data.DataFilters;
 
 public interface IDataFilter<TFilter>
     where TFilter : class
