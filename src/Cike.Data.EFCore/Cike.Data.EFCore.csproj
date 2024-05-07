@@ -18,8 +18,4 @@
     <ProjectReference Include="..\Cike.Uow\Cike.Uow.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Uow\" />
-  </ItemGroup>
-
 </Project>

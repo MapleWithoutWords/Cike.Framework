@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
@@ -16,7 +17,7 @@ using System.Reflection;
 
 namespace Cike.Data.EFCore;
 
-public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency where TDbContext : DbContext
+public abstract class CikeDbContext<TDbContext> : DbContext, ICikeDbContext, IScopedDependency where TDbContext : DbContext
 {
     private static IServiceProvider? _rootServiceProvider;
 
