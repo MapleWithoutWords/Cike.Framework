@@ -1,4 +1,6 @@
-﻿namespace Cike.Data;
+﻿using Cike.Data;
+
+namespace Cike.Domain.Entities;
 
 public class AuditedEntity<TKey, TUserId> : Entity<TKey>, IAuditedEntity<TUserId>
 {

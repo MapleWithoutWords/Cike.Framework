@@ -1,19 +1,36 @@
 ﻿using Cike.Core.DependencyInjection;
 using Cike.Uow;
+using Cike.Uow.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using System.Data;
-using System.Data.Common;
 
 namespace Cike.Data.EFCore.Uow;
 
-public class EFCoreUnitOfWork<TDbContext>(IServiceProvider _serviceProvider) : IUnitOfWork, ITransientDependency where TDbContext : CikeDbContext<TDbContext>
+public class EFCoreUnitOfWork<TDbContext>(IServiceProvider _serviceProvider) : IUnitOfWork, IScopedDependency where TDbContext : CikeDbContext<TDbContext>
 {
     public Guid TransactionId { get; set; }
 
-    public DbTransaction DbTransaction { get; set; }
+    private DbContext? _dbContext;
+
+    public DbContext DbContext
+    {
+        get
+        {
+            return _dbContext ??= _serviceProvider.GetRequiredService<TDbContext>();
+        }
+        private set
+        {
+            _dbContext = value;
+        }
+    }
 
     public bool IsTransactionBegun { get; set; }
+
+    public IDbTransaction DbTransaction { get => DbContext.Database.CurrentTransaction!.GetDbTransaction(); }
+
+    public UnitOfWorkCommitState CommitState { get; set; }
 
     public async Task BeginTranscationAsync(IsolationLevel? isolationLevel, CancellationToken cancellationToken = default)
     {
@@ -21,17 +38,22 @@ public class EFCoreUnitOfWork<TDbContext>(IServiceProvider _serviceProvider) : I
         {
             return;
         }
-        var dbcontext = _serviceProvider.GetRequiredService<TDbContext>();
-        _transaction = isolationLevel.HasValue ? await dbcontext.Database.BeginTransactionAsync(isolationLevel.Value, cancellationToken) : await dbcontext.Database.BeginTransactionAsync(cancellationToken);
+        IDbContextTransaction transaction = isolationLevel.HasValue ? await DbContext.Database.BeginTransactionAsync(isolationLevel.Value, cancellationToken) : await DbContext.Database.BeginTransactionAsync(cancellationToken);
+        IsTransactionBegun = true;
+        TransactionId = transaction.TransactionId;
+        CommitState = UnitOfWorkCommitState.Uncommitted;
     }
 
-    public Task CommitAsync(CancellationToken cancellationToken = default)
+    public async Task CommitAsync(CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        await DbContext.SaveChangesAsync(cancellationToken);
+        await DbContext.Database.CommitTransactionAsync(cancellationToken);
+        CommitState = UnitOfWorkCommitState.Committed;
     }
 
-    public Task RollbackAsync(CancellationToken cancellationToken = default)
+    public async Task RollbackAsync(CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        await DbContext.Database.RollbackTransactionAsync(cancellationToken);
+        CommitState = UnitOfWorkCommitState.Rollbacked;
     }
 }

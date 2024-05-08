@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Cike.Auth\Cike.Auth.csproj" />
-    <ProjectReference Include="..\Cike.Data\Cike.Data.csproj" />
+    <ProjectReference Include="..\Cike.Domain\Cike.Domain.csproj" />
     <ProjectReference Include="..\Cike.Uow\Cike.Uow.csproj" />
   </ItemGroup>
 

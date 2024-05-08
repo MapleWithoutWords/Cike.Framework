@@ -4,20 +4,23 @@ using Cike.Core.Modularity;
 using Cike.Data.DataFilters;
 using Cike.Data.EFCore.Extensions;
 using Cike.Data.Guids;
+using Cike.Domain.Entities;
+using Cike.Uow;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Nito.AsyncEx;
 using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Cike.Data.EFCore;
 
-public abstract class CikeDbContext<TDbContext> : DbContext, ICikeDbContext, IScopedDependency where TDbContext : DbContext
+public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency where TDbContext : DbContext
 {
     private static IServiceProvider? _rootServiceProvider;
 
@@ -77,8 +80,8 @@ public abstract class CikeDbContext<TDbContext> : DbContext, ICikeDbContext, ISc
                 if (item.State == EntityState.Added)
                 {
                     auditedEntity.CreateUserId = CurrentUser.Id ?? Guid.Empty;
-                    auditedEntity.CreateTime = DateTime.Now;
-                    auditedEntity.UpdateTime = DateTime.Now;
+                    auditedEntity.CreateTime = auditedEntity.CreateTime != default ? auditedEntity.CreateTime : DateTime.Now;
+                    auditedEntity.UpdateTime = auditedEntity.UpdateTime != default ? auditedEntity.UpdateTime : DateTime.Now;
                     auditedEntity.UpdateUserId = Guid.Empty;
                     if (item.Entity is IEntity<Guid> guidEntity && guidEntity.Id == Guid.Empty)
                     {
@@ -87,7 +90,7 @@ public abstract class CikeDbContext<TDbContext> : DbContext, ICikeDbContext, ISc
                 }
                 else if (item.State == EntityState.Modified)
                 {
-                    auditedEntity.UpdateTime = DateTime.Now;
+                    auditedEntity.UpdateTime = auditedEntity.UpdateTime != default ? auditedEntity.UpdateTime : DateTime.Now;
                     auditedEntity.UpdateUserId = CurrentUser.Id ?? Guid.Empty;
                 }
             }
@@ -197,5 +200,102 @@ public abstract class CikeDbContext<TDbContext> : DbContext, ICikeDbContext, ISc
         }
 
         return builder.HasQueryFilter(filter);
+    }
+
+    public override EntityEntry Add(object entity)
+    {
+        AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
+        return base.Add(entity);
+    }
+    public override EntityEntry<TEntity> Add<TEntity>(TEntity entity)
+    {
+        AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
+        return base.Add(entity);
+    }
+    public override async ValueTask<EntityEntry> AddAsync(object entity, CancellationToken cancellationToken = default)
+    {
+        await BeginUnitOfWorkAsync(entity);
+        return await base.AddAsync(entity, cancellationToken);
+    }
+    public override async ValueTask<EntityEntry<TEntity>> AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default)
+    {
+        await BeginUnitOfWorkAsync(entity);
+        return await base.AddAsync(entity, cancellationToken);
+    }
+    public override void AddRange(IEnumerable<object> entities)
+    {
+        AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
+        base.AddRange(entities);
+    }
+    public override void AddRange(params object[] entities)
+    {
+        AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
+        base.AddRange(entities);
+    }
+    public override async Task AddRangeAsync(IEnumerable<object> entities, CancellationToken cancellationToken = default)
+    {
+        await BeginUnitOfWorkAsync(entities);
+        await base.AddRangeAsync(entities, cancellationToken);
+    }
+    public override async Task AddRangeAsync(params object[] entities)
+    {
+        await BeginUnitOfWorkAsync(entities);
+        await base.AddRangeAsync(entities);
+    }
+
+    public override EntityEntry Update(object entity)
+    {
+        AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
+        return base.Update(entity);
+    }
+    public override EntityEntry<TEntity> Update<TEntity>(TEntity entity)
+    {
+        AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
+        return base.Update(entity);
+    }
+    public override void UpdateRange(IEnumerable<object> entities)
+    {
+        AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
+        base.UpdateRange(entities);
+    }
+    public override void UpdateRange(params object[] entities)
+    {
+        AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
+        base.UpdateRange(entities);
+    }
+
+    public override EntityEntry Remove(object entity)
+    {
+        AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
+        return base.Remove(entity);
+    }
+    public override EntityEntry<TEntity> Remove<TEntity>(TEntity entity)
+    {
+        AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
+        return base.Remove(entity);
+    }
+    public override void RemoveRange(IEnumerable<object> entities)
+    {
+        AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
+        base.RemoveRange(entities);
+    }
+    public override void RemoveRange(params object[] entities)
+    {
+        AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
+        base.RemoveRange(entities);
+    }
+
+
+    private async Task BeginUnitOfWorkAsync(params object[] entities)
+    {
+        if (entities?.Any() != true)
+        {
+            return;
+        }
+        var unitOfWork = CurrentServiceProvider?.GetService<IUnitOfWork>()!;
+        if (!unitOfWork.IsTransactionBegun)
+        {
+            await unitOfWork.BeginTranscationAsync();
+        }
     }
 }
