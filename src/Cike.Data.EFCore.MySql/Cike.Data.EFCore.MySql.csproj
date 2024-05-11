@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Cike.Core\Cike.Core.csproj" />
-    <ProjectReference Include="..\Cike.Data.EFCore\Cike.EFCore.csproj" />
+    <ProjectReference Include="..\Cike.Data.EFCore\Cike.Data.EFCore.csproj" />
   </ItemGroup>
 
 </Project>

@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq.Expressions;
 
-namespace Cike.EFCore.Repositories;
+namespace Cike.Data.EFCore.Repositories;
 
 public class EFCoreRepository<TDbContext, TEntity, TKey> : IRepository<TEntity, TKey>, IScopedDependency where TEntity : class, IEntity<TKey> where TDbContext : CikeDbContext<TDbContext>
 {

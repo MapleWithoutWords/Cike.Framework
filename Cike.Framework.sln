@@ -24,15 +24,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cike.EventBus.Local", "src\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cike.Uow", "src\Cike.Uow\Cike.Uow.csproj", "{B66AD29D-9EA5-4541-A60F-4FBA121635C4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cike.EFCore", "src\Cike.Data.EFCore\Cike.EFCore.csproj", "{08223D0C-B1FB-4F00-ADA9-7847BCB67384}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cike.Data.EFCore", "src\Cike.Data.EFCore\Cike.Data.EFCore.csproj", "{08223D0C-B1FB-4F00-ADA9-7847BCB67384}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cike.Data", "src\Cike.Data\Cike.Data.csproj", "{CD278DC5-01BF-46D5-9CD6-CCDBB28D2F10}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cike.Auth", "src\Cike.Auth\Cike.Auth.csproj", "{50BF0BFB-7CCE-451C-B670-997F2A04F9DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cike.Data.EFCore.MySql", "src\Cike.Data.EFCore.MySql\Cike.Data.EFCore.MySql.csproj", "{B51AA5A0-3654-4B1E-B4FD-DC6968A0BAAD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cike.Data.EFCore.MySql", "src\Cike.Data.EFCore.MySql\Cike.Data.EFCore.MySql.csproj", "{B51AA5A0-3654-4B1E-B4FD-DC6968A0BAAD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cike.Domain", "src\Cike.Domain\Cike.Domain.csproj", "{0A7C4564-1335-4003-B60B-DBE36DFE01CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cike.Domain", "src\Cike.Domain\Cike.Domain.csproj", "{0A7C4564-1335-4003-B60B-DBE36DFE01CF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

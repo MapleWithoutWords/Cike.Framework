@@ -3,7 +3,7 @@ using Cike.EFCore;
 
 namespace Cike.Data.EFCore.MySql;
 
-[DependsOn([typeof(CikeEFCoreModule)])]
+[DependsOn([typeof(CikeDataEFCoreModule)])]
 public class CikeDataEFCoreMySqlModule : CikeModule
 {
     public override async Task ConfigureServicesAsync(ServiceConfigurationContext context)
