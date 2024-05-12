@@ -2,5 +2,5 @@
 
 public class CikeDbConnectionOptions
 {
-    public Dictionary<string,string> ConnectionStrings { get; set; }
+    public Dictionary<string, string> ConnectionStrings { get; set; } = null!;
 }

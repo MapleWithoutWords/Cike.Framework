@@ -1,5 +1,4 @@
 ﻿using Cike.Core.Modularity;
-using Cike.EFCore;
 
 namespace Cike.Data.EFCore.MySql;
 
