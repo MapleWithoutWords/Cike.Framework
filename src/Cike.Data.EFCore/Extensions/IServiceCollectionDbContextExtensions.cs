@@ -7,7 +7,6 @@ using Cike.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
 using System.Reflection;
 
 namespace Cike.Data.Extensions;
@@ -21,7 +20,7 @@ public static class IServiceCollectionDbContextExtensions
         GetEntityTypes(typeof(TDbContext)).ToList().ForEach(e =>
         {
             //添加仓储
-            services.AddDefaultRepository(e, typeof(EFCoreRepository<,,>).MakeGenericType(e, EntityHelper.FindPrimaryKeyType(e)!));
+            services.AddDefaultRepository(e, typeof(EFCoreRepository<,,>).MakeGenericType(typeof(TDbContext), e, EntityHelper.FindPrimaryKeyType(e)!));
         });
 
         return services;
