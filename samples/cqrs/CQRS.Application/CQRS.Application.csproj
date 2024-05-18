@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Mapster" Version="7.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Cike.Cqrs\Cike.Cqrs.csproj" />
+    <ProjectReference Include="..\..\..\src\Cike.EventBus.Local\Cike.EventBus.Local.csproj" />
+    <ProjectReference Include="..\CQRS.Data\CQRS.Data.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -5,12 +5,13 @@ using System.Reflection;
 
 namespace Cike.EventBus.Local;
 
+[DependsOn(typeof(CikeEventBusModule))]
 public class CikeEventBusLocalModule : CikeModule
 {
 
     public override async Task ConfigureServicesAsync(ServiceConfigurationContext context)
     {
-        if (!context.Services.Any(e=>e.ServiceType==typeof(CikeEventBusLocalModuleDenpency)))
+        if (!context.Services.Any(e => e.ServiceType == typeof(CikeEventBusLocalModuleDenpency)))
         {
             var cikeModuleContainer = context.Services.GetSingletonInstance<CikeModuleContainer>();
             var eventHandlerRelationContainer = new LocalEventHandlerRelationContainer(cikeModuleContainer);

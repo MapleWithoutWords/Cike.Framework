@@ -8,7 +8,7 @@ using System.Data;
 
 namespace Cike.Data.EFCore.Uow;
 
-public class EFCoreUnitOfWork<TDbContext>(IServiceProvider _serviceProvider) : IUnitOfWork, IScopedDependency where TDbContext : CikeDbContext<TDbContext>
+public class EFCoreUnitOfWork<TDbContext>(IServiceProvider _serviceProvider) : IUnitOfWork where TDbContext : CikeDbContext<TDbContext>
 {
     public Guid TransactionId { get; set; }
 

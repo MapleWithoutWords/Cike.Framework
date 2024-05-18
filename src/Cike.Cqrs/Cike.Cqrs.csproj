@@ -1,14 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <TargetFramework>$(TargetFramework)</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Cike.EventBus\Cike.EventBus.csproj" />
-    <ProjectReference Include="..\Cike.Uow\Cike.Uow.csproj" />
   </ItemGroup>
 
 </Project>

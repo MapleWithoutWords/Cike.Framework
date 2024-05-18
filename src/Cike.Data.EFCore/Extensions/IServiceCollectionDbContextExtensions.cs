@@ -3,7 +3,9 @@ using Cike.Data.EFCore;
 using Cike.Data.EFCore.Extensions;
 using Cike.Data.EFCore.Internal;
 using Cike.Data.EFCore.Repositories;
+using Cike.Data.EFCore.Uow;
 using Cike.Domain;
+using Cike.Uow;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -22,6 +24,8 @@ public static class IServiceCollectionDbContextExtensions
             //添加仓储
             services.AddDefaultRepository(e, typeof(EFCoreRepository<,,>).MakeGenericType(typeof(TDbContext), e, EntityHelper.FindPrimaryKeyType(e)!));
         });
+
+        services.AddScoped<IUnitOfWork, EFCoreUnitOfWork<TDbContext>>();
 
         return services;
     }

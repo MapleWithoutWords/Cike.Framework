@@ -1,4 +1,6 @@
 ﻿using Cike.Core.Modularity;
+using Cike.Data.EFCore.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Cike.Data.EFCore.MySql;
 
