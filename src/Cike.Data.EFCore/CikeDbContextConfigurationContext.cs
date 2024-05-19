@@ -22,7 +22,7 @@ public class CikeDbContextConfigurationContext
 }
 public class CikeDbContextConfigurationContext<TDbContext> : CikeDbContextConfigurationContext where TDbContext : CikeDbContext<TDbContext>
 {
-    public new DbContextOptionsBuilder<TDbContext> DbContextOptionsBuilder => (DbContextOptionsBuilder<TDbContext>)base.DbContextOptionsBuilder
+    public new DbContextOptionsBuilder<TDbContext> DbContextOptionsBuilder => (DbContextOptionsBuilder<TDbContext>)base.DbContextOptionsBuilder;
     public CikeDbContextConfigurationContext(IServiceProvider serviceProvider, string connectionString, string? connectionStringName) : base(serviceProvider, connectionString, connectionStringName)
     {
         base.DbContextOptionsBuilder = new DbContextOptionsBuilder<TDbContext>()

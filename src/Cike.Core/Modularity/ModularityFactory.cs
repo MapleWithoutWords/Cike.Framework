@@ -1,4 +1,5 @@
 ﻿using Cike.Core.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Cike.Core.Modularity
 {
@@ -33,20 +34,20 @@ namespace Cike.Core.Modularity
                         serviceLifetime = ServiceLifetime.Singleton;
                     }
 
-                    foreach (var interfaceType in typeItem.GetInterfaces())
+                    foreach (var interfaceType in typeItem.GetInterfaces().Concat(typeItem.GetBaseClasses()))
                     {
                         switch (serviceLifetime)
                         {
                             case ServiceLifetime.Singleton:
-                                services.AddSingleton(typeItem, typeItem);
+                                services.TryAddSingleton(typeItem);
                                 services.AddSingleton(interfaceType, typeItem);
                                 break;
                             case ServiceLifetime.Scoped:
-                                services.AddScoped(typeItem, typeItem);
+                                services.TryAddScoped(typeItem);
                                 services.AddScoped(interfaceType, typeItem);
                                 break;
                             case ServiceLifetime.Transient:
-                                services.AddTransient(typeItem, typeItem);
+                                services.TryAddTransient(typeItem);
                                 services.AddTransient(interfaceType, typeItem);
                                 break;
                             default:

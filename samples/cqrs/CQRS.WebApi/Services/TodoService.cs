@@ -1,4 +1,5 @@
 ﻿using Cike.AspNetCore.MinimalAPIs;
+using Cike.Core.DependencyInjection;
 using Cike.EventBus.LocalEvent;
 using CQRS.Application.Applications.Todos.Commands;
 using CQRS.Application.Applications.Todos.Queries;

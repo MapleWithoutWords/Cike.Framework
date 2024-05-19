@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Cike.EventBus.Local.Middlewares;
 
-public class DbTransactionLocalEventMiddleware<TEvent> : ILocalEventMiddleware<TEvent>, ITransientDependency
+public class DbTransactionLocalEventMiddleware<TEvent> : ILocalEventMiddleware<TEvent>
     where TEvent : IEvent
 {
     private IUnitOfWork _unitOfWork;

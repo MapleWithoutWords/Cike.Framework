@@ -1,9 +1,10 @@
 ﻿
+using Cike.Core.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Cike.Data;
 
-public class DefaultConnectionStringResolver : IConnectionStringResolver
+public class DefaultConnectionStringResolver : IConnectionStringResolver, ISingletonDependency
 {
     private readonly CikeDbConnectionOptions _options;
     public DefaultConnectionStringResolver(IOptionsMonitor<CikeDbConnectionOptions> options)

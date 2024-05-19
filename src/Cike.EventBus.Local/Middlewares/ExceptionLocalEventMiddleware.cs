@@ -7,7 +7,7 @@ using System.Runtime.ExceptionServices;
 
 namespace Cike.EventBus.Local.Middlewares;
 
-public class ExceptionLocalEventMiddleware<TEvent> : ILocalEventMiddleware<TEvent>,ITransientDependency
+public class ExceptionLocalEventMiddleware<TEvent> : ILocalEventMiddleware<TEvent>
     where TEvent : IEvent
 {
     private readonly Lazy<ILocalEventExecutor> _executeProviderLazy;

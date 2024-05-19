@@ -12,7 +12,7 @@ using System.Linq.Expressions;
 
 namespace Cike.Data.EFCore.Repositories;
 
-public class EFCoreRepository<TDbContext, TEntity, TKey> : IRepository<TEntity, TKey>, IScopedDependency where TEntity : class, IEntity<TKey> where TDbContext : CikeDbContext<TDbContext>
+public class EFCoreRepository<TDbContext, TEntity, TKey> : IRepository<TEntity, TKey> where TEntity : class, IEntity<TKey> where TDbContext : CikeDbContext<TDbContext>
 {
     protected TDbContext DbContext { get; set; }
     protected IUnitOfWork UnitOfWork { get; set; }

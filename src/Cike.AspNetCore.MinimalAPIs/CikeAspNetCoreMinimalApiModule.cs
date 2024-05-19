@@ -15,6 +15,7 @@ public class CikeAspNetCoreMinimalApiModule : CikeModule
 {
     public override async Task ConfigureServicesAsync(ServiceConfigurationContext context)
     {
+        context.Services.AddHttpContextAccessor();
         context.Services.Configure<GlobalMinimalApiRouteOptions>(options =>
         {
             options.Prefix = "api";

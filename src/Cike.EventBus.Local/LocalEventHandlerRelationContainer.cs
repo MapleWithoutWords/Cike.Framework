@@ -27,7 +27,7 @@ namespace Cike.EventBus.Local
                     {
                         continue;
                     }
-                    var parameters = item.GetParameters().Where(e => typeof(LocalEvent).IsAssignableFrom(e.ParameterType)).ToList();
+                    var parameters = item.GetParameters().Where(e => typeof(Event).IsAssignableFrom(e.ParameterType)).ToList();
                     if (parameters.Count != 1)
                     {
                         throw new ArgumentException($"Method '{classType.FullName}.{item.Name}' must have only one parameter of type LocalEvent.");

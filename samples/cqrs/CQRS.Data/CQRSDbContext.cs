@@ -12,15 +12,14 @@ public class CQRSDbContext : CikeDbContext<CQRSDbContext>
 
     public DbSet<Todo> Todos { get; set; } = null!;
 
-    override protected void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder);
-
         modelBuilder.Entity<Todo>(b =>
         {
             b.ToTable("Todo");
             b.Property(x => x.Title).IsRequired().HasMaxLength(128);
             b.Property(x => x.Description).IsRequired().HasMaxLength(512);
         });
+        base.OnModelCreating(modelBuilder);
     }
 }

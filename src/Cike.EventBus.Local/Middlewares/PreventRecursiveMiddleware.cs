@@ -3,7 +3,7 @@ using Cike.EventBus.Local.LocalEventMiddlewares;
 
 namespace Cike.EventBus.Local.Middlewares;
 
-public class PreventRecursiveMiddleware<TEvent> : ILocalEventMiddleware<TEvent>, ITransientDependency
+public class PreventRecursiveMiddleware<TEvent> : ILocalEventMiddleware<TEvent>
 where TEvent : IEvent
 {
     public bool PreventRecursive => true;

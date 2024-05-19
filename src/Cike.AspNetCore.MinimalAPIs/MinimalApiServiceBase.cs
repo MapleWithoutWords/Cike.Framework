@@ -13,6 +13,4 @@ public abstract class MinimalApiServiceBase : ISingletonDependency
     public string? ServiceName { get; set; }
 
     public MinimalApiServiceBase() { }
-
-
 }

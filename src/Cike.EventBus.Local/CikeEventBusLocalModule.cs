@@ -1,4 +1,5 @@
 ﻿using Cike.Core.Modularity;
+using Cike.EventBus.Local.Middlewares;
 using Cike.EventBus.LocalEvent;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -21,6 +22,10 @@ public class CikeEventBusLocalModule : CikeModule
                 context.Services.AddScoped(item);
             }
             context.Services.AddSingleton(typeof(CikeEventBusLocalModuleDenpency));
+
+            context.Services.AddScoped(typeof(DbTransactionLocalEventMiddleware<>));
+            context.Services.AddScoped(typeof(ExceptionLocalEventMiddleware<>));
+            context.Services.AddScoped(typeof(PreventRecursiveMiddleware<>));
         }
 
         await base.ConfigureServicesAsync(context);
