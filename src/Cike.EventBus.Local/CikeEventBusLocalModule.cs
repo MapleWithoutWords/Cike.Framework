@@ -1,7 +1,9 @@
 ﻿using Cike.Core.Modularity;
+using Cike.EventBus.Local.LocalEventMiddlewares;
 using Cike.EventBus.Local.Middlewares;
 using Cike.EventBus.LocalEvent;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Reflection;
 
 namespace Cike.EventBus.Local;
@@ -23,9 +25,9 @@ public class CikeEventBusLocalModule : CikeModule
             }
             context.Services.AddSingleton(typeof(CikeEventBusLocalModuleDenpency));
 
-            context.Services.AddScoped(typeof(DbTransactionLocalEventMiddleware<>));
-            context.Services.AddScoped(typeof(ExceptionLocalEventMiddleware<>));
-            context.Services.AddScoped(typeof(PreventRecursiveMiddleware<>));
+            context.Services.TryAddEnumerable(new ServiceDescriptor(typeof(ILocalEventMiddleware<>), typeof(DbTransactionLocalEventMiddleware<>), ServiceLifetime.Transient));
+            context.Services.TryAddEnumerable(new ServiceDescriptor(typeof(ILocalEventMiddleware<>), typeof(ExceptionLocalEventMiddleware<>), ServiceLifetime.Transient));
+            context.Services.TryAddEnumerable(new ServiceDescriptor(typeof(ILocalEventMiddleware<>), typeof(PreventRecursiveMiddleware<>), ServiceLifetime.Transient));
         }
 
         await base.ConfigureServicesAsync(context);

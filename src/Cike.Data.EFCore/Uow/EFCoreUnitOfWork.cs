@@ -46,14 +46,20 @@ public class EFCoreUnitOfWork<TDbContext>(IServiceProvider _serviceProvider) : I
 
     public async Task CommitAsync(CancellationToken cancellationToken = default)
     {
-        await DbContext.SaveChangesAsync(cancellationToken);
-        await DbContext.Database.CommitTransactionAsync(cancellationToken);
-        CommitState = UnitOfWorkCommitState.Committed;
+        if (CommitState == UnitOfWorkCommitState.Uncommitted)
+        {
+            await DbContext.SaveChangesAsync(cancellationToken);
+            await DbContext.Database.CommitTransactionAsync(cancellationToken);
+            CommitState = UnitOfWorkCommitState.Committed;
+        }
     }
 
     public async Task RollbackAsync(CancellationToken cancellationToken = default)
     {
-        await DbContext.Database.RollbackTransactionAsync(cancellationToken);
-        CommitState = UnitOfWorkCommitState.Rollbacked;
+        if (CommitState == UnitOfWorkCommitState.Uncommitted)
+        {
+            await DbContext.Database.RollbackTransactionAsync(cancellationToken);
+            CommitState = UnitOfWorkCommitState.Rollbacked;
+        }
     }
 }

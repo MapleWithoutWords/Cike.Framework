@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Nito.AsyncEx;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -51,6 +52,7 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
 
     public IDataFilter DataFilter => CurrentServiceProvider!.GetRequiredService<IDataFilter>();
     public IGuidGenerator GuidGenerator => CurrentServiceProvider!.GetRequiredService<IGuidGenerator>();
+    public UnitOfWorkOptions UnitOfWorkOptions => CurrentServiceProvider!.GetRequiredService<IOptions<UnitOfWorkOptions>>().Value;
     protected virtual bool IsMultiTenantFilterEnabled => DataFilter?.IsEnabled<IMultiTenant>() ?? false;
 
     protected virtual bool IsSoftDeleteFilterEnabled => DataFilter?.IsEnabled<ISoftDelete>() ?? false;
@@ -86,6 +88,10 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
                     if (item.Entity is IEntity<Guid> guidEntity && guidEntity.Id == Guid.Empty)
                     {
                         guidEntity.Id = GuidGenerator.Create();
+                    }
+                    if (item.Entity is ISoftDelete softDelete)
+                    {
+                        softDelete.IsDeleted = false;
                     }
                 }
                 else if (item.State == EntityState.Modified)
@@ -124,6 +130,10 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
     {
         base.OnConfiguring(optionsBuilder);
         optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
+        if (UnitOfWorkOptions.Enable)
+        {
+            optionsBuilder.UseUow();
+        }
     }
     protected virtual void ConfigureBaseProperties<TEntity>(ModelBuilder modelBuilder, IMutableEntityType mutableEntityType)
         where TEntity : class
@@ -292,6 +302,10 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
 
     private async Task BeginUnitOfWorkAsync(params object[] entities)
     {
+        if (!UnitOfWorkOptions.Enable)
+        {
+            return;
+        }
         if (entities?.Any() != true)
         {
             return;
@@ -301,5 +315,10 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
         {
             await unitOfWork.BeginTranscationAsync();
         }
+    }
+
+    private IServiceProvider GetServiceProvider()
+    {
+        return CurrentServiceProvider!;
     }
 }

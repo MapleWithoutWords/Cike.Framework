@@ -29,7 +29,6 @@ public static class EntityTypeBuilderExtensions
         {
             b.Property(nameof(ISoftDelete.IsDeleted))
                 .IsRequired()
-                .HasDefaultValue(false)
                 .HasColumnName(nameof(ISoftDelete.IsDeleted));
         }
     }
