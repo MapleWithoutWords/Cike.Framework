@@ -1,4 +1,5 @@
 ﻿using Cike.AspNetCore.MinimalAPIs;
+using Cike.AspNetCore.MinimalAPIs.Options;
 using Cike.Core.Modularity;
 using CQRS.Application;
 using CQRS.WebApi.Services;
@@ -11,6 +12,11 @@ public class CQRSWebApiModule : CikeModule
 {
     public override async Task ConfigureServicesAsync(ServiceConfigurationContext context)
     {
+        context.Services.Configure<MinimalApiOptions>(options =>
+        {
+            options.LoadMinimalApi(typeof(CQRSWebApiModule).Assembly);
+        });
+
         var services = context.Services;
         services.AddSingleton(typeof(TodoService));
         services.AddEndpointsApiExplorer()

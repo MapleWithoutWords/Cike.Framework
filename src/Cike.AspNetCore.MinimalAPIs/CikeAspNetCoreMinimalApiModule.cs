@@ -22,6 +22,8 @@ public class CikeAspNetCoreMinimalApiModule : CikeModule
             options.Version = "v1";
         });
 
+        context.Services.Configure<MinimalApiOptions>(options => { });
+
         context.Services.AddObjectAccessor<IApplicationBuilder>();
         context.Services.AddObjectAccessor<IEndpointRouteBuilder>();
     }
@@ -38,10 +40,11 @@ public class CikeAspNetCoreMinimalApiModule : CikeModule
     private IEndpointRouteBuilder AddCikeMinimalAPIs(IEndpointRouteBuilder builder)
     {
         var globalRouteOptions = builder.ServiceProvider.GetRequiredService<IOptions<GlobalMinimalApiRouteOptions>>().Value;
+        var minimalApiOptions = builder.ServiceProvider.GetRequiredService<IOptions<MinimalApiOptions>>().Value;
 
         var cikeModuleContainer = builder.ServiceProvider.GetRequiredService<CikeModuleContainer>();
 
-        var minimalApiServiceTypeList = cikeModuleContainer.ModuleTypes.SelectMany(e => e.Assembly.GetTypes().Where(x => !x.IsAbstract && x.IsClass && typeof(MinimalApiServiceBase).IsAssignableFrom(x)).Select(x => x)).ToList();
+        var minimalApiServiceTypeList = minimalApiOptions.MinimalApiAsseblies.SelectMany(e => e.GetTypes().Where(x => !x.IsAbstract && x.IsClass && typeof(MinimalApiServiceBase).IsAssignableFrom(x)).Select(x => x)).ToList();
         foreach (var item in minimalApiServiceTypeList)
         {
             var serviceName = item.Name;
