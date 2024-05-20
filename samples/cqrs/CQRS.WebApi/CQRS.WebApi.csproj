@@ -11,6 +11,13 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.1" />
   </ItemGroup>
 
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Cike.AspNetCore.MinimalAPIs\Cike.AspNetCore.MinimalAPIs.csproj" />
     <ProjectReference Include="..\CQRS.Application\CQRS.Application.csproj" />

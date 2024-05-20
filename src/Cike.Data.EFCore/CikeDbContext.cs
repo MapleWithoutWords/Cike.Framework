@@ -62,7 +62,11 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
                 nameof(ConfigureBaseProperties),
                 BindingFlags.Instance | BindingFlags.NonPublic
             )!;
-    public CikeDbContext(DbContextOptions<TDbContext> options) : base(options)
+    public CikeDbContext(DbContextOptions<TDbContext> options) : base(options.UseUow())
+    {
+    }
+
+    public CikeDbContext(DbContextOptions<TDbContext> options,bool isUow) : base(isUow?options.UseUow():options)
     {
     }
 
@@ -128,12 +132,8 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
     }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        base.OnConfiguring(optionsBuilder);
         optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
-        if (UnitOfWorkOptions.Enable)
-        {
-            optionsBuilder.UseUow();
-        }
+        base.OnConfiguring(optionsBuilder);
     }
     protected virtual void ConfigureBaseProperties<TEntity>(ModelBuilder modelBuilder, IMutableEntityType mutableEntityType)
         where TEntity : class
@@ -221,36 +221,43 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
         return base.Add(entity);
     }
+
     public override EntityEntry<TEntity> Add<TEntity>(TEntity entity)
     {
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
         return base.Add(entity);
     }
+
     public override async ValueTask<EntityEntry> AddAsync(object entity, CancellationToken cancellationToken = default)
     {
         await BeginUnitOfWorkAsync(entity);
         return await base.AddAsync(entity, cancellationToken);
     }
+
     public override async ValueTask<EntityEntry<TEntity>> AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default)
     {
         await BeginUnitOfWorkAsync(entity);
         return await base.AddAsync(entity, cancellationToken);
     }
+
     public override void AddRange(IEnumerable<object> entities)
     {
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
         base.AddRange(entities);
     }
+
     public override void AddRange(params object[] entities)
     {
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
         base.AddRange(entities);
     }
+
     public override async Task AddRangeAsync(IEnumerable<object> entities, CancellationToken cancellationToken = default)
     {
         await BeginUnitOfWorkAsync(entities);
         await base.AddRangeAsync(entities, cancellationToken);
     }
+
     public override async Task AddRangeAsync(params object[] entities)
     {
         await BeginUnitOfWorkAsync(entities);
@@ -262,16 +269,19 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
         return base.Update(entity);
     }
+
     public override EntityEntry<TEntity> Update<TEntity>(TEntity entity)
     {
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
         return base.Update(entity);
     }
+
     public override void UpdateRange(IEnumerable<object> entities)
     {
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
         base.UpdateRange(entities);
     }
+
     public override void UpdateRange(params object[] entities)
     {
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
@@ -283,22 +293,24 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
         return base.Remove(entity);
     }
+
     public override EntityEntry<TEntity> Remove<TEntity>(TEntity entity)
     {
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
         return base.Remove(entity);
     }
+
     public override void RemoveRange(IEnumerable<object> entities)
     {
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
         base.RemoveRange(entities);
     }
+
     public override void RemoveRange(params object[] entities)
     {
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
         base.RemoveRange(entities);
     }
-
 
     private async Task BeginUnitOfWorkAsync(params object[] entities)
     {

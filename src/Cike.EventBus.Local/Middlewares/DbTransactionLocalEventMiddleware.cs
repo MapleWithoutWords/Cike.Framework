@@ -1,7 +1,6 @@
 ﻿using Cike.Core.DependencyInjection;
 using Cike.EventBus.Local.LocalEventMiddlewares;
 using Cike.Uow;
-using Cike.Uow.Attributes;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 

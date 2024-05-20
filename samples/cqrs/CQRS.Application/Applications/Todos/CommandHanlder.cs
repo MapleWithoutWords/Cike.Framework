@@ -12,7 +12,8 @@ public class CommandHanlder(CQRSDbContext _dbContext)
     public async Task CreateAsync(TodoCreateCommand command)
     {
         var todo = command.Dto.Adapt<Todo>();
-        await _dbContext.AddAsync(todo);
+        Console.WriteLine(_dbContext.Todos.GetType().Name);
+        await _dbContext.Todos.AddAsync(todo);
     }
 
     [LocalEventHandler]

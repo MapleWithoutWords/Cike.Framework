@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
 using Nito.AsyncEx;
 using System.Reflection;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Options;
 
 namespace Cike.Data.EFCore.Internal;
 
@@ -31,11 +33,12 @@ public class UowDbSet<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes
 
 
     private IUnitOfWork? _unitOfWork;
+    private UnitOfWorkOptions? _unitOfWorkOptions;
 
     public UowDbSet(DbContext context, string? entityTypeName) : base(context, entityTypeName)
     {
-        var serviceProvider = (IServiceProvider)GetServiceProvider.Invoke(context, Array.Empty<object>())!;
-        _unitOfWork = serviceProvider.GetService<IUnitOfWork>();
+        _unitOfWork = context.GetService<IUnitOfWork>();
+        _unitOfWorkOptions = context.GetService<IOptions<UnitOfWorkOptions>>().Value;
     }
 
     public override EntityEntry<TEntity> Add(TEntity entity)
@@ -115,10 +118,10 @@ public class UowDbSet<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes
     private void SetUnitOfWorkTracking(params object[] entities)
     {
         var unitOfWork = _unitOfWork;
-        if (unitOfWork == null)
+        if (unitOfWork == null || _unitOfWorkOptions?.Enable == false)
             return;
 
-        AsyncContext.Run(async () =>await unitOfWork.BeginTranscationAsync());
+        AsyncContext.Run(async () => await unitOfWork.BeginTranscationAsync());
     }
 }
 #pragma warning restore EF1001

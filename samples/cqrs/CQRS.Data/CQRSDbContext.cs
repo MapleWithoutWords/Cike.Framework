@@ -9,6 +9,9 @@ public class CQRSDbContext : CikeDbContext<CQRSDbContext>
     public CQRSDbContext(DbContextOptions<CQRSDbContext> options) : base(options)
     {
     }
+    public CQRSDbContext(DbContextOptions<CQRSDbContext> options, bool isUow) : base(options, isUow)
+    {
+    }
 
     public DbSet<Todo> Todos { get; set; } = null!;
 
