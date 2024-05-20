@@ -23,14 +23,12 @@ public class EFCoreRepository<TDbContext, TEntity, TKey> : IRepository<TEntity, 
     }
     public async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        await BeginUnitOfWorkAsync();
         var result = await DbContext.AddAsync(entity, cancellationToken);
         return result.Entity;
     }
 
     public async Task AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
-        await BeginUnitOfWorkAsync();
         await DbContext.AddRangeAsync(entities, cancellationToken);
     }
 
@@ -57,7 +55,6 @@ public class EFCoreRepository<TDbContext, TEntity, TKey> : IRepository<TEntity, 
 
     public async Task DeleteRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
-        await BeginUnitOfWorkAsync();
         foreach (var item in entities)
         {
             if (item is ISoftDelete softDeleteEntity)
@@ -127,13 +124,5 @@ public class EFCoreRepository<TDbContext, TEntity, TKey> : IRepository<TEntity, 
     {
         DbContext.UpdateRange(entities, cancellationToken);
         return Task.CompletedTask;
-    }
-
-    private async Task BeginUnitOfWorkAsync()
-    {
-        if (!UnitOfWork.IsTransactionBegun)
-        {
-            await UnitOfWork.BeginTranscationAsync();
-        }
     }
 }
