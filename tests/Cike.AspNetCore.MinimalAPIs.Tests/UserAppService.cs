@@ -74,7 +74,16 @@ public class UserAppService : MinimalApiServiceBase
 
 }
 
+/// <summary>
+/// 
+/// </summary>
+/// <param name="Keyword"></param>
+/// <param name="PageIndex"></param>
+/// <param name="PageSize"></param>
 public record UserGetEvent(string Keyword, int PageIndex, int PageSize) : LocalEvent
 {
-    public object User { get; set; }
+    /// <summary>
+    /// 
+    /// </summary>
+    public object User { get; set; } = null!;
 }

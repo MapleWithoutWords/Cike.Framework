@@ -7,9 +7,9 @@ public class ApplicationWithExternalServiceProvider : IApplicationWithExternalSe
     {
         var cikeModuleContainer = serviceProvider.GetRequiredService<CikeModuleContainer>();
         List<Task> tasks = new List<Task>();
-        cikeModuleContainer.CikeModules.Reverse<CikeModule>().ToList().ForEach(async module =>
+        cikeModuleContainer.CikeModules.Reverse<CikeModule>().ToList().ForEach(module =>
         {
-            tasks.Add(module.InitializeAsync(new  ApplicationInitializationContext(serviceProvider)));
+            tasks.Add(module.InitializeAsync(new ApplicationInitializationContext(serviceProvider)));
         });
 
         await Task.WhenAll(tasks);
@@ -19,7 +19,7 @@ public class ApplicationWithExternalServiceProvider : IApplicationWithExternalSe
     {
         var cikeModuleContainer = serviceProvider.GetRequiredService<CikeModuleContainer>();
         List<Task> tasks = new List<Task>();
-        cikeModuleContainer.CikeModules.Reverse<CikeModule>().ToList().ForEach(async module =>
+        cikeModuleContainer.CikeModules.Reverse<CikeModule>().ToList().ForEach(module =>
         {
             tasks.Add(module.ShutdownAsync(new ApplicationShutdownContext(serviceProvider)));
         });
