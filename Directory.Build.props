@@ -2,15 +2,7 @@
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<StandardTargetFramework>netstandard2.1</StandardTargetFramework>
-		<Version>1.0.3</Version>
+		<Version>1.0.616</Version>
 		<MicrosoftPackageVersion>8.0.0</MicrosoftPackageVersion>
-		<Authors>Lemon.Li</Authors>
-		<Company>Lemon.Li</Company>
-		<PackageProjectUrl>https://github.com/MapleWithoutWords/Cike.Framework</PackageProjectUrl>
-		<PackageIconUrl>logo.png</PackageIconUrl>
-		<RepositoryUrl>https://github.com/MapleWithoutWords/Cike.Framework</RepositoryUrl>
-		<RepositoryType>git</RepositoryType>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 </Project>

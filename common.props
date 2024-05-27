@@ -3,10 +3,13 @@
 		<Authors>Lemon.Li</Authors>
 		<Company>Lemon.Li</Company>
 		<PackageProjectUrl>https://github.com/MapleWithoutWords/Cike.Framework</PackageProjectUrl>
-		<PackageIcon>logo.png</PackageIcon>
+		<PackageIconUrl>https://github.com/MapleWithoutWords/Cike.Framework/blob/main/logo.png</PackageIconUrl>
 		<RepositoryUrl>https://github.com/MapleWithoutWords/Cike.Framework</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageReadmeFile>NuGet.md</PackageReadmeFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
+	<ItemGroup>
+		<None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+	</ItemGroup>
 </Project>
