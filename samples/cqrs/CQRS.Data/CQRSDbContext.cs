@@ -6,10 +6,10 @@ namespace CQRS.Data;
 
 public class CQRSDbContext : CikeDbContext<CQRSDbContext>
 {
-    public CQRSDbContext(DbContextOptions<CQRSDbContext> options) : base(options)
+    public CQRSDbContext(DbContextOptions<CQRSDbContext> options, IServiceProvider serviceProvider) : base(options, serviceProvider)
     {
     }
-    public CQRSDbContext(DbContextOptions<CQRSDbContext> options, bool isUow) : base(options, isUow)
+    public CQRSDbContext(DbContextOptions<CQRSDbContext> options, IServiceProvider serviceProvider, bool isUow) : base(options, serviceProvider, isUow)
     {
     }
 

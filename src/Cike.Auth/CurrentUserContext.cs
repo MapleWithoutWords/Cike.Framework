@@ -1,12 +1,10 @@
-﻿using Cike.Core.DependencyInjection;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
 namespace Cike.Auth;
 
-public class CurrentUserContext : ISingletonDependency
+public class CurrentUserContext : ICurrentUser, ISingletonDependency
 {
-
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public CurrentUserContext(IHttpContextAccessor httpContextAccessor)
@@ -26,12 +24,12 @@ public class CurrentUserContext : ISingletonDependency
 
     protected string? GetValue(string key)
     {
-        return GetClaimsPrincipal()?.Claims.FirstOrDefault(e=>e.Type==key)?.Value;
+        return GetClaimsPrincipal()?.Claims.FirstOrDefault(e => e.Type == key)?.Value;
     }
     protected Guid? GetGuidValue(string key)
     {
         var str = GetValue(key);
-        if (Guid.TryParse(str,out Guid result))
+        if (Guid.TryParse(str, out Guid result))
         {
             return result;
         }
@@ -55,4 +53,6 @@ public class CurrentUserContext : ISingletonDependency
     public virtual Guid? TenantId => GetGuidValue(CikeClaimTypes.TenantId);
 
     public virtual string[] Roles => FindClaims(CikeClaimTypes.Role).Select(c => c.Value).Distinct().ToArray();
+
+    public virtual bool IsAuthorization => _httpContextAccessor.HttpContext.User.Identity?.IsAuthenticated ?? true;
 }

@@ -1,12 +1,10 @@
 ﻿using Cike.Auth;
+using Cike.Auth.MultiTenant;
 using Cike.Core.DependencyInjection;
-using Cike.Core.Modularity;
 using Cike.Data.DataFilters;
 using Cike.Data.EFCore.Extensions;
 using Cike.Data.Guids;
-using Cike.Domain.Entities;
 using Cike.Uow;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -23,36 +21,29 @@ namespace Cike.Data.EFCore;
 
 public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency where TDbContext : DbContext
 {
-    private static IServiceProvider? _rootServiceProvider;
+    private ILogger<TDbContext> _logger => _currentServiceProvider.GetRequiredService<ILogger<TDbContext>>();
 
-    private bool _isInitialized;
-    private ILogger<TDbContext>? _logger;
-    private IServiceProvider? _currentServiceProvider;
+    private IServiceProvider _currentServiceProvider;
 
-    protected IServiceProvider? CurrentServiceProvider
+    protected IServiceProvider CurrentServiceProvider
     {
         get
         {
-            if (_isInitialized)
-                return _currentServiceProvider;
 
             if (_currentServiceProvider == null)
             {
-                _rootServiceProvider ??= ModuleLoader.Services.BuildServiceProvider();
-                _logger = _rootServiceProvider.GetService<ILogger<TDbContext>>();
-                _currentServiceProvider = _rootServiceProvider.GetService<IHttpContextAccessor>()?.HttpContext?.RequestServices;
+                throw new Exception("Please Use the constructor with IServiceProvider");
             }
-
-            _isInitialized = true;
             return _currentServiceProvider;
         }
     }
 
-    protected CurrentUserContext CurrentUser => CurrentServiceProvider!.GetRequiredService<CurrentUserContext>();
+    protected ICurrentUser CurrentUser => CurrentServiceProvider.GetRequiredService<ICurrentUser>();
+    protected ICurrentTenant CurrentTenant => CurrentServiceProvider.GetRequiredService<ICurrentTenant>();
 
-    public IDataFilter DataFilter => CurrentServiceProvider!.GetRequiredService<IDataFilter>();
-    public IGuidGenerator GuidGenerator => CurrentServiceProvider!.GetRequiredService<IGuidGenerator>();
-    public UnitOfWorkOptions UnitOfWorkOptions => CurrentServiceProvider!.GetRequiredService<IOptions<UnitOfWorkOptions>>().Value;
+    public IDataFilter DataFilter => CurrentServiceProvider.GetRequiredService<IDataFilter>();
+    public IGuidGenerator GuidGenerator => CurrentServiceProvider.GetRequiredService<IGuidGenerator>();
+    public UnitOfWorkOptions UnitOfWorkOptions => CurrentServiceProvider.GetRequiredService<IOptions<UnitOfWorkOptions>>().Value;
     protected virtual bool IsMultiTenantFilterEnabled => DataFilter?.IsEnabled<IMultiTenant>() ?? false;
 
     protected virtual bool IsSoftDeleteFilterEnabled => DataFilter?.IsEnabled<ISoftDelete>() ?? false;
@@ -62,12 +53,14 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
                 nameof(ConfigureBaseProperties),
                 BindingFlags.Instance | BindingFlags.NonPublic
             )!;
-    public CikeDbContext(DbContextOptions<TDbContext> options) : base(options.UseUow())
+    public CikeDbContext(DbContextOptions<TDbContext> options, IServiceProvider serviceProvider) : base(options.UseUow())
     {
+        _currentServiceProvider = serviceProvider;
     }
 
-    public CikeDbContext(DbContextOptions<TDbContext> options,bool isUow) : base(isUow?options.UseUow():options)
+    public CikeDbContext(DbContextOptions<TDbContext> options, IServiceProvider serviceProvider, bool isUow) : base(isUow ? options.UseUow() : options)
     {
+        _currentServiceProvider = serviceProvider;
     }
 
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
@@ -96,6 +89,10 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
                     if (item.Entity is ISoftDelete softDelete)
                     {
                         softDelete.IsDeleted = false;
+                    }
+                    if (item.Entity is IMultiTenant multiTenant)
+                    {
+                        multiTenant.TenantId = CurrentUser.TenantId ?? Guid.Empty;
                     }
                 }
                 else if (item.State == EntityState.Modified)
