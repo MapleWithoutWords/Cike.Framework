@@ -1,4 +1,5 @@
 ﻿using Cike.AspNetCore.MinimalAPIs.Options;
+using Cike.Auth;
 using Cike.Core.Extensions.DependencyInjection;
 using Cike.Core.Modularity;
 using Microsoft.AspNetCore.Builder;
@@ -11,6 +12,7 @@ using System.Reflection;
 
 namespace Cike.AspNetCore.MinimalAPIs;
 
+[DependsOn([typeof(CikeAuthModule)])]
 public class CikeAspNetCoreMinimalApiModule : CikeModule
 {
     public override async Task ConfigureServicesAsync(ServiceConfigurationContext context)

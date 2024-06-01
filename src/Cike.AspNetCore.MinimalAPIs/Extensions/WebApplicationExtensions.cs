@@ -26,7 +26,7 @@ public static class WebApplicationExtensions
         await application.InitializeAsync(app.Services);
     }
 
-    public static void UseMultiTenant(this WebApplication app)
+    public static void UseMultiTenant(this IApplicationBuilder app)
     {
         app.UseMiddleware<TenantMiddleware>();
     }
