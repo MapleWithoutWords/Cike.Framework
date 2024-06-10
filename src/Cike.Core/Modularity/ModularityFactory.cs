@@ -1,64 +1,60 @@
-﻿using Cike.Core.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+﻿namespace Cike.Core.Modularity;
 
-namespace Cike.Core.Modularity
+public class ModularityFactory
 {
-    public class ModularityFactory
+
+    public static async Task AddApplicationAsync<TStartupModule>(IServiceCollection services)
     {
+        services.AddSingleton<IModuleLoader>(new ModuleLoader());
 
-        public static async Task AddApplicationAsync<TStartupModule>(IServiceCollection services)
+        var moduleLoader = services.GetSingletonInstance<IModuleLoader>();
+        var moduleContainer = moduleLoader.LoadCikeModules(typeof(TStartupModule));
+        services.AddSingleton(moduleContainer);
+
+        foreach (var item in moduleContainer.CikeModules.Reverse<CikeModule>())
         {
-            services.AddSingleton<IModuleLoader>(new ModuleLoader());
-
-            var moduleLoader = services.GetSingletonInstance<IModuleLoader>();
-            var moduleContainer = moduleLoader.LoadCikeModules(typeof(TStartupModule));
-            services.AddSingleton(moduleContainer);
-
-            foreach (var item in moduleContainer.CikeModules.Reverse<CikeModule>())
+            //Add Service Register
+            foreach (var typeItem in item.GetType().Assembly.GetTypes().Where(t => !t.IsAbstract && t.IsClass && typeof(IDependencyInjection).IsAssignableFrom(t)))
             {
-                //Add Service Register
-                foreach (var typeItem in item.GetType().Assembly.GetTypes().Where(t => !t.IsAbstract && t.IsClass && typeof(IDependencyInjection).IsAssignableFrom(t)))
+                var interfaceList = typeItem.GetInterfaces();
+                ServiceLifetime serviceLifetime = ServiceLifetime.Transient;
+                if (interfaceList.Any(x => x == typeof(ITransientDependency)))
                 {
-                    var interfaceList = typeItem.GetInterfaces();
-                    ServiceLifetime serviceLifetime = ServiceLifetime.Transient;
-                    if (interfaceList.Any(x => x == typeof(ITransientDependency)))
-                    {
-                        serviceLifetime = ServiceLifetime.Transient;
-                    }
-                    else if (interfaceList.Any(x => x == typeof(IScopedDependency)))
-                    {
-                        serviceLifetime = ServiceLifetime.Scoped;
-                    }
-                    else if (interfaceList.Any(x => x == typeof(ISingletonDependency)))
-                    {
-                        serviceLifetime = ServiceLifetime.Singleton;
-                    }
-
-                    foreach (var interfaceType in typeItem.GetInterfaces().Concat(typeItem.GetBaseClasses()))
-                    {
-                        switch (serviceLifetime)
-                        {
-                            case ServiceLifetime.Singleton:
-                                services.TryAddSingleton(typeItem);
-                                services.AddSingleton(interfaceType, typeItem);
-                                break;
-                            case ServiceLifetime.Scoped:
-                                services.TryAddScoped(typeItem);
-                                services.AddScoped(interfaceType, typeItem);
-                                break;
-                            case ServiceLifetime.Transient:
-                                services.TryAddTransient(typeItem);
-                                services.AddTransient(interfaceType, typeItem);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
+                    serviceLifetime = ServiceLifetime.Transient;
+                }
+                else if (interfaceList.Any(x => x == typeof(IScopedDependency)))
+                {
+                    serviceLifetime = ServiceLifetime.Scoped;
+                }
+                else if (interfaceList.Any(x => x == typeof(ISingletonDependency)))
+                {
+                    serviceLifetime = ServiceLifetime.Singleton;
                 }
 
-                await item.ConfigureServicesAsync(new ServiceConfigurationContext(services));
+                foreach (var interfaceType in typeItem.GetInterfaces().Concat(typeItem.GetBaseClasses()))
+                {
+                    switch (serviceLifetime)
+                    {
+                        case ServiceLifetime.Singleton:
+                            services.TryAddSingleton(typeItem);
+                            services.AddSingleton(interfaceType, typeItem);
+                            break;
+                        case ServiceLifetime.Scoped:
+                            services.TryAddScoped(typeItem);
+                            services.AddScoped(interfaceType, typeItem);
+                            break;
+                        case ServiceLifetime.Transient:
+                            services.TryAddTransient(typeItem);
+                            services.AddTransient(interfaceType, typeItem);
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
-            ModuleLoader.Services = services;
+
+            await item.ConfigureServicesAsync(new ServiceConfigurationContext(services));
         }
+        ModuleLoader.Services = services;
     }
 }

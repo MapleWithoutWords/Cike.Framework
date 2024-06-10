@@ -1,6 +1,4 @@
-﻿using System.Linq.Expressions;
-
-namespace Cike.Data.EFCore;
+﻿namespace Cike.Data.EFCore;
 
 public static class QueryFilterExpressionHelper
 {

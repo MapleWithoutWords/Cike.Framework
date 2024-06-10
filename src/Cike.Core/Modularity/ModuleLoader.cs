@@ -1,12 +1,11 @@
-﻿
-namespace Cike.Core.Modularity;
+﻿namespace Cike.Core.Modularity;
 
 public class ModuleLoader : IModuleLoader
 {
     public static IServiceCollection Services { get; set; }
     public CikeModuleContainer LoadCikeModules(Type startupType)
     {
-        var cikeModules= new HashSet<Type>();
+        var cikeModules = new HashSet<Type>();
         ForModuleTypeTree(cikeModules, startupType);
         cikeModules.Add(startupType);
         var moduleContainer = new CikeModuleContainer(cikeModules.ToList());

@@ -1,7 +1,3 @@
-using Cike.Core.ObjectAccessor;
-using System;
-using System.Linq;
-
 namespace Cike.Core.Extensions.DependencyInjection;
 
 public static class ServiceCollectionObjectAccessorExtensions

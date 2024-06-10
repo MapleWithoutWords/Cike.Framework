@@ -1,12 +1,4 @@
-﻿using Cike.Core.DependencyInjection;
-using Cike.Uow;
-using Cike.Uow.Enums;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.DependencyInjection;
-using System.Data;
-
-namespace Cike.Data.EFCore.Uow;
+﻿namespace Cike.Data.EFCore.Uow;
 
 public class EFCoreUnitOfWork<TDbContext>(IServiceProvider _serviceProvider) : IUnitOfWork where TDbContext : CikeDbContext<TDbContext>
 {

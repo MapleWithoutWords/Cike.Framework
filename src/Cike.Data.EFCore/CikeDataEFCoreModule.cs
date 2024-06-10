@@ -1,14 +1,18 @@
-﻿using Cike.Auth;
-using Cike.Core.Modularity;
-using Cike.Domain;
-using Cike.Uow;
-
-namespace Cike.Data.EFCore;
+﻿namespace Cike.Data.EFCore;
 
 [DependsOn([typeof(CikeAuthModule),
     typeof(CikeDomainModule),
-    typeof(CikeUowModule),])]
+    typeof(CikeUowModule),
+    typeof(CikeUniversalIdModule),
+])]
 public class CikeDataEFCoreModule : CikeModule
 {
-
+    public override Task ConfigureServicesAsync(ServiceConfigurationContext context)
+    {
+        context.Services.Configure<CikeSnowflakeOptions>(options =>
+        {
+            options.IsEnable = true;
+        });
+        return base.ConfigureServicesAsync(context);
+    }
 }

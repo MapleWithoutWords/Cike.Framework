@@ -1,5 +1,4 @@
-﻿
-namespace Cike.Core.Modularity;
+﻿namespace Cike.Core.Modularity;
 
 public class ApplicationWithExternalServiceProvider : IApplicationWithExternalServiceProvider
 {

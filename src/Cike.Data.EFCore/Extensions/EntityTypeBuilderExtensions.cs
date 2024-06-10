@@ -1,7 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore;
-
-namespace Cike.Data.EFCore.Extensions;
+﻿namespace Cike.Data.EFCore.Extensions;
 
 public static class EntityTypeBuilderExtensions
 {

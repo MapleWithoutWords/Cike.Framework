@@ -1,17 +1,4 @@
-﻿using Cike.Core.Extensions.System;
-using Cike.Data.EFCore;
-using Cike.Data.EFCore.Extensions;
-using Cike.Data.EFCore.Internal;
-using Cike.Data.EFCore.Repositories;
-using Cike.Data.EFCore.Uow;
-using Cike.Domain;
-using Cike.Uow;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using System.Reflection;
-
-namespace Cike.Data.Extensions;
+﻿namespace Cike.Data.Extensions;
 
 public static class IServiceCollectionDbContextExtensions
 {

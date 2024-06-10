@@ -1,12 +1,4 @@
-﻿using Cike.Data.Attributes;
-using Cike.Data.EFCore;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Nito.AsyncEx;
-
-namespace Cike.Data.EFCore.Internal;
+﻿namespace Cike.Data.EFCore.Internal;
 
 internal static class DbContextOptionsFactory
 {

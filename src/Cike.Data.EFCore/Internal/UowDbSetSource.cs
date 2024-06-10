@@ -1,9 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Concurrent;
-using System.Reflection;
-
-namespace Cike.Data.EFCore.Internal;
+﻿namespace Cike.Data.EFCore.Internal;
 
 #pragma warning disable EF1001
 internal class UowDbSetSource : IDbSetSource

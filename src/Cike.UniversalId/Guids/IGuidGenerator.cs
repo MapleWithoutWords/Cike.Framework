@@ -1,4 +1,4 @@
-﻿namespace Cike.Data.Guids;
+﻿namespace Cike.UniversalId.Guids;
 
 /// <summary>
 /// Used to generate Ids.

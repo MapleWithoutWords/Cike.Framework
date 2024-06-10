@@ -1,9 +1,4 @@
-﻿using Cike.Domain;
-using Cike.Domain.Repositories;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-
-namespace Cike.Data.EFCore.Extensions;
+﻿namespace Cike.Data.EFCore.Extensions;
 
 public static class ServiceCollectionRepositoryExtensions
 {

@@ -1,15 +1,4 @@
-﻿using Cike.Uow;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using System.Diagnostics.CodeAnalysis;
-using Nito.AsyncEx;
-using System.Reflection;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.Extensions.Options;
-
-namespace Cike.Data.EFCore.Internal;
+﻿namespace Cike.Data.EFCore.Internal;
 
 #pragma warning disable EF1001
 public class UowDbSet<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes)] TEntity> : InternalDbSet<TEntity> where TEntity : class

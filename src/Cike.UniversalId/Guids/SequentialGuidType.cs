@@ -1,4 +1,4 @@
-﻿namespace Cike.Data.Guids;
+﻿namespace Cike.UniversalId.Guids;
 
 /// <summary>
 /// Describes the type of a sequential GUID value.

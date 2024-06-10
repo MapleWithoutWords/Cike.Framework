@@ -1,23 +1,4 @@
-﻿using Cike.Auth;
-using Cike.Auth.MultiTenant;
-using Cike.Core.DependencyInjection;
-using Cike.Data.DataFilters;
-using Cike.Data.EFCore.Extensions;
-using Cike.Data.Guids;
-using Cike.Uow;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Nito.AsyncEx;
-using System.Linq.Expressions;
-using System.Reflection;
-
-namespace Cike.Data.EFCore;
+﻿namespace Cike.Data.EFCore;
 
 public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency where TDbContext : DbContext
 {
@@ -43,6 +24,7 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
 
     public IDataFilter DataFilter => CurrentServiceProvider.GetRequiredService<IDataFilter>();
     public IGuidGenerator GuidGenerator => CurrentServiceProvider.GetRequiredService<IGuidGenerator>();
+    public ISnowflakeIdGenerator SnowflakeIdGenerator => CurrentServiceProvider.GetRequiredService<ISnowflakeIdGenerator>();
     public UnitOfWorkOptions UnitOfWorkOptions => CurrentServiceProvider.GetRequiredService<IOptions<UnitOfWorkOptions>>().Value;
     protected virtual bool IsMultiTenantFilterEnabled => DataFilter?.IsEnabled<IMultiTenant>() ?? false;
 
@@ -85,6 +67,10 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
                     if (item.Entity is IEntity<Guid> guidEntity && guidEntity.Id == Guid.Empty)
                     {
                         guidEntity.Id = GuidGenerator.Create();
+                    }
+                    if (item.Entity is IEntity<long> longEntity && longEntity.Id > 0)
+                    {
+                        longEntity.Id = SnowflakeIdGenerator.NextId();
                     }
                     if (item.Entity is ISoftDelete softDelete)
                     {

@@ -51,6 +51,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cike.Cqrs", "src\Cike.Cqrs\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cike.Localization", "src\Cike.Localization\Cike.Localization.csproj", "{EE054374-F018-4D05-ACDA-4867A4546B39}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cike.Console.Test", "tests\Cike.Console.Test\Cike.Console.Test.csproj", "{93CD69B9-C2A0-4EA9-8626-150C432EEBED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cike.UniversalId", "src\Cike.UniversalId\Cike.UniversalId.csproj", "{E3B47830-567B-4942-BC8D-600B3D6ED5A0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -125,6 +129,14 @@ Global
 		{EE054374-F018-4D05-ACDA-4867A4546B39}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE054374-F018-4D05-ACDA-4867A4546B39}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE054374-F018-4D05-ACDA-4867A4546B39}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93CD69B9-C2A0-4EA9-8626-150C432EEBED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93CD69B9-C2A0-4EA9-8626-150C432EEBED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93CD69B9-C2A0-4EA9-8626-150C432EEBED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93CD69B9-C2A0-4EA9-8626-150C432EEBED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3B47830-567B-4942-BC8D-600B3D6ED5A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3B47830-567B-4942-BC8D-600B3D6ED5A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3B47830-567B-4942-BC8D-600B3D6ED5A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3B47830-567B-4942-BC8D-600B3D6ED5A0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -148,6 +160,8 @@ Global
 		{EB5DF725-BD82-47C1-9A32-7DF50CCF289B} = {1BEF81A1-F519-4CCD-BCF0-6CE864E37E9D}
 		{32306E26-3DF1-4D56-A860-CF1B185FA7ED} = {27D9FDC8-F174-49F1-8CB7-DA31137E32FC}
 		{EE054374-F018-4D05-ACDA-4867A4546B39} = {27D9FDC8-F174-49F1-8CB7-DA31137E32FC}
+		{93CD69B9-C2A0-4EA9-8626-150C432EEBED} = {F47E477D-E643-49DE-94E4-D129178159AD}
+		{E3B47830-567B-4942-BC8D-600B3D6ED5A0} = {27D9FDC8-F174-49F1-8CB7-DA31137E32FC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DFC945B5-5799-4CB7-A1A0-1B30513EAD83}

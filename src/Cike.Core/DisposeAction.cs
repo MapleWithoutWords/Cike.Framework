@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace Cike.Core;
+﻿namespace Cike.Core;
 
 /// <summary>
 /// This class can be used to provide an action when

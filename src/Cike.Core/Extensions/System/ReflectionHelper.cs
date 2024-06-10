@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-
-namespace Cike.Core.Extensions.System;
+﻿namespace Cike.Core.Extensions.System;
 
 //TODO: Consider to make internal
 public static class ReflectionHelper

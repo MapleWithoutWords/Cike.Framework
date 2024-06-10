@@ -1,9 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-
-namespace Cike.Data.EFCore.Internal;
+﻿namespace Cike.Data.EFCore.Internal;
 
 public class UowDbContextOptionsExtension : IDbContextOptionsExtension
 {

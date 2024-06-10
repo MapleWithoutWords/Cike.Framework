@@ -1,9 +1,3 @@
-using System.Collections.Generic;
-using System.Globalization;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.RegularExpressions;
-
 namespace System;
 
 /// <summary>
@@ -29,7 +23,7 @@ public static class CikeStringExtensions
     /// </summary>
     public static string EnsureStartsWith(this string str, char c, StringComparison comparisonType = StringComparison.Ordinal)
     {
-        
+
 
         if (str.StartsWith(c.ToString(), comparisonType))
         {
@@ -42,7 +36,7 @@ public static class CikeStringExtensions
     /// <summary>
     /// Indicates whether this string is null or an System.String.Empty string.
     /// </summary>
-    public static bool IsNullOrEmpty([System.Diagnostics.CodeAnalysis.NotNullWhen(false)]this string? str)
+    public static bool IsNullOrEmpty([System.Diagnostics.CodeAnalysis.NotNullWhen(false)] this string? str)
     {
         return string.IsNullOrEmpty(str);
     }
@@ -50,8 +44,8 @@ public static class CikeStringExtensions
     /// <summary>
     /// indicates whether this string is null, empty, or consists only of white-space characters.
     /// </summary>
-    
-    public static bool IsNullOrWhiteSpace([System.Diagnostics.CodeAnalysis.NotNullWhen(false)]this string? str)
+
+    public static bool IsNullOrWhiteSpace([System.Diagnostics.CodeAnalysis.NotNullWhen(false)] this string? str)
     {
         return string.IsNullOrWhiteSpace(str);
     }
@@ -63,7 +57,7 @@ public static class CikeStringExtensions
     /// <exception cref="ArgumentException">Thrown if <paramref name="len"/> is bigger that string's length</exception>
     public static string Left(this string str, int len)
     {
-        
+
 
         if (str.Length < len)
         {
@@ -89,7 +83,7 @@ public static class CikeStringExtensions
     /// <param name="n">Count of the occurrence</param>
     public static int NthIndexOf(this string str, char c, int n)
     {
-        
+
 
         var count = 0;
         for (var i = 0; i < str.Length; i++)
@@ -192,7 +186,7 @@ public static class CikeStringExtensions
 
     public static string ReplaceFirst(this string str, string search, string replace, StringComparison comparisonType = StringComparison.Ordinal)
     {
-        
+
 
         var pos = str.IndexOf(search, comparisonType);
         if (pos < 0)
@@ -225,7 +219,7 @@ public static class CikeStringExtensions
     /// <exception cref="ArgumentException">Thrown if <paramref name="len"/> is bigger that string's length</exception>
     public static string Right(this string str, int len)
     {
-        
+
 
         if (str.Length < len)
         {
@@ -554,7 +548,7 @@ public static class CikeStringExtensions
     /// </summary>
     public static byte[] GetBytes(this string str, Encoding encoding)
     {
-        
+
 
         return encoding.GetBytes(str);
     }

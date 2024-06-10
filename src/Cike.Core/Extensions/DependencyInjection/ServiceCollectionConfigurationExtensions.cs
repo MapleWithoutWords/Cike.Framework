@@ -1,8 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Hosting;
-
-namespace Microsoft.Extensions.DependencyInjection;
+﻿namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionConfigurationExtensions
 {
@@ -13,10 +9,10 @@ public static class ServiceCollectionConfigurationExtensions
 
     public static IConfiguration GetConfiguration(this IServiceCollection services)
     {
-        return services.GetConfigurationOrNull() ?? 
+        return services.GetConfigurationOrNull() ??
                throw new ApplicationException("Could not find an implementation of " + typeof(IConfiguration).AssemblyQualifiedName + " in the service collection.");
     }
-    
+
     public static IConfiguration? GetConfigurationOrNull(this IServiceCollection services)
     {
         var hostBuilderContext = services.GetSingletonInstanceOrNull<HostBuilderContext>();

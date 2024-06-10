@@ -1,7 +1,4 @@
-﻿using Cike.Data.EFCore.Internal;
-using Microsoft.EntityFrameworkCore;
-
-namespace Cike.Data.EFCore.Extensions;
+﻿namespace Cike.Data.EFCore.Extensions;
 
 public static class DbContextOptionsExtensions
 {

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Security.Cryptography;
-using Cike.Core.DependencyInjection;
-using Microsoft.Extensions.Options;
-
-namespace Cike.Data.Guids;
+﻿namespace Cike.UniversalId.Guids;
 
 /// <summary>
 /// Implements <see cref="IGuidGenerator"/> by creating sequential Guids.
