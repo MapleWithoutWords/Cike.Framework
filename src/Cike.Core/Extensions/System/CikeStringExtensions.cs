@@ -553,6 +553,32 @@ public static class CikeStringExtensions
         return encoding.GetBytes(str);
     }
 
+    public static string FistCharToUpper(this string str)
+    {
+        if (str.Length < 1)
+        {
+            return string.Empty;
+        }
+        if (str[0] >= 'A' && str[0] <= 'Z')
+        {
+            return str;
+        }
+        return (char)(str[0] - 32) + str.Substring(1);
+    }
+
+    public static string FistCharToLower(this string str)
+    {
+        if (str.Length < 1)
+        {
+            return string.Empty;
+        }
+        if (str[0] >= 'a' && str[0] <= 'z')
+        {
+            return str;
+        }
+        return (char)(str[0] + 32) + str.Substring(1);
+    }
+
     private static bool IsAllUpperCase(string input)
     {
         for (int i = 0; i < input.Length; i++)
