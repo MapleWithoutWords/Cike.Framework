@@ -104,5 +104,6 @@ $projects = (
     "src/Cike.Domain",
     "src/Cike.EventBus",
     "src/Cike.EventBus.Local",
-    "src/Cike.Uow"
+    "src/Cike.Uow",
+    "src/Cike.UniversalId"
 )
