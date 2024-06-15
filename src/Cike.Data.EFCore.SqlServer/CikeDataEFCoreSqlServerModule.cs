@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Cike.Data.EFCore.SqlServer;
 
+[DependsOn([typeof(CikeDataEFCoreModule)])]
 public class CikeDataEFCoreSqlServerModule : CikeModule
 {
     public override Task ConfigureServicesAsync(ServiceConfigurationContext context)

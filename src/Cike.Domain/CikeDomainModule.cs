@@ -4,7 +4,7 @@ using Cike.Data;
 namespace Cike.Domain;
 
 [DependsOn([typeof(CikeDataModule)])]
-public class CikeDomainModule:CikeModule
+public class CikeDomainModule : CikeModule
 {
 
 }

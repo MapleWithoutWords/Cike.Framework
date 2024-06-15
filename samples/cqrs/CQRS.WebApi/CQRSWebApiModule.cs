@@ -1,8 +1,8 @@
 ﻿using Cike.AspNetCore.MinimalAPIs;
 using Cike.AspNetCore.MinimalAPIs.Options;
 using Cike.Core.Modularity;
+using Cike.Data;
 using CQRS.Application;
-using CQRS.WebApi.Services;
 using Microsoft.OpenApi.Models;
 
 namespace CQRS.WebApi;
@@ -18,7 +18,6 @@ public class CQRSWebApiModule : CikeModule
         });
 
         var services = context.Services;
-        services.AddSingleton(typeof(TodoService));
         services.AddEndpointsApiExplorer()
                 .AddSwaggerGen(options =>
                 {
@@ -66,6 +65,8 @@ public class CQRSWebApiModule : CikeModule
                 $"CQRS HTTP API"
             )
         );
+
+        var connection = context.ServiceProvider.GetRequiredService<IConnectionStringResolver>();
         return base.InitializeAsync(context);
     }
 }

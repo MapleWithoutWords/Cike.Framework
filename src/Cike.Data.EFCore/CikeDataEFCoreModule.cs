@@ -2,8 +2,8 @@
 
 [DependsOn([typeof(CikeAuthModule),
     typeof(CikeDomainModule),
-    typeof(CikeUowModule),
     typeof(CikeUniversalIdModule),
+    typeof(CikeUowModule),
 ])]
 public class CikeDataEFCoreModule : CikeModule
 {
