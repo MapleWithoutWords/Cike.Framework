@@ -1,4 +1,5 @@
 ﻿using Cike.Core.Modularity;
+using Cike.Data.EFCore.Extensions;
 using Cike.UniversalId.Guids;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,6 +17,10 @@ public class CikeDataEFCoreMySqlModule : CikeModule
                  options.DefaultSequentialGuidType = SequentialGuidType.SequentialAsString;
              }
          });
+        context.Services.Configure<CikeDbContextOptions>(options =>
+        {
+            options.UseMySQL();
+        });
         await base.ConfigureServicesAsync(context);
     }
 }

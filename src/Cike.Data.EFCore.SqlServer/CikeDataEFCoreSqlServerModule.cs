@@ -16,6 +16,10 @@ public class CikeDataEFCoreSqlServerModule : CikeModule
                 options.DefaultSequentialGuidType = SequentialGuidType.SequentialAtEnd;
             }
         });
+        context.Services.Configure<CikeDbContextOptions>(options =>
+        {
+            options.UseSqlServer();
+        });
         return base.ConfigureServicesAsync(context);
     }
 }

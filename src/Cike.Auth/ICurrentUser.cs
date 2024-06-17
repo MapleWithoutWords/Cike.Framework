@@ -2,7 +2,7 @@
 
 public interface ICurrentUser
 {
-    Guid? Id { get; }
+    string? Id { get; }
 
     string? UserName { get; }
 

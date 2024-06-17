@@ -26,17 +26,26 @@ public class CurrentUserContext : ICurrentUser, ISingletonDependency
     {
         return GetClaimsPrincipal()?.Claims.FirstOrDefault(e => e.Type == key)?.Value;
     }
+    protected long? GetLongValue(string key)
+    {
+        var str = GetValue(key);
+        if (long.TryParse(str, out var result))
+        {
+            return result;
+        }
+        return null;
+    }
     protected Guid? GetGuidValue(string key)
     {
         var str = GetValue(key);
-        if (Guid.TryParse(str, out Guid result))
+        if (Guid.TryParse(str, out var result))
         {
             return result;
         }
         return null;
     }
 
-    public virtual Guid? Id => GetGuidValue(CikeClaimTypes.UserId);
+    public virtual string? Id => GetValue(CikeClaimTypes.UserId);
 
     public virtual string? UserName => this.GetValue(CikeClaimTypes.UserName);
 

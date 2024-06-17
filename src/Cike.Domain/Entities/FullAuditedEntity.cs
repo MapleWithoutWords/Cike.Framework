@@ -2,12 +2,12 @@
 
 namespace Cike.Domain.Entities;
 
-public class FullAuditedEntity<TKey, TUserId> : AuditedEntity<TKey, TUserId>, ISoftDelete
+public class FullAuditedEntity<TKey, TUserId> : AuditedEntity<TKey, TUserId>, IFullAuditedEntity<TUserId>
 {
     public bool IsDeleted { get; set; } = false;
 }
 
-public class FullAuditedEntity<TKey> : AuditedEntity<TKey>, ISoftDelete
+public class FullAuditedEntity<TKey> : FullAuditedEntity<TKey, long>
 {
     public bool IsDeleted { get; set; } = false;
 }

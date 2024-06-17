@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<StandardTargetFramework>netstandard2.1</StandardTargetFramework>
-		<Version>1.0.623</Version>
+		<Version>1.0.626</Version>
 		<MicrosoftPackageVersion>8.0.0</MicrosoftPackageVersion>
 	</PropertyGroup>
 </Project>

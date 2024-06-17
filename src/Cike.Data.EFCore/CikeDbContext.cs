@@ -10,7 +10,6 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
     {
         get
         {
-
             if (_currentServiceProvider == null)
             {
                 throw new Exception("Please Use the constructor with IServiceProvider");
@@ -35,6 +34,7 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
                 nameof(ConfigureBaseProperties),
                 BindingFlags.Instance | BindingFlags.NonPublic
             )!;
+
     public CikeDbContext(DbContextOptions<TDbContext> options, IServiceProvider serviceProvider) : base(options.UseUow())
     {
         _currentServiceProvider = serviceProvider;
@@ -56,36 +56,48 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
     {
         foreach (var item in ChangeTracker.Entries())
         {
-            if (item.Entity is IAuditedEntity<Guid> auditedEntity)
+            if (item.State == EntityState.Added)
             {
-                if (item.State == EntityState.Added)
+                if (item.Entity is IEntity<long> longIdEntity && longIdEntity.Id <= 0)
                 {
-                    auditedEntity.CreateUserId = CurrentUser.Id ?? Guid.Empty;
-                    auditedEntity.CreateTime = auditedEntity.CreateTime != default ? auditedEntity.CreateTime : DateTime.Now;
-                    auditedEntity.UpdateTime = auditedEntity.UpdateTime != default ? auditedEntity.UpdateTime : DateTime.Now;
-                    auditedEntity.UpdateUserId = Guid.Empty;
-                    if (item.Entity is IEntity<Guid> guidEntity && guidEntity.Id == Guid.Empty)
-                    {
-                        guidEntity.Id = GuidGenerator.Create();
-                    }
-                    if (item.Entity is IEntity<long> longEntity && longEntity.Id > 0)
-                    {
-                        longEntity.Id = SnowflakeIdGenerator.NextId();
-                    }
-                    if (item.Entity is ISoftDelete softDelete)
-                    {
-                        softDelete.IsDeleted = false;
-                    }
-                    if (item.Entity is IMultiTenant multiTenant)
-                    {
-                        multiTenant.TenantId = CurrentUser.TenantId ?? Guid.Empty;
-                    }
+                    longIdEntity.Id = SnowflakeIdGenerator.NextId();
                 }
-                else if (item.State == EntityState.Modified)
+                else if (item.Entity is IEntity<Guid> guidIdEntity && guidIdEntity.Id == Guid.Empty)
                 {
-                    auditedEntity.UpdateTime = auditedEntity.UpdateTime != default ? auditedEntity.UpdateTime : DateTime.Now;
-                    auditedEntity.UpdateUserId = CurrentUser.Id ?? Guid.Empty;
+                    guidIdEntity.Id = GuidGenerator.Create();
                 }
+                if (item.Entity is IAuditedEntity<long> longAuditedEntity)
+                {
+                    long.TryParse(CurrentUser.Id, out var userId);
+                    longAuditedEntity.CreateUserId = userId;
+                    longAuditedEntity.CreateTime = DateTime.Now;
+                    longAuditedEntity.UpdateTime = DateTime.Now;
+                    longAuditedEntity.UpdateUserId = userId;
+                }
+                else if (item.Entity is IAuditedEntity<Guid> guidAuditedEntity)
+                {
+                    Guid.TryParse(CurrentUser.Id, out var userId);
+                    guidAuditedEntity.CreateUserId = userId;
+                    guidAuditedEntity.CreateTime = DateTime.Now;
+                    guidAuditedEntity.UpdateTime = DateTime.Now;
+                    guidAuditedEntity.UpdateUserId = userId;
+                }
+            }
+            else if (item.State == EntityState.Modified)
+            {
+                if (item.Entity is IAuditedEntity<long> longAuditedEntity)
+                {
+                    long.TryParse(CurrentUser.Id, out var userId);
+                    longAuditedEntity.UpdateTime = DateTime.Now;
+                    longAuditedEntity.UpdateUserId = userId;
+                }
+                else if (item.Entity is IAuditedEntity<Guid> guidAuditedEntity)
+                {
+                    Guid.TryParse(CurrentUser.Id, out var userId);
+                    guidAuditedEntity.UpdateTime = DateTime.Now;
+                    guidAuditedEntity.UpdateUserId = userId;
+                }
+
             }
         }
     }
