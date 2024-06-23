@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System.Linq.Expressions;
@@ -29,12 +30,32 @@ public class CikeAspNetCoreMinimalApiModule : CikeModule
 
         context.Services.AddObjectAccessor<IApplicationBuilder>();
         context.Services.AddObjectAccessor<IEndpointRouteBuilder>();
+
+        var corsDomains = context.Services.GetConfiguration().GetSection("CorsDomains").Get<string[]>();
+        corsDomains ??= ["localhost"];
+        context.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(builder =>
+            {
+                builder.SetIsOriginAllowed(origin => corsDomains.Any(d => new Uri(origin).Host.EndsWith(d, StringComparison.CurrentCultureIgnoreCase)))
+                .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowAnyOrigin();
+            });
+        });
+
+        context.Services.ConfigureHttpJsonOptions(options =>
+        {
+            options.SerializerOptions.Converters.Add(new LongToStringConverter());
+            options.SerializerOptions.Converters.Add(new NullableLongToStringConverter());
+        });
     }
 
     public override async Task InitializeAsync(ApplicationInitializationContext context)
     {
         var endpointRouteBuilder = context.GetEndpointRouteBuilder();
-
+        var app = context.GetApplicationBuilder();
+        app.UseCors();
         AddCikeMinimalAPIs(endpointRouteBuilder);
         await base.InitializeAsync(context);
     }

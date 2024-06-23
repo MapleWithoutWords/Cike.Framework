@@ -106,5 +106,6 @@ $projects = (
     "src/Cike.EventBus.Local",
     "src/Cike.Uow",
     "src/Cike.UniversalId",
-    "src/Cike.Contracts"
+    "src/Cike.Contracts",
+    "src/Cike.AspNetCore.Swagger"
 )
