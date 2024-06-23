@@ -4,6 +4,7 @@ using Cike.Core.Extensions.DependencyInjection;
 using Cike.Core.Modularity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -78,7 +79,17 @@ public class CikeAspNetCoreMinimalApiModule : CikeModule
                     httpMethods = ["Post"];
                 }
 
-                var methodName = methodInfo.Name.RemovePreFix(globalRouteOptions.HttpMethodPrefixMapDic.Keys.ToArray()).RemovePostFix("Async");
+                var idParameter = methodInfo.GetParameters().FirstOrDefault(p =>
+                    p.Name!.Equals("id", StringComparison.OrdinalIgnoreCase) &&
+                    p.GetCustomAttributes().All(attr => attr is not IBindingSourceMetadata)
+                );
+                string methodName = methodInfo.Name.RemovePreFix(globalRouteOptions.HttpMethodPrefixMapDic.Keys.ToArray()).RemovePostFix("Async");
+                if (idParameter is not null)
+                {
+                    var id = (idParameter.ParameterType.IsGenericType && idParameter.ParameterType.GetGenericTypeDefinition() == typeof(Nullable<>)) || idParameter.HasDefaultValue ? "{id?}" : "{id}";
+                    methodName = $"{(methodName.IsNullOrEmpty() ? "" : $"{methodName}/")}{id}";
+                }
+
                 var route = $"{globalRouteOptions.RootUrl}/{serviceName}{(methodName.IsNullOrEmpty() ? "" : $"/{methodName}")}";
                 if (methodRouteAttr?.Pattern.IsNullOrEmpty() == false)
                 {
