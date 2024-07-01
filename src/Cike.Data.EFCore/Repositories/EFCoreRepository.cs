@@ -77,7 +77,7 @@ public class EFCoreRepository<TDbContext, TEntity, TKey> : IRepository<TEntity, 
         var result = await FindAsync(filter);
         if (result == null)
         {
-            throw new FriendlyException($"Entity Not Found.");
+            throw new UserFriendlyException($"Entity Not Found.");
         }
         return result;
     }

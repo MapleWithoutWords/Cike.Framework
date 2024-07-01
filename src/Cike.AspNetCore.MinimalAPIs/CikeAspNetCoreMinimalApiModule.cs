@@ -1,4 +1,6 @@
-﻿using Cike.AspNetCore.MinimalAPIs.Options;
+﻿using Cike.AspNetCore.MinimalAPIs.JsonConverts;
+using Cike.AspNetCore.MinimalAPIs.Middlewares;
+using Cike.AspNetCore.MinimalAPIs.Options;
 using Cike.Auth;
 using Cike.Core.Extensions.DependencyInjection;
 using Cike.Core.Modularity;
@@ -48,6 +50,8 @@ public class CikeAspNetCoreMinimalApiModule : CikeModule
         {
             options.SerializerOptions.Converters.Add(new LongToStringConverter());
             options.SerializerOptions.Converters.Add(new NullableLongToStringConverter());
+            options.SerializerOptions.Converters.Add(new StringToLongConverter());
+            options.SerializerOptions.Converters.Add(new StringToLongNullableConverter());
         });
     }
 
@@ -55,11 +59,11 @@ public class CikeAspNetCoreMinimalApiModule : CikeModule
     {
         var endpointRouteBuilder = context.GetEndpointRouteBuilder();
         var app = context.GetApplicationBuilder();
+        app.UseMiddleware<BusinessExceptionMiddleware>();
         app.UseCors();
         AddCikeMinimalAPIs(endpointRouteBuilder);
         await base.InitializeAsync(context);
     }
-
 
     private IEndpointRouteBuilder AddCikeMinimalAPIs(IEndpointRouteBuilder builder)
     {

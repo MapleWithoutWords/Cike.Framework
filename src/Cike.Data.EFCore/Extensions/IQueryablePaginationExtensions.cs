@@ -33,7 +33,7 @@ public static class IQueryablePaginationExtensions
         var data = await query.FirstOrDefaultAsync(e => e.Id.Equals(id));
         if (data == null)
         {
-            throw new FriendlyException($"Id {id} is NotFound.");
+            throw new UserFriendlyException($"Id {id} is NotFound.");
         }
         return data;
     }

@@ -6,7 +6,7 @@ namespace Cike.AspNetCore.Swagger;
 
 public static class ServiceExtensions
 {
-    public static IServiceCollection AddCikeSwagger(IServiceCollection services, string projectName, Action<SwaggerGenOptions> configOptions = null)
+    public static IServiceCollection AddCikeSwagger(this IServiceCollection services, string projectName, Action<SwaggerGenOptions> configOptions = null)
     {
         return services.AddEndpointsApiExplorer()
                 .AddSwaggerGen(options =>

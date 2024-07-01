@@ -1,4 +1,4 @@
-﻿namespace Cike.AspNetCore.MinimalAPIs;
+﻿namespace Cike.AspNetCore.MinimalAPIs.JsonConverts;
 
 public class LongToStringConverter : JsonConverter<long>
 {
