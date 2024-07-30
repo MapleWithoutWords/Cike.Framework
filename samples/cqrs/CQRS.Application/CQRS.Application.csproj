@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Cike.Contracts\Cike.Contracts.csproj" />
     <ProjectReference Include="..\..\..\src\Cike.Cqrs\Cike.Cqrs.csproj" />
     <ProjectReference Include="..\..\..\src\Cike.EventBus.Local\Cike.EventBus.Local.csproj" />
     <ProjectReference Include="..\CQRS.Data\CQRS.Data.csproj" />

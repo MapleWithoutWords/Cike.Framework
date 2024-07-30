@@ -1,8 +1,4 @@
-﻿using Cike.Data;
-using Cike.Domain.Entities;
-using System.Linq.Dynamic.Core;
-
-namespace Cike.Contracts.Extensions;
+﻿namespace Cike.Contracts.Extensions;
 
 public static class IQueryablePaginationExtensions
 {
@@ -28,7 +24,7 @@ public static class IQueryablePaginationExtensions
         return (total, items);
     }
 
-    public static async Task<TEntity> GetAsync<TEntity, TKey>(this IQueryable<TEntity> query, TKey id) where TEntity : Entity<TKey> where TKey : struct
+    public static async Task<TEntity> GetAsync<TEntity, TKey>(this IQueryable<TEntity> query, TKey id) where TEntity : IEntity<TKey> where TKey : struct
     {
         var data = await query.FirstOrDefaultAsync(e => e.Id.Equals(id));
         if (data == null)
@@ -36,5 +32,14 @@ public static class IQueryablePaginationExtensions
             throw new UserFriendlyException($"Id {id} is NotFound.");
         }
         return data;
+    }
+
+    public static IQueryable<TEntity> WhereIf<TEntity>(this IQueryable<TEntity> query, Func<bool> ifExpression, Expression<Func<TEntity, bool>> whereExpression) where TEntity : class
+    {
+        if (ifExpression())
+        {
+            return query.Where(whereExpression);
+        }
+        return query;
     }
 }

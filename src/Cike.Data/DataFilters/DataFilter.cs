@@ -1,10 +1,5 @@
-﻿using Cike.Core;
-using Cike.Core.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using System.Collections.Concurrent;
+﻿namespace Cike.Data.DataFilters;
 
-namespace Cike.Data.DataFilters;
 public class DataFilter : IDataFilter, ISingletonDependency
 {
     private readonly ConcurrentDictionary<Type, object> _filters;

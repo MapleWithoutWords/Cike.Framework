@@ -2,6 +2,13 @@
 
 public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency where TDbContext : DbContext
 {
+    private static readonly MethodInfo ConfigureBasePropertiesMethodInfo
+        = typeof(CikeDbContext<TDbContext>)
+            .GetMethod(
+                nameof(ConfigureBaseProperties),
+                BindingFlags.Instance | BindingFlags.NonPublic
+            )!;
+
     private ILogger<TDbContext> _logger => _currentServiceProvider.GetRequiredService<ILogger<TDbContext>>();
 
     private IServiceProvider _currentServiceProvider;
@@ -19,21 +26,20 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
     }
 
     protected ICurrentUser CurrentUser => CurrentServiceProvider.GetRequiredService<ICurrentUser>();
+
     protected ICurrentTenant CurrentTenant => CurrentServiceProvider.GetRequiredService<ICurrentTenant>();
 
     public IDataFilter DataFilter => CurrentServiceProvider.GetRequiredService<IDataFilter>();
+
     public IGuidGenerator GuidGenerator => CurrentServiceProvider.GetRequiredService<IGuidGenerator>();
+
     public ISnowflakeIdGenerator SnowflakeIdGenerator => CurrentServiceProvider.GetRequiredService<ISnowflakeIdGenerator>();
+
     public UnitOfWorkOptions UnitOfWorkOptions => CurrentServiceProvider.GetRequiredService<IOptions<UnitOfWorkOptions>>().Value;
+
     protected virtual bool IsMultiTenantFilterEnabled => DataFilter?.IsEnabled<IMultiTenant>() ?? false;
 
     protected virtual bool IsSoftDeleteFilterEnabled => DataFilter?.IsEnabled<ISoftDelete>() ?? false;
-    private static readonly MethodInfo ConfigureBasePropertiesMethodInfo
-        = typeof(CikeDbContext<TDbContext>)
-            .GetMethod(
-                nameof(ConfigureBaseProperties),
-                BindingFlags.Instance | BindingFlags.NonPublic
-            )!;
 
     public CikeDbContext(DbContextOptions<TDbContext> options, IServiceProvider serviceProvider) : base(options.UseUow())
     {
@@ -125,11 +131,13 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
                 .Invoke(this, new object[] { modelBuilder, entityType });
         }
     }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
         base.OnConfiguring(optionsBuilder);
     }
+
     protected virtual void ConfigureBaseProperties<TEntity>(ModelBuilder modelBuilder, IMutableEntityType mutableEntityType)
         where TEntity : class
     {
@@ -160,6 +168,7 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
             }
         }
     }
+
     protected virtual bool ShouldFilterEntity<TEntity>(IMutableEntityType entityType) where TEntity : class
     {
         if (typeof(IMultiTenant).IsAssignableFrom(typeof(TEntity)))
@@ -174,6 +183,7 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
 
         return false;
     }
+
     protected virtual Expression<Func<TEntity, bool>>? CreateFilterExpression<TEntity>()
         where TEntity : class
     {
@@ -193,10 +203,6 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
         return expression;
     }
 
-    /// <summary>
-    /// This method is used to add a query filter to this entity which combine with ABP EF Core builtin query filters.
-    /// </summary>
-    /// <returns></returns>
     public static EntityTypeBuilder<TEntity> HasCikeQueryFilter<TEntity>(EntityTypeBuilder<TEntity> builder, Expression<Func<TEntity, bool>> filter)
         where TEntity : class
     {
@@ -286,28 +292,66 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
     public override EntityEntry Remove(object entity)
     {
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
+        if (entity is ISoftDelete softDeleteEntity)
+        {
+            softDeleteEntity.IsDeleted = true;
+            return Update(entity);
+        }
         return base.Remove(entity);
     }
 
     public override EntityEntry<TEntity> Remove<TEntity>(TEntity entity)
     {
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
+        if (entity is ISoftDelete softDeleteEntity)
+        {
+            softDeleteEntity.IsDeleted = true;
+            return Update(entity);
+        }
         return base.Remove(entity);
+    }
+
+    public virtual void Remove<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class
+    {
+        var entities = Set<TEntity>().Where(predicate).ToList();
+        RemoveRange(entities);
     }
 
     public override void RemoveRange(IEnumerable<object> entities)
     {
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
-        base.RemoveRange(entities);
+        foreach (var item in entities)
+        {
+            if (item is ISoftDelete softDeleteEntity)
+            {
+                softDeleteEntity.IsDeleted = true;
+                Update(item);
+            }
+            else
+            {
+                Remove(item);
+            }
+        }
     }
 
     public override void RemoveRange(params object[] entities)
     {
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
-        base.RemoveRange(entities);
+        foreach (var item in entities)
+        {
+            if (item is ISoftDelete softDeleteEntity)
+            {
+                softDeleteEntity.IsDeleted = true;
+                Update(item);
+            }
+            else
+            {
+                Remove(item);
+            }
+        }
     }
 
-    private async Task BeginUnitOfWorkAsync(params object[] entities)
+    protected async Task BeginUnitOfWorkAsync(params object[] entities)
     {
         if (!UnitOfWorkOptions.Enable)
         {

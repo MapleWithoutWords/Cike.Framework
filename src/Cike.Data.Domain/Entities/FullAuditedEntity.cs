@@ -9,5 +9,4 @@ public class FullAuditedEntity<TKey, TUserId> : AuditedEntity<TKey, TUserId>, IF
 
 public class FullAuditedEntity<TKey> : FullAuditedEntity<TKey, long>
 {
-    public bool IsDeleted { get; set; } = false;
 }

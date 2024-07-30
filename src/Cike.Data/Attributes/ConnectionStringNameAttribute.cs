@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace Cike.Data.Attributes;
+﻿namespace Cike.Data.Attributes;
 
 [AttributeUsage(AttributeTargets.Class)]
 public class ConnectionStringNameAttribute : Attribute

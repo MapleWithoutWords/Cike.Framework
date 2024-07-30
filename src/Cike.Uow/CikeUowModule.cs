@@ -1,7 +1,4 @@
-﻿using Cike.Core.Modularity;
-using Microsoft.Extensions.DependencyInjection;
-
-namespace Cike.Uow;
+﻿namespace Cike.Uow;
 
 public class CikeUowModule : CikeModule
 {

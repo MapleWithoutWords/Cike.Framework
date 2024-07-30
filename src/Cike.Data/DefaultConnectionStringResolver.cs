@@ -1,8 +1,4 @@
-﻿
-using Cike.Core.DependencyInjection;
-using Microsoft.Extensions.Options;
-
-namespace Cike.Data;
+﻿namespace Cike.Data;
 
 public class DefaultConnectionStringResolver : IConnectionStringResolver, ISingletonDependency
 {

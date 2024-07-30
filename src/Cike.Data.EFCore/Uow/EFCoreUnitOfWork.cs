@@ -2,9 +2,9 @@
 
 public class EFCoreUnitOfWork<TDbContext>(IServiceProvider _serviceProvider) : IUnitOfWork where TDbContext : CikeDbContext<TDbContext>
 {
-    public Guid TransactionId { get; set; }
-
     private DbContext? _dbContext;
+
+    public Guid TransactionId { get; set; }
 
     public DbContext DbContext
     {

@@ -101,7 +101,7 @@ $projects = (
     "src/Cike.Data.EFCore",
     "src/Cike.Data.EFCore.MySql",
     "src/Cike.Data.EFCore.SqlServer",
-    "src/Cike.Domain",
+    "src/Cike.Data.Domain",
     "src/Cike.EventBus",
     "src/Cike.EventBus.Local",
     "src/Cike.Uow",

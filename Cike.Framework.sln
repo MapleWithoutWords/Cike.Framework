@@ -33,7 +33,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cike.Auth", "src\Cike.Auth\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cike.Data.EFCore.MySql", "src\Cike.Data.EFCore.MySql\Cike.Data.EFCore.MySql.csproj", "{B51AA5A0-3654-4B1E-B4FD-DC6968A0BAAD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cike.Domain", "src\Cike.Domain\Cike.Domain.csproj", "{0A7C4564-1335-4003-B60B-DBE36DFE01CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cike.Data.Domain", "src\Cike.Data.Domain\Cike.Data.Domain.csproj", "{0A7C4564-1335-4003-B60B-DBE36DFE01CF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{453249D5-C1E7-4EB4-A2FC-36500736DB66}"
 EndProject
@@ -57,7 +57,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cike.UniversalId", "src\Cik
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cike.Contracts", "src\Cike.Contracts\Cike.Contracts.csproj", "{9B4054EA-B668-475D-8152-E444256CB8D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cike.AspNetCore.Swagger", "src\Cike.AspNetCore.Swagger\Cike.AspNetCore.Swagger.csproj", "{0C189D96-3911-4B68-A1C7-84FB2BBCE2DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cike.AspNetCore.Swagger", "src\Cike.AspNetCore.Swagger\Cike.AspNetCore.Swagger.csproj", "{0C189D96-3911-4B68-A1C7-84FB2BBCE2DE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

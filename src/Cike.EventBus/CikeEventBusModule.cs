@@ -1,6 +1,4 @@
-﻿using Cike.Core.Modularity;
-
-namespace Cike.EventBus;
+﻿namespace Cike.EventBus;
 
 public class CikeEventBusModule : CikeModule
 {

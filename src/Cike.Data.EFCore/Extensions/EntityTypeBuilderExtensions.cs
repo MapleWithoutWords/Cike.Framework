@@ -20,6 +20,7 @@ public static class EntityTypeBuilderExtensions
                 .HasColumnName(nameof(IHasConcurrencyStamp.ConcurrencyStamp));
         }
     }
+
     public static void TryConfigureSoftDelete(this EntityTypeBuilder b)
     {
         if (b.Metadata.ClrType.IsAssignableTo<ISoftDelete>())
@@ -29,6 +30,7 @@ public static class EntityTypeBuilderExtensions
                 .HasColumnName(nameof(ISoftDelete.IsDeleted));
         }
     }
+
     public static void TryConfigureMultiTenant(this EntityTypeBuilder b)
     {
         if (b.Metadata.ClrType.IsAssignableTo<IMultiTenant>())
@@ -38,6 +40,7 @@ public static class EntityTypeBuilderExtensions
                 .HasColumnName(nameof(IMultiTenant.TenantId));
         }
     }
+
     public static void TryConfigureAudited(this EntityTypeBuilder b)
     {
         if (b.Metadata.ClrType.IsAssignableTo<IAuditedEntity<Guid>>())
@@ -45,19 +48,19 @@ public static class EntityTypeBuilderExtensions
             b.Property(nameof(IAuditedEntity<Guid>.CreateTime))
                 .IsRequired()
                 .HasColumnName(nameof(IAuditedEntity<Guid>.CreateTime))
-                .HasComment("CreateTime");
+                .HasComment(nameof(IAuditedEntity<Guid>.CreateTime));
             b.Property(nameof(IAuditedEntity<Guid>.CreateUserId))
                 .IsRequired()
                 .HasColumnName(nameof(IAuditedEntity<Guid>.CreateUserId))
-                .HasComment("CreateUserId");
+                .HasComment(nameof(IAuditedEntity<Guid>.CreateUserId));
             b.Property(nameof(IAuditedEntity<Guid>.UpdateUserId))
                 .IsRequired()
                 .HasColumnName(nameof(IAuditedEntity<Guid>.UpdateUserId))
-                .HasComment("UpdateUserId");
+                .HasComment(nameof(IAuditedEntity<Guid>.UpdateUserId));
             b.Property(nameof(IAuditedEntity<Guid>.UpdateTime))
                 .IsRequired()
                 .HasColumnName(nameof(IAuditedEntity<Guid>.UpdateTime))
-                .HasComment("UpdateTime");
+                .HasComment(nameof(IAuditedEntity<Guid>.UpdateTime));
         }
     }
 }

@@ -5,18 +5,10 @@ public static class IServiceCollectionDbContextExtensions
     public static IServiceCollection AddCikeDbContext<TDbContext>(this IServiceCollection services) where TDbContext : CikeDbContext<TDbContext>
     {
         services.TryAddTransient(DbContextOptionsFactory.Create<TDbContext>);
-
-        GetEntityTypes(typeof(TDbContext)).ToList().ForEach(e =>
-        {
-            //添加仓储
-            services.AddDefaultRepository(e, typeof(EFCoreRepository<,,>).MakeGenericType(typeof(TDbContext), e, EntityHelper.FindPrimaryKeyType(e)!));
-        });
-
         services.AddScoped<IUnitOfWork, EFCoreUnitOfWork<TDbContext>>();
 
         return services;
     }
-
 
     public static IEnumerable<Type> GetEntityTypes(Type dbContextType)
     {

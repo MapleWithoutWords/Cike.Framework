@@ -1,9 +1,4 @@
-﻿using Cike.Core.Modularity;
-using Cike.Data.EFCore.Extensions;
-using Cike.UniversalId.Guids;
-using Microsoft.Extensions.DependencyInjection;
-
-namespace Cike.Data.EFCore.MySql;
+﻿namespace Cike.Data.EFCore.MySql;
 
 [DependsOn([typeof(CikeDataEFCoreModule)])]
 public class CikeDataEFCoreMySqlModule : CikeModule

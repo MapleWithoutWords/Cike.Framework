@@ -22,4 +22,16 @@ public class TodoService : MinimalApiServiceBase
         var command = new TodoCreateCommand(dto);
         await localEventBus.PublishAsync(command);
     }
+
+    public async Task UpdateAsync(Guid id, TodoCreateUpdateDto dto, [FromServices] ILocalEventBus localEventBus)
+    {
+        var command = new TodoUpdateCommand(id, dto);
+        await localEventBus.PublishAsync(command);
+    }
+
+    public async Task DeleteAsync(Guid id, [FromServices] ILocalEventBus localEventBus)
+    {
+        var command = new TodoDeleteCommand(id);
+        await localEventBus.PublishAsync(command);
+    }
 }

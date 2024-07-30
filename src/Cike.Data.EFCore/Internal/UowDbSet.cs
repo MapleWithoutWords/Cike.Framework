@@ -3,7 +3,6 @@
 #pragma warning disable EF1001
 public class UowDbSet<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes)] TEntity> : InternalDbSet<TEntity> where TEntity : class
 {
-
     internal const DynamicallyAccessedMemberTypes DynamicallyAccessedMemberTypes =
         System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors
         | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors
@@ -22,6 +21,7 @@ public class UowDbSet<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes
 
 
     private IUnitOfWork? _unitOfWork;
+
     private UnitOfWorkOptions? _unitOfWorkOptions;
 
     public UowDbSet(DbContext context, string? entityTypeName) : base(context, entityTypeName)

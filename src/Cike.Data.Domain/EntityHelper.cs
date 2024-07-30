@@ -1,12 +1,7 @@
-﻿using Cike.Data;
-using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-
-namespace Cike.Domain;
+﻿namespace Cike.Domain;
 
 public static class EntityHelper
 {
-
     /// <summary>
     /// Tries to find the primary key type of the given entity type.
     /// May return null if given type does not implement <see cref="IEntity{TKey}"/>
@@ -21,7 +16,7 @@ public static class EntityHelper
     /// Tries to find the primary key type of the given entity type.
     /// May return null if given type does not implement <see cref="IEntity{TKey}"/>
     /// </summary>
-    public static Type? FindPrimaryKeyType([NotNull] Type entityType)
+    public static Type? FindPrimaryKeyType(Type entityType)
     {
         if (!typeof(IEntity).IsAssignableFrom(entityType))
         {
