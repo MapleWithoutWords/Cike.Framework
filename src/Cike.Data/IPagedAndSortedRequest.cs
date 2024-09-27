@@ -2,7 +2,7 @@
 
 public interface IPagedAndSortedRequest
 {
-    int PageIndex { get; set; }
+    int Page { get; set; }
     int PageSize { get; set; }
     string Sorting { get; set; }
 }

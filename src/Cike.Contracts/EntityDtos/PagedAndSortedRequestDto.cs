@@ -2,7 +2,7 @@
 
 public abstract class PagedAndSortedResultRequest : IPagedAndSortedRequest
 {
-    public virtual int PageIndex { get; set; } = 1;
+    public virtual int Page { get; set; } = 1;
 
     public virtual int PageSize { get; set; } = 10;
 

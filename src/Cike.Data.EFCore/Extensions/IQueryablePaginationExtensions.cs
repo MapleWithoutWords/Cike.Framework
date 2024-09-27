@@ -14,7 +14,7 @@ public static class IQueryablePaginationExtensions
             }
             if (pageAndSorted.PageSize > 0)
             {
-                items = await query.Skip((pageAndSorted.PageIndex - 1) * pageAndSorted.PageSize).Take(pageAndSorted.PageSize).ToListAsync();
+                items = await query.Skip((pageAndSorted.Page - 1) * pageAndSorted.PageSize).Take(pageAndSorted.PageSize).ToListAsync();
             }
             else
             {

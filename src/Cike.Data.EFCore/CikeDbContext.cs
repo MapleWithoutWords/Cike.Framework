@@ -31,9 +31,7 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
 
     public IDataFilter DataFilter => CurrentServiceProvider.GetRequiredService<IDataFilter>();
 
-    public IGuidGenerator GuidGenerator => CurrentServiceProvider.GetRequiredService<IGuidGenerator>();
-
-    public ISnowflakeIdGenerator SnowflakeIdGenerator => CurrentServiceProvider.GetRequiredService<ISnowflakeIdGenerator>();
+    public EntityHelper EntityHelper => CurrentServiceProvider.GetRequiredService<EntityHelper>();
 
     public UnitOfWorkOptions UnitOfWorkOptions => CurrentServiceProvider.GetRequiredService<IOptions<UnitOfWorkOptions>>().Value;
 
@@ -53,59 +51,12 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
 
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
-        SetAuditedProperty();
-
         return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
     private void SetAuditedProperty()
     {
-        foreach (var item in ChangeTracker.Entries())
-        {
-            if (item.State == EntityState.Added)
-            {
-                if (item.Entity is IEntity<long> longIdEntity && longIdEntity.Id <= 0)
-                {
-                    longIdEntity.Id = SnowflakeIdGenerator.NextId();
-                }
-                else if (item.Entity is IEntity<Guid> guidIdEntity && guidIdEntity.Id == Guid.Empty)
-                {
-                    guidIdEntity.Id = GuidGenerator.Create();
-                }
-                if (item.Entity is IAuditedEntity<long> longAuditedEntity)
-                {
-                    long.TryParse(CurrentUser.Id, out var userId);
-                    longAuditedEntity.CreateUserId = userId;
-                    longAuditedEntity.CreateTime = DateTime.Now;
-                    longAuditedEntity.UpdateTime = DateTime.Now;
-                    longAuditedEntity.UpdateUserId = userId;
-                }
-                else if (item.Entity is IAuditedEntity<Guid> guidAuditedEntity)
-                {
-                    Guid.TryParse(CurrentUser.Id, out var userId);
-                    guidAuditedEntity.CreateUserId = userId;
-                    guidAuditedEntity.CreateTime = DateTime.Now;
-                    guidAuditedEntity.UpdateTime = DateTime.Now;
-                    guidAuditedEntity.UpdateUserId = userId;
-                }
-            }
-            else if (item.State == EntityState.Modified)
-            {
-                if (item.Entity is IAuditedEntity<long> longAuditedEntity)
-                {
-                    long.TryParse(CurrentUser.Id, out var userId);
-                    longAuditedEntity.UpdateTime = DateTime.Now;
-                    longAuditedEntity.UpdateUserId = userId;
-                }
-                else if (item.Entity is IAuditedEntity<Guid> guidAuditedEntity)
-                {
-                    Guid.TryParse(CurrentUser.Id, out var userId);
-                    guidAuditedEntity.UpdateTime = DateTime.Now;
-                    guidAuditedEntity.UpdateUserId = userId;
-                }
-
-            }
-        }
+        EntityHelper.SetAuditedProperty(ChangeTracker.Entries().Select(e => e.Entity).ToList());
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
@@ -219,48 +170,56 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
 
     public override EntityEntry Add(object entity)
     {
+        EntityHelper.SetAuditedProperty([entity]);
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
         return base.Add(entity);
     }
 
     public override EntityEntry<TEntity> Add<TEntity>(TEntity entity)
     {
+        EntityHelper.SetAuditedProperty([entity]);
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
         return base.Add(entity);
     }
 
     public override async ValueTask<EntityEntry> AddAsync(object entity, CancellationToken cancellationToken = default)
     {
+        EntityHelper.SetAuditedProperty([entity]);
         await BeginUnitOfWorkAsync(entity);
         return await base.AddAsync(entity, cancellationToken);
     }
 
     public override async ValueTask<EntityEntry<TEntity>> AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default)
     {
+        EntityHelper.SetAuditedProperty([entity]);
         await BeginUnitOfWorkAsync(entity);
         return await base.AddAsync(entity, cancellationToken);
     }
 
     public override void AddRange(IEnumerable<object> entities)
     {
+        EntityHelper.SetAuditedProperty(entities);
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
         base.AddRange(entities);
     }
 
     public override void AddRange(params object[] entities)
     {
+        EntityHelper.SetAuditedProperty(entities);
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
         base.AddRange(entities);
     }
 
     public override async Task AddRangeAsync(IEnumerable<object> entities, CancellationToken cancellationToken = default)
     {
+        EntityHelper.SetAuditedProperty(entities);
         await BeginUnitOfWorkAsync(entities);
         await base.AddRangeAsync(entities, cancellationToken);
     }
 
     public override async Task AddRangeAsync(params object[] entities)
     {
+        EntityHelper.SetAuditedProperty(entities);
         await BeginUnitOfWorkAsync(entities);
         await base.AddRangeAsync(entities);
     }
