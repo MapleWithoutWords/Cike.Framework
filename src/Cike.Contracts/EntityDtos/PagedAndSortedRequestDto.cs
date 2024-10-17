@@ -1,6 +1,6 @@
 ﻿namespace Cike.Contracts.EntityDtos;
 
-public abstract class PagedAndSortedResultRequest : IPagedAndSortedRequest
+public class PagedAndSortedResultRequest : IPagedAndSortedRequest
 {
     public virtual int Page { get; set; } = 1;
 
