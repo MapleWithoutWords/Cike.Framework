@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
-
-namespace Cike.Auth;
+﻿namespace Cike.Auth;
 
 public class CurrentUserContext : ICurrentUser, ISingletonDependency
 {
