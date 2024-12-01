@@ -7,7 +7,7 @@ public class AutoValidationEndpointFilterProvider : IEndpointFilterProvider
         var endpointFilter = new AutoFluentValidationEndpointFilter(
             ModuleLoader.Services,
             invocationContext.HttpContext.RequestServices,
-            invocationContext.HttpContext.RequestServices.GetRequiredService<IOptions<JsonOptions>>());
+            invocationContext.HttpContext.RequestServices.GetRequiredService<IOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>>());
         return endpointFilter.InvokeAsync(invocationContext, next);
     }
 }
