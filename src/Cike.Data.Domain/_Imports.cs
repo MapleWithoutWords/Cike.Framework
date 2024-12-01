@@ -1,4 +1,4 @@
 ﻿global using Cike.Core.Modularity;
 global using Cike.Data;
-global using System.Linq.Expressions;
+global using Cike.Domain.Entities;
 global using System.Reflection;

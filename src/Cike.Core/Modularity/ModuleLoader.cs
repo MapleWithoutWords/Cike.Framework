@@ -3,6 +3,7 @@
 public class ModuleLoader : IModuleLoader
 {
     public static IServiceCollection Services { get; set; }
+
     public CikeModuleContainer LoadCikeModules(Type startupType)
     {
         var cikeModules = new HashSet<Type>();

@@ -1,4 +1,11 @@
-﻿global using System.Globalization;
+﻿global using Cike.Core.Modularity;
+global using Cike.FluentValidation;
+global using Microsoft.AspNetCore.Builder;
+global using Microsoft.AspNetCore.Http;
+global using Microsoft.AspNetCore.Http.Json;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Options;
+global using System.Globalization;
 global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;

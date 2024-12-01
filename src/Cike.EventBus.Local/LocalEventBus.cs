@@ -6,9 +6,7 @@ using Cike.EventBus.Local.LocalEventMiddlewares;
 using Cike.EventBus.Local.Strategies;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Runtime.ExceptionServices;
-using System.Threading;
 
 namespace Cike.EventBus.LocalEvent;
 
@@ -40,7 +38,6 @@ public class LocalEventBus(IServiceProvider _serviceProvider,
         var isCancel = false;
         foreach (var item in eventHanlderDto.Handlers)
         {
-
             await _strategyExecutor.ExecuteAsync(item, @event, async () =>
             {
                 _logger?.LogDebug("Publish event, event id: {EventId}, event: {@Event}", @event.GetEventId(), @event);
@@ -94,7 +91,6 @@ public class LocalEventBus(IServiceProvider _serviceProvider,
             if (isCancel) return;
         }
     }
-
 
     public async Task CancelAsync<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : IEvent
     {

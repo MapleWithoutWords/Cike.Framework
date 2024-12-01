@@ -6,6 +6,11 @@ public abstract class Entity<TKey> : IEntity<TKey>
 
     public object[] GetKeys()
     {
-        return [Id];
+        return [Id!];
+    }
+
+    public virtual void SetId(TKey id)
+    {
+        Id = id;
     }
 }

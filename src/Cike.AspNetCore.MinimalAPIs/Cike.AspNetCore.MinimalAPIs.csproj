@@ -14,6 +14,11 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Cike.Auth\Cike.Auth.csproj" />
 		<ProjectReference Include="..\Cike.Core\Cike.Core.csproj" />
+		<ProjectReference Include="..\Cike.FluentValidation\Cike.FluentValidation.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
 	</ItemGroup>
 
 </Project>

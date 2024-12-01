@@ -34,9 +34,9 @@ public static class IQueryablePaginationExtensions
         return data;
     }
 
-    public static IQueryable<TEntity> WhereIf<TEntity>(this IQueryable<TEntity> query, Func<bool> ifExpression, Expression<Func<TEntity, bool>> whereExpression) where TEntity : class
+    public static IQueryable<TEntity> WhereIf<TEntity>(this IQueryable<TEntity> query, bool ifExpression, Expression<Func<TEntity, bool>> whereExpression) where TEntity : class
     {
-        if (ifExpression())
+        if (ifExpression)
         {
             return query.Where(whereExpression);
         }

@@ -17,6 +17,13 @@ public class TodoService : MinimalApiServiceBase
         return TypedResults.Ok(query.Result);
     }
 
+    public async Task<Results<Ok<TodoItemDto>, NotFound>> GetAsync(Guid id, [FromServices] ILocalEventBus localEventBus)
+    {
+        var query = new TodoGetQuery(id);
+        await localEventBus.PublishAsync(query);
+        return query.Result == null ? TypedResults.NotFound() : TypedResults.Ok(query.Result);
+    }
+
     public async Task CreateAsync(TodoCreateUpdateDto dto, [FromServices] ILocalEventBus localEventBus)
     {
         var command = new TodoCreateCommand(dto);

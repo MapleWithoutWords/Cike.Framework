@@ -17,6 +17,7 @@ public class LongToStringConverter : JsonConverter<long>
         writer.WriteStringValue(value.ToString());
     }
 }
+
 public class NullableLongToStringConverter : JsonConverter<long?>
 {
     public override long? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)

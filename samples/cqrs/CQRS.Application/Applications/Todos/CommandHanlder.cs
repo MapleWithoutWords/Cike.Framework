@@ -1,4 +1,5 @@
-﻿using Cike.EventBus.LocalEvent;
+﻿using Cike.Caching;
+using Cike.EventBus.LocalEvent;
 using CQRS.Application.Applications.Todos.Commands;
 using CQRS.Data;
 using CQRS.Data.Entities;
@@ -6,13 +7,14 @@ using Mapster;
 
 namespace CQRS.Application.Applications.Todos;
 
-public class CommandHanlder(CQRSDbContext _cqrsDbContext)
+public class CommandHanlder(CQRSDbContext _cqrsDbContext, IMultilevelCacheClient _multilevelCacheClient)
 {
     [LocalEventHandler]
     public async Task CreateAsync(TodoCreateCommand command)
     {
         var todo = command.Dto.Adapt<Todo>();
         await _cqrsDbContext.AddAsync(todo);
+        await _multilevelCacheClient.SetAsync(todo.Id.ToString(), todo);
     }
 
     [LocalEventHandler]

@@ -27,11 +27,9 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
 
     protected ICurrentUser CurrentUser => CurrentServiceProvider.GetRequiredService<ICurrentUser>();
 
-    protected ICurrentTenant CurrentTenant => CurrentServiceProvider.GetRequiredService<ICurrentTenant>();
-
     public IDataFilter DataFilter => CurrentServiceProvider.GetRequiredService<IDataFilter>();
 
-    public EntityHelper EntityHelper => CurrentServiceProvider.GetRequiredService<EntityHelper>();
+    internal EntityHelper EntityHelper => CurrentServiceProvider.GetRequiredService<EntityHelper>();
 
     public UnitOfWorkOptions UnitOfWorkOptions => CurrentServiceProvider.GetRequiredService<IOptions<UnitOfWorkOptions>>().Value;
 
@@ -51,24 +49,26 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
 
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
+        SetAuditedProperty();
         return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
     private void SetAuditedProperty()
     {
-        EntityHelper.SetAuditedProperty(ChangeTracker.Entries().Select(e => e.Entity).ToList());
+        foreach (var entry in ChangeTracker.Entries().ToList())
+        {
+            EntityHelper.SetAuditedProperty(entry);
+            if (entry.State.IsIn(EntityState.Modified, EntityState.Deleted))
+            {
+                UpdateConcurrencyStamp(entry);
+            }
+        }
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
         SetAuditedProperty();
         return base.SaveChanges(acceptAllChangesOnSuccess);
-    }
-
-    public virtual void SoftDelete<TEntity>(TEntity entity) where TEntity : ISoftDelete
-    {
-        entity.IsDeleted = true;
-        Update(entity);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -170,56 +170,48 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
 
     public override EntityEntry Add(object entity)
     {
-        EntityHelper.SetAuditedProperty([entity]);
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
         return base.Add(entity);
     }
 
     public override EntityEntry<TEntity> Add<TEntity>(TEntity entity)
     {
-        EntityHelper.SetAuditedProperty([entity]);
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
         return base.Add(entity);
     }
 
     public override async ValueTask<EntityEntry> AddAsync(object entity, CancellationToken cancellationToken = default)
     {
-        EntityHelper.SetAuditedProperty([entity]);
         await BeginUnitOfWorkAsync(entity);
         return await base.AddAsync(entity, cancellationToken);
     }
 
     public override async ValueTask<EntityEntry<TEntity>> AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default)
     {
-        EntityHelper.SetAuditedProperty([entity]);
         await BeginUnitOfWorkAsync(entity);
         return await base.AddAsync(entity, cancellationToken);
     }
 
     public override void AddRange(IEnumerable<object> entities)
     {
-        EntityHelper.SetAuditedProperty(entities);
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
         base.AddRange(entities);
     }
 
     public override void AddRange(params object[] entities)
     {
-        EntityHelper.SetAuditedProperty(entities);
         AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
         base.AddRange(entities);
     }
 
     public override async Task AddRangeAsync(IEnumerable<object> entities, CancellationToken cancellationToken = default)
     {
-        EntityHelper.SetAuditedProperty(entities);
         await BeginUnitOfWorkAsync(entities);
         await base.AddRangeAsync(entities, cancellationToken);
     }
 
     public override async Task AddRangeAsync(params object[] entities)
     {
-        EntityHelper.SetAuditedProperty(entities);
         await BeginUnitOfWorkAsync(entities);
         await base.AddRangeAsync(entities);
     }
@@ -330,5 +322,17 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
     private IServiceProvider GetServiceProvider()
     {
         return CurrentServiceProvider!;
+    }
+
+    protected void UpdateConcurrencyStamp(EntityEntry entry)
+    {
+        var entity = entry.Entity as IHasConcurrencyStamp;
+        if (entity == null)
+        {
+            return;
+        }
+
+        Entry(entity).Property(x => x.ConcurrencyStamp).OriginalValue = entity.ConcurrencyStamp;
+        entity.ConcurrencyStamp = Guid.NewGuid().ToString("N");
     }
 }

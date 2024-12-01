@@ -95,6 +95,7 @@ $projects = (
     # framework
     "src/Cike.AspNetCore.MinimalAPIs",
     "src/Cike.Auth",
+    "src/Cike.Caching",
     "src/Cike.Core",
     "src/Cike.Cqrs",
     "src/Cike.Data",
@@ -104,6 +105,7 @@ $projects = (
     "src/Cike.Data.Domain",
     "src/Cike.EventBus",
     "src/Cike.EventBus.Local",
+    "src/Cike.FluentValidation",
     "src/Cike.Uow",
     "src/Cike.UniversalId",
     "src/Cike.Contracts",

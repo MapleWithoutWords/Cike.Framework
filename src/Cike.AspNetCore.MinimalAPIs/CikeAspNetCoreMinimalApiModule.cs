@@ -1,16 +1,13 @@
-﻿using Cike.AspNetCore.MinimalAPIs.JsonConverts;
+﻿using Cike.AspNetCore.MinimalAPIs.EndpointFilters;
+using Cike.AspNetCore.MinimalAPIs.JsonConverts;
 using Cike.AspNetCore.MinimalAPIs.Middlewares;
 using Cike.AspNetCore.MinimalAPIs.Options;
 using Cike.Auth;
 using Cike.Core.Extensions.DependencyInjection;
-using Cike.Core.Modularity;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -46,6 +43,8 @@ public class CikeAspNetCoreMinimalApiModule : CikeModule
             });
         });
 
+        context.Services.AddAuthorization();
+
         context.Services.ConfigureHttpJsonOptions(options =>
         {
             options.SerializerOptions.Converters.Add(new LongToStringConverter());
@@ -59,6 +58,13 @@ public class CikeAspNetCoreMinimalApiModule : CikeModule
         var app = context.GetApplicationBuilder();
         app.UseMiddleware<BusinessExceptionMiddleware>();
         app.UseCors();
+
+        var globalRouteOptions = app.ApplicationServices.GetRequiredService<IOptions<GlobalMinimalApiRouteOptions>>().Value;
+        if (globalRouteOptions.EnabledAuthorization)
+        {
+            app.UseAuthentication();
+            app.UseAuthorization();
+        }
         AddCikeMinimalAPIs(endpointRouteBuilder);
         await base.InitializeAsync(context);
     }
@@ -81,6 +87,7 @@ public class CikeAspNetCoreMinimalApiModule : CikeModule
             }
             serviceName = serviceName.RemovePostFix(StringComparison.CurrentCultureIgnoreCase, globalRouteOptions.IgnoredUrlSuffixesInServiceNames.ToArray());
             serviceName = globalRouteOptions.GetPluralizationName(serviceName);
+            var classEndpointFilters = item.GetCustomAttributes<EndpointFilterBaseAttribute>(true).ToList();
 
             foreach (var methodInfo in GetMethodInfos(item))
             {
@@ -120,6 +127,11 @@ public class CikeAspNetCoreMinimalApiModule : CikeModule
                 }
 
                 var routeBuilder = builder.MapMethods(route, httpMethods, CreateDelegate(methodInfo, instance));
+                if (globalRouteOptions.EnabledAuthorization)
+                {
+                    globalRouteOptions.RouteHandlerBuilder?.Invoke(routeBuilder);
+                }
+                RegisterEndpointFilter(routeBuilder, methodInfo, classEndpointFilters);
             }
         }
         return builder;
@@ -146,5 +158,26 @@ public class CikeAspNetCoreMinimalApiModule : CikeModule
             }).ToArray()
         );
         return Delegate.CreateDelegate(type, targetInstance, methodInfo);
+    }
+
+    public static void RegisterEndpointFilter(RouteHandlerBuilder routeHandlerBuilder, MethodInfo methodInfo, List<EndpointFilterBaseAttribute> classEndpointFilters)
+    {
+        var endpointFilterAttributes = methodInfo.GetCustomAttributes<EndpointFilterBaseAttribute>(true).ToList();
+        var tempEndpointFilters = classEndpointFilters.Where(attribute => !endpointFilterAttributes.Any(a => a.GetType() == attribute.GetType())).ToList();
+        foreach (var attribute in tempEndpointFilters)
+        {
+            routeHandlerBuilder.WithMetadata(attribute);
+        }
+        var allEndpointFilters = endpointFilterAttributes.Union(tempEndpointFilters).OrderBy(attribute => attribute.Order).ToList();
+
+        foreach (var endpointFilter in allEndpointFilters)
+        {
+            routeHandlerBuilder.AddEndpointFilter(async (invocationContext, next) =>
+            {
+                var endpointFilterProvider = invocationContext.HttpContext.RequestServices.GetService(endpointFilter.ServiceType) as IEndpointFilterProvider;
+                ArgumentNullException.ThrowIfNull(endpointFilterProvider);//需要验证特性中的 ServiceType 是否实现了 IEndpointFilterProvider 接口
+                return await endpointFilterProvider.HandlerAsync(invocationContext, next);
+            });
+        }
     }
 }

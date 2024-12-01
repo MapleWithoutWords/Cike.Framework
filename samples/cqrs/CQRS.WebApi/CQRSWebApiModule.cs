@@ -1,9 +1,12 @@
 ﻿using Cike.AspNetCore.MinimalAPIs;
 using Cike.AspNetCore.MinimalAPIs.Options;
+using Cike.AspNetCore.Swagger;
 using Cike.Core.Modularity;
 using Cike.Data;
 using CQRS.Application;
-using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace CQRS.WebApi;
 
@@ -12,59 +15,48 @@ public class CQRSWebApiModule : CikeModule
 {
     public override async Task ConfigureServicesAsync(ServiceConfigurationContext context)
     {
+        var configuration = context.Services.GetConfiguration();
         context.Services.Configure<MinimalApiOptions>(options =>
         {
             options.LoadMinimalApi(typeof(CQRSWebApiModule).Assembly);
         });
 
-        var services = context.Services;
-        services.AddEndpointsApiExplorer()
-                .AddSwaggerGen(options =>
+        context.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    options.SwaggerDoc("v1", new OpenApiInfo()
+                    ValidIssuer = configuration["Jwt:Issuer"],
+                    ValidAudience = configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:SecretKey"])),
+                    // 默认允许 300s  的时间偏移量，设置为0
+                    ClockSkew = TimeSpan.Zero
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
                     {
-                        Title = $"CQRS",
-                        Version = "v1"
-                    });
-                    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
-                    {
-                        Name = "Authorization",
-                        BearerFormat = "JWT",
-                        Scheme = "Bearer",
-                        Description = "Specify the authorization token",
-                        In = ParameterLocation.Header,
-                        Type = SecuritySchemeType.Http,
-                    });
-                    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-                    {
+                        //兼容SignalR授权
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken))
                         {
-                            new OpenApiSecurityScheme
-                            {
-                                Reference = new OpenApiReference
-                                {
-                                    Type = ReferenceType.SecurityScheme,
-                                    Id = "Bearer"
-                                }
-                            },
-                            Array.Empty<string>()
+                            context.Token = accessToken;
+                            context?.HttpContext?.Request?.Headers?.TryAdd("Authorization", $"Bearer {accessToken}");
                         }
-                    });
-                    // 支持多态
-                    options.UseAllOfForInheritance();
-                    options.UseOneOfForPolymorphism();
-                    // 支持枚举
-                    //options.SchemaFilter<EnumDescriptionSupplementSchemaFilter>();
-                });
+                        return Task.CompletedTask;
+                    }
+                };
+            });
+
+        var services = context.Services;
+        context.Services.AddCikeSwagger("CQRS");
     }
 
     public override Task InitializeAsync(ApplicationInitializationContext context)
     {
-        context.GetApplicationBuilder().UseSwagger();
-        context.GetApplicationBuilder().UseSwaggerUI(options => options.SwaggerEndpoint(
-                $"/swagger/{"v1"}/swagger.json",
-                $"CQRS HTTP API"
-            )
-        );
+        var app = context.GetApplicationBuilder();
+        app.UseCikeSwaggerUI("CQRS");
 
         var connection = context.ServiceProvider.GetRequiredService<IConnectionStringResolver>();
         return base.InitializeAsync(context);

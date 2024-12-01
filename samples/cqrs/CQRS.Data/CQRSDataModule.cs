@@ -1,4 +1,5 @@
-﻿using Cike.Core.Modularity;
+﻿using Cike.Caching;
+using Cike.Core.Modularity;
 using Cike.Data.EFCore;
 using Cike.Data.EFCore.Extensions;
 using Cike.Data.EFCore.MySql;
@@ -7,8 +8,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CQRS.Data;
 
-[DependsOn([typeof(CikeDataEFCoreMySqlModule)])]
-public class CQRSDataModule:CikeModule
+[DependsOn([
+    typeof(CikeDataEFCoreMySqlModule),
+    typeof(CikeCachingModule)
+    ])]
+public class CQRSDataModule : CikeModule
 {
     public override Task ConfigureServicesAsync(ServiceConfigurationContext context)
     {
