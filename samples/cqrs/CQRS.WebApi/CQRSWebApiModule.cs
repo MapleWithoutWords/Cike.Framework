@@ -21,7 +21,7 @@ public class CQRSWebApiModule : CikeModule
             options.LoadMinimalApi(typeof(CQRSWebApiModule).Assembly);
         });
 
-        context.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        context.Services.AddAuthentication()
             .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -38,7 +38,6 @@ public class CQRSWebApiModule : CikeModule
                     {
                         //兼容SignalR授权
                         var accessToken = context.Request.Query["access_token"];
-                        var path = context.HttpContext.Request.Path;
                         if (!string.IsNullOrEmpty(accessToken))
                         {
                             context.Token = accessToken;
@@ -48,6 +47,7 @@ public class CQRSWebApiModule : CikeModule
                     }
                 };
             });
+        context.Services.AddAuthorization();
 
         var services = context.Services;
         context.Services.AddCikeSwagger("CQRS");

@@ -1,17 +1,4 @@
-﻿using Cike.AspNetCore.MinimalAPIs.EndpointFilters;
-using Cike.AspNetCore.MinimalAPIs.JsonConverts;
-using Cike.AspNetCore.MinimalAPIs.Middlewares;
-using Cike.AspNetCore.MinimalAPIs.Options;
-using Cike.Auth;
-using Cike.Core.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Configuration;
-using System.Linq.Expressions;
-using System.Reflection;
-
-namespace Cike.AspNetCore.MinimalAPIs;
+﻿namespace Cike.AspNetCore.MinimalAPIs;
 
 [DependsOn([typeof(CikeAuthModule)])]
 public class CikeAspNetCoreMinimalApiModule : CikeModule
@@ -42,8 +29,6 @@ public class CikeAspNetCoreMinimalApiModule : CikeModule
                     .AllowAnyOrigin();
             });
         });
-
-        context.Services.AddAuthorization();
 
         context.Services.ConfigureHttpJsonOptions(options =>
         {

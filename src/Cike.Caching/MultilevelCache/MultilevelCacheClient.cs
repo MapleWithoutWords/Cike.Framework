@@ -19,7 +19,7 @@ public class MultilevelCacheClient : MultilevelCacheClientBase, ISingletonDepend
     public MultilevelCacheClient(
         IMemoryCache memoryCache,
         IDistributedCacheClient distributedCacheClient,
-        IOptionsSnapshot<MultilevelCacheGlobalOptions> multilevelCacheOptions,
+        IOptions<MultilevelCacheGlobalOptions> multilevelCacheOptions,
         ITypeAliasProvider? typeAliasProvider,
         IFormatCacheKeyProvider? formatCacheKeyProvider)
     {

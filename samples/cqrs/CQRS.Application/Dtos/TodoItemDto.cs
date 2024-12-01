@@ -2,7 +2,7 @@
 
 namespace CQRS.Application.Dtos;
 
-public class TodoItemDto : FullAuditedEntityDto<Guid>
+public class TodoItemDto : FullAuditedEntityDto<Guid, Guid>
 {
     public string Title { get; set; } = null!;
     public string Description { get; set; } = null!;
