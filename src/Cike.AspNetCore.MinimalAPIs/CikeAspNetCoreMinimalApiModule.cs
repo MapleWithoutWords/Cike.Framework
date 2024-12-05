@@ -70,7 +70,7 @@ public class CikeAspNetCoreMinimalApiModule : CikeModule
             {
                 serviceName = instance.ServiceName;
             }
-            serviceName = serviceName.RemovePostFix(StringComparison.CurrentCultureIgnoreCase, globalRouteOptions.IgnoredUrlSuffixesInServiceNames.ToArray());
+            serviceName = serviceName.RemovePostFix(StringComparison.CurrentCultureIgnoreCase, instance.RouteOptions.IgnoredUrlSuffixesInServiceNames?.ToArray() ?? globalRouteOptions.IgnoredUrlSuffixesInServiceNames.ToArray());
             serviceName = globalRouteOptions.GetPluralizationName(serviceName);
             var classEndpointFilters = item.GetCustomAttributes<EndpointFilterBaseAttribute>(true).ToList();
 
@@ -78,7 +78,8 @@ public class CikeAspNetCoreMinimalApiModule : CikeModule
             {
                 var methodRouteAttr = methodInfo.GetCustomAttribute<MinimalApiRouteAttribute>();
                 IEnumerable<string> httpMethods = [];
-                foreach (var httpMethodPrefixItem in globalRouteOptions.HttpMethodPrefixMapDic)
+                var httpMethodPrefixMapDic = instance.RouteOptions.HttpMethodPrefixMapDic ?? globalRouteOptions.HttpMethodPrefixMapDic;
+                foreach (var httpMethodPrefixItem in httpMethodPrefixMapDic)
                 {
                     if (methodInfo.Name.StartsWith(httpMethodPrefixItem.Key, StringComparison.CurrentCultureIgnoreCase))
                     {
@@ -98,23 +99,23 @@ public class CikeAspNetCoreMinimalApiModule : CikeModule
                     p.Name!.Equals("id", StringComparison.OrdinalIgnoreCase) &&
                     p.GetCustomAttributes().All(attr => attr is not IBindingSourceMetadata)
                 );
-                string methodName = methodInfo.Name.RemovePreFix(globalRouteOptions.HttpMethodPrefixMapDic.Keys.ToArray()).RemovePostFix("Async");
+                string methodName = methodInfo.Name.RemovePreFix(httpMethodPrefixMapDic.Keys.ToArray()).RemovePostFix("Async");
                 if (idParameter is not null)
                 {
                     var id = (idParameter.ParameterType.IsGenericType && idParameter.ParameterType.GetGenericTypeDefinition() == typeof(Nullable<>)) || idParameter.HasDefaultValue ? "{id?}" : "{id}";
                     methodName = $"{(methodName.IsNullOrEmpty() ? "" : $"{methodName}/")}{id}";
                 }
 
-                var route = $"{globalRouteOptions.RootUrl}/{serviceName}{(methodName.IsNullOrEmpty() ? "" : $"/{methodName}")}";
+                var route = $"{instance.RouteOptions.RootUrl ?? globalRouteOptions.RootUrl}/{serviceName}{(methodName.IsNullOrEmpty() ? "" : $"/{methodName}")}";
                 if (methodRouteAttr?.Pattern.IsNullOrEmpty() == false)
                 {
                     route = methodRouteAttr.Pattern;
                 }
 
                 var routeBuilder = builder.MapMethods(route, httpMethods, CreateDelegate(methodInfo, instance));
-                if (globalRouteOptions.EnabledAuthorization)
+                if (instance.RouteOptions.EnabledAuthorization)
                 {
-                    globalRouteOptions.RouteHandlerBuilder?.Invoke(routeBuilder);
+                    (instance.RouteOptions.RouteHandlerBuilder ?? globalRouteOptions.RouteHandlerBuilder)?.Invoke(routeBuilder);
                 }
                 RegisterEndpointFilter(routeBuilder, methodInfo, classEndpointFilters);
             }

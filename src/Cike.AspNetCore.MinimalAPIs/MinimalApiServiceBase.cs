@@ -1,15 +1,11 @@
-﻿using Cike.AspNetCore.MinimalAPIs.Options;
-using Cike.Core.DependencyInjection;
-using Microsoft.AspNetCore.Mvc;
-using System.Linq.Expressions;
-using System.Reflection;
+﻿using Cike.Core.DependencyInjection;
 
 namespace Cike.AspNetCore.MinimalAPIs;
 
 public abstract class MinimalApiServiceBase : ISingletonDependency
 {
-    public string? Prefix { get; set; }
-    public string? Version { get; set; }
+    public MinimalApiRouteOptions RouteOptions { get; set; } = new MinimalApiRouteOptions();
+
     public string? ServiceName { get; set; }
 
     public MinimalApiServiceBase() { }

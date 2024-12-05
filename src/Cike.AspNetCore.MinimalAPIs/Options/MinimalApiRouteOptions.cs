@@ -4,7 +4,7 @@ public class MinimalApiRouteOptions
 {
     public string Prefix { get; set; } = "api";
 
-    public string Version { get; set; } = "";
+    public string Version { get; set; } = "v1";
 
     public bool DisablePluralizeServiceName { get; set; } = false;
 
