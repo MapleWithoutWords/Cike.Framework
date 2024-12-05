@@ -47,7 +47,14 @@ public class CQRSWebApiModule : CikeModule
                     }
                 };
             });
-        context.Services.AddAuthorization();
+        context.Services.AddAuthorization(options =>
+        {
+            options.AddPolicy("BackendUser", policy =>
+                policy.RequireClaim("userType", "1"));
+
+            options.AddPolicy("FrontendUser", policy =>
+                policy.RequireClaim("userType", "2"));
+        });
 
         var services = context.Services;
         context.Services.AddCikeSwagger("CQRS");

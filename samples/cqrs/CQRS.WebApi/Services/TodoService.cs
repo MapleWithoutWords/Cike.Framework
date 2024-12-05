@@ -16,6 +16,14 @@ namespace CQRS.WebApi.Services;
 
 public class TodoService : MinimalApiServiceBase
 {
+    public TodoService()
+    {
+        RouteOptions.RouteHandlerBuilder = routeHanlderBuilder =>
+        {
+            routeHanlderBuilder.RequireAuthorization("FrontendUser");
+        };
+    }
+
     public async Task<Results<Ok<IEnumerable<TodoItemDto>>, NotFound>> GetListAsync([FromServices] ILocalEventBus localEventBus, [FromServices] ICurrentUser currentUser, [FromServices] IHttpContextAccessor httpContextAccessor)
     {
         var userPrinal = httpContextAccessor.HttpContext?.User;
@@ -50,14 +58,21 @@ public class TodoService : MinimalApiServiceBase
     }
 
     [AllowAnonymous]
-    public async Task<Results<Ok<string>, BadRequest>> LoginAsync([FromServices] IConfiguration configuration)
+    public async Task<Results<Ok<string>, BadRequest>> Login1Async([FromServices] IConfiguration configuration)
     {
-        var token = GetToken(configuration);
+        var token = GetToken(configuration, 1);
         return TypedResults.Ok(token.Token);
     }
 
 
-    private (string Token, DateTime Expire) GetToken(IConfiguration configuration)
+    [AllowAnonymous]
+    public async Task<Results<Ok<string>, BadRequest>> Login2Async([FromServices] IConfiguration configuration)
+    {
+        var token = GetToken(configuration, 2);
+        return TypedResults.Ok(token.Token);
+    }
+
+    private (string Token, DateTime Expire) GetToken(IConfiguration configuration, int userType)
     {
         var nowTime = DateTime.Now;
         var claims = new[]
@@ -66,6 +81,7 @@ public class TodoService : MinimalApiServiceBase
             new Claim(ClaimTypes.Email, "123@qq.com"),
             new Claim(ClaimTypes.MobilePhone, "13133737905"),
             new Claim(ClaimTypes.Name, "test"),
+            new Claim("userType", userType.ToString()),
             //new Claim(ClaimTypes.Role, string.Join(",",roleList.Select(e=>e.Name))),
         };
         var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:SecretKey"]!));
