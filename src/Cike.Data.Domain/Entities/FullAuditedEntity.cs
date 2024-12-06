@@ -1,8 +1,6 @@
-﻿using Cike.Data;
+﻿namespace Cike.Domain.Entities;
 
-namespace Cike.Domain.Entities;
-
-public class FullAuditedEntity<TKey, TUserId> : AuditedEntity<TKey, TUserId>, IFullAuditedEntity<TUserId>
+public class FullAuditedEntity<TKey, TUserId> : AuditedEntity<TKey, TUserId>, IFullAuditedEntity<TUserId> where TUserId : struct
 {
     public bool IsDeleted { get; set; } = false;
 }

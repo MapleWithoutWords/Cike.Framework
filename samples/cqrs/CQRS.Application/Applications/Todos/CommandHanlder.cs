@@ -14,7 +14,7 @@ public class CommandHanlder(CQRSDbContext _cqrsDbContext, IMultilevelCacheClient
     {
         var todo = command.Dto.Adapt<Todo>();
         await _cqrsDbContext.AddAsync(todo);
-        await _multilevelCacheClient.SetAsync(todo.Id.ToString(), todo);
+        //await _multilevelCacheClient.SetAsync(todo.Id.ToString(), todo);
     }
 
     [LocalEventHandler]

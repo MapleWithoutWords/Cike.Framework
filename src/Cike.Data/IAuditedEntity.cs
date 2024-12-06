@@ -1,11 +1,7 @@
 ﻿namespace Cike.Data;
 
-public interface IAuditedEntity<TUserId>
+public interface IAuditedEntity<TUserId> : ICreateAuditedEntity<TUserId> where TUserId : struct
 {
-    DateTime CreateTime { get; set; }
-
-    TUserId CreateUserId { get; set; }
-
     DateTime UpdateTime { get; set; }
 
     TUserId UpdateUserId { get; set; }

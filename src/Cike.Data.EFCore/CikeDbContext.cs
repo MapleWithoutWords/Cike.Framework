@@ -37,37 +37,23 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
 
     protected virtual bool IsSoftDeleteFilterEnabled => DataFilter?.IsEnabled<ISoftDelete>() ?? false;
 
-    public CikeDbContext(DbContextOptions<TDbContext> options, IServiceProvider serviceProvider) : base(options.UseUow())
+    public CikeDbContext(DbContextOptions<TDbContext> options, IServiceProvider serviceProvider) : base(options)
     {
         _currentServiceProvider = serviceProvider;
-    }
 
-    public CikeDbContext(DbContextOptions<TDbContext> options, IServiceProvider serviceProvider, bool isUow) : base(isUow ? options.UseUow() : options)
-    {
-        _currentServiceProvider = serviceProvider;
+        ChangeTracker.Tracked += ChangeTracker_Tracked;
+        ChangeTracker.StateChanged += ChangeTracker_StateChanged;
     }
 
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
-        SetAuditedProperty();
+        HandlePropertiesBeforeSave();
         return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-    }
-
-    private void SetAuditedProperty()
-    {
-        foreach (var entry in ChangeTracker.Entries().ToList())
-        {
-            EntityHelper.SetAuditedProperty(entry);
-            if (entry.State.IsIn(EntityState.Modified, EntityState.Deleted))
-            {
-                UpdateConcurrencyStamp(entry);
-            }
-        }
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
-        SetAuditedProperty();
+        HandlePropertiesBeforeSave();
         return base.SaveChanges(acceptAllChangesOnSuccess);
     }
 
@@ -168,137 +154,47 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
         return builder.HasQueryFilter(filter);
     }
 
-    public override EntityEntry Add(object entity)
+    private void HandlePropertiesBeforeSave()
     {
-        AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
-        return base.Add(entity);
-    }
-
-    public override EntityEntry<TEntity> Add<TEntity>(TEntity entity)
-    {
-        AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
-        return base.Add(entity);
-    }
-
-    public override async ValueTask<EntityEntry> AddAsync(object entity, CancellationToken cancellationToken = default)
-    {
-        await BeginUnitOfWorkAsync(entity);
-        return await base.AddAsync(entity, cancellationToken);
-    }
-
-    public override async ValueTask<EntityEntry<TEntity>> AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default)
-    {
-        await BeginUnitOfWorkAsync(entity);
-        return await base.AddAsync(entity, cancellationToken);
-    }
-
-    public override void AddRange(IEnumerable<object> entities)
-    {
-        AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
-        base.AddRange(entities);
-    }
-
-    public override void AddRange(params object[] entities)
-    {
-        AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
-        base.AddRange(entities);
-    }
-
-    public override async Task AddRangeAsync(IEnumerable<object> entities, CancellationToken cancellationToken = default)
-    {
-        await BeginUnitOfWorkAsync(entities);
-        await base.AddRangeAsync(entities, cancellationToken);
-    }
-
-    public override async Task AddRangeAsync(params object[] entities)
-    {
-        await BeginUnitOfWorkAsync(entities);
-        await base.AddRangeAsync(entities);
-    }
-
-    public override EntityEntry Update(object entity)
-    {
-        AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
-        return base.Update(entity);
-    }
-
-    public override EntityEntry<TEntity> Update<TEntity>(TEntity entity)
-    {
-        AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
-        return base.Update(entity);
-    }
-
-    public override void UpdateRange(IEnumerable<object> entities)
-    {
-        AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
-        base.UpdateRange(entities);
-    }
-
-    public override void UpdateRange(params object[] entities)
-    {
-        AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
-        base.UpdateRange(entities);
-    }
-
-    public override EntityEntry Remove(object entity)
-    {
-        AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
-        if (entity is ISoftDelete softDeleteEntity)
+        foreach (var entry in ChangeTracker.Entries().ToList())
         {
-            softDeleteEntity.IsDeleted = true;
-            return Update(entity);
-        }
-        return base.Remove(entity);
-    }
-
-    public override EntityEntry<TEntity> Remove<TEntity>(TEntity entity)
-    {
-        AsyncContext.Run(() => BeginUnitOfWorkAsync(entity));
-        if (entity is ISoftDelete softDeleteEntity)
-        {
-            softDeleteEntity.IsDeleted = true;
-            return Update(entity);
-        }
-        return base.Remove(entity);
-    }
-
-    public virtual void Remove<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class
-    {
-        var entities = Set<TEntity>().Where(predicate).ToList();
-        RemoveRange(entities);
-    }
-
-    public override void RemoveRange(IEnumerable<object> entities)
-    {
-        AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
-        foreach (var item in entities)
-        {
-            if (item is ISoftDelete softDeleteEntity)
+            //EntityHelper.SetCreateAuditedProperty(entry);
+            if (entry.State.IsIn(EntityState.Modified, EntityState.Deleted))
             {
-                softDeleteEntity.IsDeleted = true;
-                Update(item);
-            }
-            else
-            {
-                Remove(item);
+                UpdateConcurrencyStamp(entry);
             }
         }
     }
 
-    public override void RemoveRange(params object[] entities)
+    protected virtual void ChangeTracker_Tracked(object? sender, EntityTrackedEventArgs e)
     {
-        AsyncContext.Run(() => BeginUnitOfWorkAsync(entities));
-        foreach (var item in entities)
+        PublishEventsForTrackedEntity(e.Entry);
+    }
+
+    protected virtual void ChangeTracker_StateChanged(object? sender, EntityStateChangedEventArgs e)
+    {
+        PublishEventsForTrackedEntity(e.Entry);
+    }
+
+    protected virtual void PublishEventsForTrackedEntity(EntityEntry entry)
+    {
+        switch (entry.State)
         {
-            if (item is ISoftDelete softDeleteEntity)
-            {
-                softDeleteEntity.IsDeleted = true;
-                Update(item);
-            }
-            else
-            {
-                Remove(item);
-            }
+            case EntityState.Added:
+                AsyncContext.Run(() => BeginUnitOfWorkAsync(entry.Entity));
+                EntityHelper.TrySetId(entry);
+                EntityHelper.SetCreateAuditedProperty(entry);
+                break;
+
+            case EntityState.Modified:
+                AsyncContext.Run(() => BeginUnitOfWorkAsync(entry.Entity));
+                EntityHelper.SetUpdateAuditedProperty(entry);
+                break;
+
+            case EntityState.Deleted:
+                AsyncContext.Run(() => BeginUnitOfWorkAsync(entry.Entity));
+                EntityHelper.SetDeleteAuditedProperty(entry);
+                break;
         }
     }
 
@@ -317,11 +213,6 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
         {
             await unitOfWork.BeginTranscationAsync();
         }
-    }
-
-    private IServiceProvider GetServiceProvider()
-    {
-        return CurrentServiceProvider!;
     }
 
     protected void UpdateConcurrencyStamp(EntityEntry entry)

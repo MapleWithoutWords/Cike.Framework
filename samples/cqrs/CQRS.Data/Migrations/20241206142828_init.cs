@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CQRS.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -24,10 +24,10 @@ namespace CQRS.Data.Migrations
                     Description = table.Column<string>(type: "varchar(512)", maxLength: 512, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     IsDone = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CreateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false, comment: "CreateTime"),
-                    CreateUserId = table.Column<Guid>(type: "char(36)", nullable: false, comment: "CreateUserId", collation: "ascii_general_ci"),
-                    UpdateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false, comment: "UpdateTime"),
-                    UpdateUserId = table.Column<Guid>(type: "char(36)", nullable: false, comment: "UpdateUserId", collation: "ascii_general_ci"),
+                    CreateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    CreateUserId = table.Column<long>(type: "bigint", nullable: false),
+                    UpdateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UpdateUserId = table.Column<long>(type: "bigint", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
                 constraints: table =>

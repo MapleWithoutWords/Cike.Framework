@@ -4,7 +4,7 @@ public class FullAuditedAggregateRoot<TKey> : FullAuditedAggregateRoot<TKey, lon
 {
 }
 
-public class FullAuditedAggregateRoot<TKey, TUserId> : FullAuditedEntity<TKey, TUserId>, IHasConcurrencyStamp
+public class FullAuditedAggregateRoot<TKey, TUserId> : FullAuditedEntity<TKey, TUserId>, IHasConcurrencyStamp where TUserId : struct
 {
     public virtual string ConcurrencyStamp { get; set; } = default!;
 

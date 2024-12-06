@@ -2,7 +2,7 @@
 
 namespace CQRS.Data.Entities;
 
-public class Todo : FullAuditedEntity<Guid, Guid>
+public class Todo : FullAuditedEntity<Guid, long>
 {
     public string Title { get; set; } = null!;
     public string Description { get; set; } = null!;

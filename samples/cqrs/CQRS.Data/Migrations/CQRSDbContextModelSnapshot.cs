@@ -29,14 +29,10 @@ namespace CQRS.Data.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<DateTime>("CreateTime")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("CreateTime")
-                        .HasComment("CreateTime");
+                        .HasColumnType("datetime(6)");
 
-                    b.Property<Guid>("CreateUserId")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("CreateUserId")
-                        .HasComment("CreateUserId");
+                    b.Property<long>("CreateUserId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -56,14 +52,10 @@ namespace CQRS.Data.Migrations
                         .HasColumnType("varchar(128)");
 
                     b.Property<DateTime>("UpdateTime")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("UpdateTime")
-                        .HasComment("UpdateTime");
+                        .HasColumnType("datetime(6)");
 
-                    b.Property<Guid>("UpdateUserId")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("UpdateUserId")
-                        .HasComment("UpdateUserId");
+                    b.Property<long>("UpdateUserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 

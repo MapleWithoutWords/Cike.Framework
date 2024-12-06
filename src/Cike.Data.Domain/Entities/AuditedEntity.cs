@@ -1,6 +1,6 @@
 ﻿namespace Cike.Domain.Entities;
 
-public class AuditedEntity<TKey, TUserId> : Entity<TKey>, IAuditedEntity<TUserId>
+public class AuditedEntity<TKey, TUserId> : Entity<TKey>, IAuditedEntity<TUserId> where TUserId : struct
 {
     public DateTime CreateTime { get; set; }
 

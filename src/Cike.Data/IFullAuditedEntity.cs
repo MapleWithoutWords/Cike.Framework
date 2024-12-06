@@ -1,5 +1,5 @@
 ﻿namespace Cike.Data;
 
-public interface IFullAuditedEntity<TUserId> : IAuditedEntity<TUserId>, ISoftDelete
+public interface IFullAuditedEntity<TUserId> : IAuditedEntity<TUserId>, ISoftDelete where TUserId : struct
 {
 }
