@@ -54,6 +54,11 @@ internal class EntityHelper(ISnowflakeIdGenerator _snowflakeIdGenerator, IGuidGe
         {
             entry.Property(nameof(guidIdEntity.Id)).CurrentValue = _guidGenerator.Create();
         }
+
+        if (item is IMultiTenant multiTenant)
+        {
+            multiTenant.TenantId = _currentUser.TenantId ?? 0;
+        }
     }
 
     public void SetCreateAuditedProperty(EntityEntry entry)

@@ -16,7 +16,7 @@ public interface ICurrentUser
     string? Email { get; }
 
 
-    Guid? TenantId { get; }
+    long? TenantId { get; }
 
     string[] Roles { get; }
 

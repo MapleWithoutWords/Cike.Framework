@@ -2,5 +2,5 @@
 
 public interface IMultiTenant
 {
-    Guid TenantId { get; set; }
+    long TenantId { get; set; }
 }

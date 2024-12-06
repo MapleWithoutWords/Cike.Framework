@@ -56,7 +56,7 @@ public class CurrentUserContext : ICurrentUser, ISingletonDependency
     public virtual string? Email => this.GetValue(CikeClaimTypes.Email);
 
 
-    public virtual Guid? TenantId => GetGuidValue(CikeClaimTypes.TenantId);
+    public virtual long? TenantId => GetLongValue(CikeClaimTypes.TenantId);
 
     public virtual string[] Roles => FindClaims(CikeClaimTypes.Role).Select(c => c.Value).Distinct().ToArray();
 
