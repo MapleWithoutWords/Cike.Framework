@@ -46,11 +46,11 @@ internal class EntityHelper(ISnowflakeIdGenerator _snowflakeIdGenerator, IGuidGe
     public virtual void TrySetId(EntityEntry entry)
     {
         var item = entry.Entity;
-        if (item is IEntity<long> longIdEntity && longIdEntity.Id != default)
+        if (item is IEntity<long> longIdEntity && longIdEntity.Id == default)
         {
             entry.Property(nameof(longIdEntity.Id)).CurrentValue = _snowflakeIdGenerator.NextId();
         }
-        else if (item is IEntity<Guid> guidIdEntity && guidIdEntity.Id != default)
+        else if (item is IEntity<Guid> guidIdEntity && guidIdEntity.Id == default)
         {
             entry.Property(nameof(guidIdEntity.Id)).CurrentValue = _guidGenerator.Create();
         }
