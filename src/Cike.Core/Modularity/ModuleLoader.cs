@@ -6,14 +6,14 @@ public class ModuleLoader : IModuleLoader
 
     public CikeModuleContainer LoadCikeModules(Type startupType)
     {
-        var cikeModules = new HashSet<Type>();
+        var cikeModules = new List<Type>();
         ForModuleTypeTree(cikeModules, startupType);
         cikeModules.Add(startupType);
-        var moduleContainer = new CikeModuleContainer(cikeModules.ToList());
+        var moduleContainer = new CikeModuleContainer(cikeModules);
         return moduleContainer;
     }
 
-    private void ForModuleTypeTree(HashSet<Type> cikeModules, Type type)
+    private void ForModuleTypeTree(List<Type> cikeModules, Type type)
     {
         var dependsOnAttries = type.GetCustomAttributes<DependsOnAttribute>();
         if (!dependsOnAttries.Any())
@@ -27,7 +27,7 @@ public class ModuleLoader : IModuleLoader
             {
                 if (!cikeModules.Contains(dependModuleType))
                 {
-                    cikeModules.Add(dependModuleType);
+                    cikeModules.Insert(0, dependModuleType);
                     ForModuleTypeTree(cikeModules, dependModuleType);
                 }
             }

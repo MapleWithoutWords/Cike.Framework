@@ -26,7 +26,7 @@ public class CikeAspNetCoreMinimalApiModule : CikeModule
                 builder.SetIsOriginAllowed(origin => corsDomains.Any(d => new Uri(origin).Host.EndsWith(d, StringComparison.CurrentCultureIgnoreCase)))
                 .AllowAnyHeader()
                     .AllowAnyMethod()
-                    .AllowAnyOrigin();
+                    .AllowCredentials();
             });
         });
 

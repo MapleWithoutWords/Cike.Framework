@@ -4,6 +4,7 @@ using CQRS.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CQRS.Data.Migrations
 {
     [DbContext(typeof(CQRSDbContext))]
-    partial class CQRSDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250102092221_listProperty")]
+    partial class listProperty
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -45,10 +48,6 @@ namespace CQRS.Data.Migrations
 
                     b.Property<bool>("IsDone")
                         .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("Tests")
-                        .IsRequired()
-                        .HasColumnType("longtext");
 
                     b.Property<string>("Title")
                         .IsRequired()
