@@ -24,6 +24,8 @@ namespace CQRS.Data.Migrations
                     Description = table.Column<string>(type: "varchar(512)", maxLength: 512, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     IsDone = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Tests = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     CreateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreateUserId = table.Column<long>(type: "bigint", nullable: false),
                     UpdateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),

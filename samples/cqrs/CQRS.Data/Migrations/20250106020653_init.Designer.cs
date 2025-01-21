@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CQRS.Data.Migrations
 {
     [DbContext(typeof(CQRSDbContext))]
-    [Migration("20250102092415_listProperty2")]
-    partial class listProperty2
+    [Migration("20250106020653_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

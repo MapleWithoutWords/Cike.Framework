@@ -19,7 +19,12 @@ public class QueryHanlder(CQRSDbContext _dbContext)
     [LocalEventHandler]
     public async Task GetListAsync(TodoGetListQuery query)
     {
-        var todos = await _dbContext.Todos.AsNoTracking().Where(e => e.Tests.Contains(1)).ToListAsync();
+        var todos = await _dbContext.Todos.AsNoTracking()
+            .Where(e => e.Tests.Contains(1))
+            .ToListAsync();
+
+
+
         query.Result = todos.Adapt<List<TodoItemDto>>();
     }
 }
