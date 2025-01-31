@@ -21,12 +21,13 @@ public class CikeAspNetCoreMinimalApiModule : CikeModule
         corsDomains ??= ["localhost"];
         context.Services.AddCors(options =>
         {
-            options.AddDefaultPolicy(builder =>
+            options.AddPolicy(nameof(CikeAspNetCoreMinimalApiModule), builder =>
             {
-                builder.SetIsOriginAllowed(origin => corsDomains.Any(d => new Uri(origin).Host.EndsWith(d, StringComparison.CurrentCultureIgnoreCase)))
-                .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials();
+                builder.WithOrigins(corsDomains)
+                    .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials()
+                        .SetPreflightMaxAge(TimeSpan.FromSeconds(2520));
             });
         });
 
@@ -42,7 +43,7 @@ public class CikeAspNetCoreMinimalApiModule : CikeModule
         var endpointRouteBuilder = context.GetEndpointRouteBuilder();
         var app = context.GetApplicationBuilder();
         app.UseMiddleware<BusinessExceptionMiddleware>();
-        app.UseCors();
+        app.UseCors(nameof(CikeAspNetCoreMinimalApiModule));
 
         var globalRouteOptions = app.ApplicationServices.GetRequiredService<IOptions<GlobalMinimalApiRouteOptions>>().Value;
         if (globalRouteOptions.EnabledAuthorization)
