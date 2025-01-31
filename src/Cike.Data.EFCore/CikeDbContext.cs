@@ -71,7 +71,6 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
         base.OnConfiguring(optionsBuilder);
     }
 
