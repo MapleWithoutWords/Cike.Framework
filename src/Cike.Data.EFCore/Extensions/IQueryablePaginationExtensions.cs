@@ -2,7 +2,7 @@
 
 public static class IQueryablePaginationExtensions
 {
-    public static async Task<(long Total, List<TEntity> Items)> ToPaginationAsync<TEntity>(this IQueryable<TEntity> query, IPagedAndSortedRequest pageAndSorted)
+    public static async Task<(long Total, List<TEntity> Items)> ToPaginationAsync<TEntity>(this IQueryable<TEntity> query, IPagedAndSortedRequest pageAndSorted, CancellationToken cancellationToken = default)
     {
         var total = await query.LongCountAsync();
         var items = new List<TEntity>();
@@ -18,15 +18,15 @@ public static class IQueryablePaginationExtensions
             }
             else
             {
-                items = await query.ToListAsync();
+                items = await query.ToListAsync(cancellationToken);
             }
         }
         return (total, items);
     }
 
-    public static async Task<TEntity> GetAsync<TEntity, TKey>(this IQueryable<TEntity> query, TKey id) where TEntity : IEntity<TKey> where TKey : struct
+    public static async Task<TEntity> GetAsync<TEntity, TKey>(this IQueryable<TEntity> query, TKey id, CancellationToken cancellationToken = default) where TEntity : IEntity<TKey> where TKey : struct
     {
-        var data = await query.FirstOrDefaultAsync(e => e.Id.Equals(id));
+        var data = await query.FirstOrDefaultAsync(e => e.Id.Equals(id), cancellationToken);
         if (data == null)
         {
             throw new UserFriendlyException($"Id {id} is NotFound.");
