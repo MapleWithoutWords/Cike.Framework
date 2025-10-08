@@ -104,6 +104,7 @@ $projects = (
     "src/Cike.Data.EFCore.SqlServer",
     "src/Cike.Data.Domain",
     "src/Cike.EventBus",
+    "src/Cike.EventBus.Adaptive",
     "src/Cike.EventBus.Local",
     "src/Cike.FluentValidation",
     "src/Cike.Uow",

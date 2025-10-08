@@ -1,4 +1,7 @@
-﻿namespace Cike.Data.EFCore;
+﻿using Cike.EventBus;
+using System.Threading.Tasks;
+
+namespace Cike.Data.EFCore;
 
 public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency where TDbContext : DbContext
 {
@@ -48,6 +51,7 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         HandlePropertiesBeforeSave();
+        await EnqueueDomainEventAsync();
         return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
@@ -224,5 +228,25 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
 
         Entry(entity).Property(x => x.ConcurrencyStamp).OriginalValue = entity.ConcurrencyStamp;
         entity.ConcurrencyStamp = Guid.NewGuid().ToString("N");
+    }
+
+    protected async Task EnqueueDomainEventAsync()
+    {
+        if (CurrentServiceProvider == null)
+        {
+            return;
+        }
+        var queueEventBus = CurrentServiceProvider.GetService<IQueueEventBus>();
+        if (queueEventBus == null)
+        {
+            return;
+        }
+        foreach (var item in ChangeTracker.Entries().Where(e => e.Entity is IAggregateRoot))
+        {
+            foreach (var eventItem in item.Entity.As<IAggregateRoot>().DomainEvents)
+            {
+                await queueEventBus.EnqueueAsync(eventItem);
+            }
+        }
     }
 }

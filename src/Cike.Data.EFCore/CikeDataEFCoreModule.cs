@@ -4,6 +4,7 @@
     typeof(CikeDomainModule),
     typeof(CikeUniversalIdModule),
     typeof(CikeUowModule),
+    typeof(CikeEventBusAdaptiveModule),
 ])]
 public class CikeDataEFCoreModule : CikeModule
 {

@@ -1,8 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.SwaggerGen;
-
-namespace Cike.AspNetCore.Swagger;
+﻿namespace Cike.AspNetCore.Swagger;
 
 public static class ServiceExtensions
 {

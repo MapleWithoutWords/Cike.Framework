@@ -1,4 +1,6 @@
-﻿namespace Cike.Data.EFCore.Uow;
+﻿using Cike.EventBus;
+
+namespace Cike.Data.EFCore.Uow;
 
 public class EFCoreUnitOfWork<TDbContext>(IServiceProvider _serviceProvider) : IUnitOfWork where TDbContext : CikeDbContext<TDbContext>
 {
@@ -38,6 +40,18 @@ public class EFCoreUnitOfWork<TDbContext>(IServiceProvider _serviceProvider) : I
 
     public async Task CommitAsync(CancellationToken cancellationToken = default)
     {
+        var queueEventBus = _serviceProvider.GetService<IQueueEventBus>();
+
+        if (queueEventBus is not null)
+        {
+            while (await queueEventBus.AnyQueueAsync())
+            {
+                await queueEventBus.PublishQueueAsync();
+
+                await DbContext.SaveChangesAsync(cancellationToken);
+            }
+        }
+
         if (CommitState == UnitOfWorkCommitState.Uncommitted)
         {
             await DbContext.SaveChangesAsync(cancellationToken);

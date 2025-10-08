@@ -2,3 +2,4 @@
 global using Cike.Data;
 global using Cike.Domain.Entities;
 global using System.Reflection;
+global using Cike.EventBus;

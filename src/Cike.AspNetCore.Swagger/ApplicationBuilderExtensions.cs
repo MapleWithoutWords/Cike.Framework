@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Swashbuckle.AspNetCore.SwaggerUI;
-
-namespace Cike.AspNetCore.Swagger;
+﻿namespace Cike.AspNetCore.Swagger;
 
 public static class ApplicationBuilderExtensions
 {

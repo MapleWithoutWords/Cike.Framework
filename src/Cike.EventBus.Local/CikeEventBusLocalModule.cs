@@ -1,12 +1,4 @@
-﻿using Cike.Core.Modularity;
-using Cike.EventBus.Local.LocalEventMiddlewares;
-using Cike.EventBus.Local.Middlewares;
-using Cike.EventBus.LocalEvent;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using System.Reflection;
-
-namespace Cike.EventBus.Local;
+﻿namespace Cike.EventBus.Local;
 
 [DependsOn(typeof(CikeEventBusModule))]
 public class CikeEventBusLocalModule : CikeModule

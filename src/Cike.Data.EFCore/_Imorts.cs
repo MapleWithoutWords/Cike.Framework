@@ -38,4 +38,5 @@ global using System.Linq.Dynamic.Core;
 global using System.Linq.Expressions;
 global using System.Reflection;
 global using System.Text;
+global using Cike.EventBus.Adaptive;
 global using System.Text.RegularExpressions;

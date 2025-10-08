@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>$(TargetFramework)</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Services\readme.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Cike.AspNetCore.MinimalAPIs" Version="$(CikeVersion)" />
+    <PackageReference Include="Cike.AspNetCore.Swagger" Version="$(CikeVersion)" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="$(MicrosoftPackageVersion)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ProjectName.Application\ProjectName.Application.csproj" />
+    <ProjectReference Include="..\ProjectName.EntityFrameworkCore\ProjectName.EntityFrameworkCore.csproj" />
+  </ItemGroup>
+
+</Project>

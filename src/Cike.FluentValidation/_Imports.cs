@@ -5,3 +5,4 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Options;
 global using System.Collections.Concurrent;
 global using System.Text.Json;
+global using Cike.Core.Modularity;

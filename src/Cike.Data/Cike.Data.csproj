@@ -10,6 +10,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Cike.Core\Cike.Core.csproj" />
+		<ProjectReference Include="..\Cike.EventBus\Cike.EventBus.csproj" />
 	</ItemGroup>
 
 </Project>

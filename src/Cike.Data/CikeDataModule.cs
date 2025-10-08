@@ -1,5 +1,6 @@
 ﻿namespace Cike.Data;
 
+[DependsOn([typeof(CikeEventBusModule)])]
 public class CikeDataModule : CikeModule
 {
     public override Task ConfigureServicesAsync(ServiceConfigurationContext context)

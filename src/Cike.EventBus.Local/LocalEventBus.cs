@@ -1,14 +1,4 @@
-﻿
-using Cike.Core.DependencyInjection;
-using Cike.EventBus.Local;
-using Cike.EventBus.Local.Enums;
-using Cike.EventBus.Local.LocalEventMiddlewares;
-using Cike.EventBus.Local.Strategies;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using System.Runtime.ExceptionServices;
-
-namespace Cike.EventBus.LocalEvent;
+﻿namespace Cike.EventBus.LocalEvent;
 
 public class LocalEventBus(IServiceProvider _serviceProvider,
     IStrategyExecutor _strategyExecutor,

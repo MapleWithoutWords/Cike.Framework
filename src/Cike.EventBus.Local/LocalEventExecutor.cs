@@ -1,7 +1,4 @@
-﻿using Cike.Core.DependencyInjection;
-using Cike.EventBus.Local.Enums;
-
-namespace Cike.EventBus.Local;
+﻿namespace Cike.EventBus.Local;
 
 public class LocalEventExecutor : ILocalEventExecutor, IScopedDependency
 {
