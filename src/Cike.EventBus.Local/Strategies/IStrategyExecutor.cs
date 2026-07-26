@@ -1,5 +1,4 @@
 ﻿using Cike.EventBus.Local.Enums;
-using Cike.EventBus.LocalEvent;
 
 namespace Cike.EventBus.Local.Strategies;
 

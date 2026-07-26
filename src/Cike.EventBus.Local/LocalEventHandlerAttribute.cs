@@ -1,4 +1,4 @@
-﻿namespace Cike.EventBus.LocalEvent;
+﻿namespace Cike.EventBus.Local;
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
 public class LocalEventHandlerAttribute : Attribute
@@ -8,16 +8,17 @@ public class LocalEventHandlerAttribute : Attribute
     public bool IsCancel { get; set; }
 
     public int RetryCount { get; set; }
+
     public FailureLevelEnum FailureLevel { get; set; }
 
-    public LocalEventHandlerAttribute(int order = 99)
+    public LocalEventHandlerAttribute(int order = 100)
     {
         Order = order;
     }
 
-    internal Type InstanceType { get; set; }
-    internal MethodInfo EventHandlerMethod { get; set; }
-    internal TaskMethodInvokeDelegate MethodDelegate { get; set; }
+    internal Type InstanceType { get; set; } = null!;
+    internal MethodInfo EventHandlerMethod { get; set; } = null!;
+    internal TaskMethodInvokeDelegate MethodDelegate { get; set; } = null!;
     internal Type[] ParameterTypes { get; set; } = default!;
     internal Type EventType { get; set; } = default!;
 

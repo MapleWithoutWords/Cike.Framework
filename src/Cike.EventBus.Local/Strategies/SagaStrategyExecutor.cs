@@ -1,6 +1,5 @@
 ﻿using Cike.Core.DependencyInjection;
 using Cike.EventBus.Local.Enums;
-using Cike.EventBus.LocalEvent;
 using Microsoft.Extensions.Logging;
 
 namespace Cike.EventBus.Local.Strategies;

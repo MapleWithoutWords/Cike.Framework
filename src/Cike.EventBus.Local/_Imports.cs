@@ -1,14 +1,15 @@
 ﻿global using Cike.Core.DependencyInjection;
 global using Cike.Core.Modularity;
-global using Cike.EventBus.Local;
 global using Cike.EventBus.Local.Enums;
 global using Cike.EventBus.Local.Expressions;
 global using Cike.EventBus.Local.LocalEventMiddlewares;
 global using Cike.EventBus.Local.Middlewares;
 global using Cike.EventBus.Local.Strategies;
-global using Cike.EventBus.LocalEvent;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.DependencyInjection.Extensions;
 global using Microsoft.Extensions.Logging;
 global using System.Reflection;
 global using System.Runtime.ExceptionServices;
+global using System.Threading.Channels;
+global using Cike.Core;
+global using Cike.EventBus.Local.Options;

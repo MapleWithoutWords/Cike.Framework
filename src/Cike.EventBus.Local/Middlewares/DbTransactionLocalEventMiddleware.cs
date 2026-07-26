@@ -11,7 +11,7 @@ public class DbTransactionLocalEventMiddleware<TEvent> : ILocalEventMiddleware<T
 {
     private IUnitOfWork _unitOfWork;
 
-    public bool PreventRecursive => true;
+    public MiddlewareExecutionPolicy ExecutionPolicy =>  MiddlewareExecutionPolicy.OncePerTree;
 
     public DbTransactionLocalEventMiddleware(IServiceProvider serviceProvider)
     {

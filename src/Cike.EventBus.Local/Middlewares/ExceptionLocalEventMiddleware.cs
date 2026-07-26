@@ -1,7 +1,6 @@
 ﻿using Cike.Core.DependencyInjection;
 using Cike.EventBus.Local.Enums;
 using Cike.EventBus.Local.LocalEventMiddlewares;
-using Cike.EventBus.LocalEvent;
 using Microsoft.Extensions.DependencyInjection;
 using System.Runtime.ExceptionServices;
 
@@ -10,15 +9,15 @@ namespace Cike.EventBus.Local.Middlewares;
 public class ExceptionLocalEventMiddleware<TEvent> : ILocalEventMiddleware<TEvent>
     where TEvent : IEvent
 {
-    private readonly Lazy<ILocalEventExecutor> _executeProviderLazy;
+    private readonly Lazy<ILocalEventContext> _executeProviderLazy;
     private readonly Lazy<ILocalEventBus> _localEventBusLazy;
     private ILocalEventBus LocalEventBus => _localEventBusLazy.Value;
 
-    public bool PreventRecursive => true;
+    public MiddlewareExecutionPolicy ExecutionPolicy => MiddlewareExecutionPolicy.OncePerTree;
 
     public ExceptionLocalEventMiddleware(IServiceProvider serviceProvider)
     {
-        _executeProviderLazy = new Lazy<ILocalEventExecutor>(serviceProvider.GetRequiredService<ILocalEventExecutor>);
+        _executeProviderLazy = new Lazy<ILocalEventContext>(serviceProvider.GetRequiredService<ILocalEventContext>);
         _localEventBusLazy = new Lazy<ILocalEventBus>(serviceProvider.GetRequiredService<ILocalEventBus>);
     }
 

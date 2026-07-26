@@ -2,8 +2,8 @@
 
 public class LocalEventHandlerRelationContainer
 {
-    public Dictionary<Type, LocalEventHandlerDto> EventHanlderRelations { get; set; } = new();
-    public HashSet<Type> EventHanlderClassTypeList { get; set; } = new();
+    public Dictionary<Type, LocalEventHandlerDto> EventHanlderRelations { get; } = new();
+    public HashSet<Type> EventHanlderClassTypeList { get; } = new();
 
     public LocalEventHandlerRelationContainer(CikeModuleContainer cikeModuleContainer)
     {
@@ -12,7 +12,11 @@ public class LocalEventHandlerRelationContainer
 
     private void Build(CikeModuleContainer cikeModuleContainer)
     {
-        cikeModuleContainer.ModuleTypes.SelectMany(e => e.Assembly.GetTypes()).Where(e => e.IsClass && !e.IsAbstract).ToList().ForEach(classType =>
+        cikeModuleContainer.ModuleTypes
+            .SelectMany(e => e.Assembly.GetTypes())
+            .Where(e => e.IsClass && !e.IsAbstract)
+            .ToList()
+            .ForEach(classType =>
         {
             foreach (var item in classType.GetMethods())
             {
@@ -21,7 +25,7 @@ public class LocalEventHandlerRelationContainer
                 {
                     continue;
                 }
-                var parameters = item.GetParameters().Where(e => typeof(Event).IsAssignableFrom(e.ParameterType)).ToList();
+                var parameters = item.GetParameters().Where(e => typeof(IEvent).IsAssignableFrom(e.ParameterType)).ToList();
                 if (parameters.Count != 1)
                 {
                     throw new ArgumentException($"Method '{classType.FullName}.{item.Name}' must have only one parameter of type LocalEvent.");

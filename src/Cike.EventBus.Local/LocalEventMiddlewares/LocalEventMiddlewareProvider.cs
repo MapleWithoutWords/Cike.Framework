@@ -19,7 +19,7 @@ public class LocalEventMiddlewareProvider : ILocalEventMiddlewareProvider, IScop
 
         if (_publishTimes++ > 0)
         {
-            eventMiddlewares = eventMiddlewares.Where(middleware => !middleware.PreventRecursive);
+            eventMiddlewares = eventMiddlewares.Where(middleware => middleware.ExecutionPolicy != MiddlewareExecutionPolicy.OncePerTree);
         }
 
         return eventMiddlewares;

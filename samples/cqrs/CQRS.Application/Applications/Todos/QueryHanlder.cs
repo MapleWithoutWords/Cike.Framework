@@ -1,4 +1,4 @@
-﻿using Cike.EventBus.LocalEvent;
+﻿using Cike.EventBus.Local;
 using CQRS.Application.Applications.Todos.Queries;
 using CQRS.Application.Dtos;
 using CQRS.Data;

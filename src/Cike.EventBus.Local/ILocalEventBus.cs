@@ -1,4 +1,4 @@
-﻿namespace Cike.EventBus.LocalEvent;
+﻿namespace Cike.EventBus.Local;
 
 public interface ILocalEventBus : IEventBus
 {

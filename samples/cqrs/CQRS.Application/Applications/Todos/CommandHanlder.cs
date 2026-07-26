@@ -1,5 +1,5 @@
 ﻿using Cike.Caching;
-using Cike.EventBus.LocalEvent;
+using Cike.EventBus.Local;
 using CQRS.Application.Applications.Todos.Commands;
 using CQRS.Data;
 using CQRS.Data.Entities;

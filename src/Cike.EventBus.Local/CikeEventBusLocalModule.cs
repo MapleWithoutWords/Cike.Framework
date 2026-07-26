@@ -1,9 +1,10 @@
-﻿namespace Cike.EventBus.Local;
+﻿using Cike.EventBus.Local.Channels;
+
+namespace Cike.EventBus.Local;
 
 [DependsOn(typeof(CikeEventBusModule))]
 public class CikeEventBusLocalModule : CikeModule
 {
-
     public override async Task ConfigureServicesAsync(ServiceConfigurationContext context)
     {
         if (!context.Services.Any(e => e.ServiceType == typeof(CikeEventBusLocalModuleDenpency)))
@@ -16,6 +17,8 @@ public class CikeEventBusLocalModule : CikeModule
                 context.Services.AddScoped(item);
             }
             context.Services.AddSingleton(typeof(CikeEventBusLocalModuleDenpency));
+
+            context.Services.TryAddEnumerable(new ServiceDescriptor(typeof(IChannelWarpper<>), typeof(ChannelWarpper<>), ServiceLifetime.Singleton));
 
             context.Services.TryAddEnumerable(new ServiceDescriptor(typeof(ILocalEventMiddleware<>), typeof(DbTransactionLocalEventMiddleware<>), ServiceLifetime.Transient));
             context.Services.TryAddEnumerable(new ServiceDescriptor(typeof(ILocalEventMiddleware<>), typeof(ExceptionLocalEventMiddleware<>), ServiceLifetime.Transient));

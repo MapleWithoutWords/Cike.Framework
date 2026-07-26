@@ -1,5 +1,4 @@
 ﻿using Cike.EventBus.Local;
-using Cike.EventBus.LocalEvent;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 

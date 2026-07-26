@@ -3,8 +3,8 @@
 public abstract record Event : IEvent
 {
     private string _id;
-
     public DateTime _createTime;
+    private bool _isBackground;
 
     public Event()
     {
@@ -19,6 +19,16 @@ public abstract record Event : IEvent
     public DateTime GetCreationTime() => _createTime;
 
     public DateTime SetCreationTime(DateTime creationTime) => _createTime = creationTime;
+
+    public virtual bool IsBackgroundThread()
+    {
+        return _isBackground;
+    }
+
+    public virtual void EnableBackgroundThread()
+    {
+        _isBackground = true;
+    }
 }
 
 public abstract record Event<TResult> : Event, IEvent<TResult>

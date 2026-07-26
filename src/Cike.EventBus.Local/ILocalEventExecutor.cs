@@ -2,11 +2,7 @@
 
 public interface ILocalEventExecutor
 {
-    public int Counter { get; set; }
+    public Task ExecuteAsync<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : IEvent;
 
-    public ExecutorStatusEnum Status { get; set; }
-
-    public Exception? Exception { get; set; }
-
-    public void Reset();
+    Task CancelAsync<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : IEvent;
 }

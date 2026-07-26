@@ -1,4 +1,6 @@
-﻿namespace Cike.EventBus.Adaptive;
+﻿using Cike.EventBus.Local;
+
+namespace Cike.EventBus.Adaptive;
 
 public class EventBusAdaptive(ILocalEventBus localEventBus) : IEventBus, IScopedDependency
 {

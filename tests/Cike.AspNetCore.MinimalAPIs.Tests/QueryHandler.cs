@@ -1,4 +1,4 @@
-﻿using Cike.EventBus.LocalEvent;
+﻿using Cike.EventBus.Local;
 
 namespace Cike.AspNetCore.MinimalAPIs.Tests;
 

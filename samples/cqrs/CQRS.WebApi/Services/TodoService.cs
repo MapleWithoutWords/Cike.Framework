@@ -1,6 +1,6 @@
 ﻿using Cike.AspNetCore.MinimalAPIs;
 using Cike.Auth;
-using Cike.EventBus.LocalEvent;
+using Cike.EventBus.Local;
 using CQRS.Application.Applications.Todos.Commands;
 using CQRS.Application.Applications.Todos.Queries;
 using CQRS.Application.Dtos;

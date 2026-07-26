@@ -10,6 +10,8 @@ where TEvent : IEvent
 
     private readonly ILocalEventMiddlewareProvider _preventRecursiveProvider;
 
+    public MiddlewareExecutionPolicy ExecutionPolicy => MiddlewareExecutionPolicy.OncePerTree;
+
     public PreventRecursiveMiddleware(ILocalEventMiddlewareProvider preventRecursiveProvider)
     {
         _preventRecursiveProvider = preventRecursiveProvider;
