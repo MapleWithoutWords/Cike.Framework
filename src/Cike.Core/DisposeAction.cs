@@ -4,22 +4,33 @@
 /// This class can be used to provide an action when
 /// Dispose method is called.
 /// </summary>
-public class DisposeAction : IDisposable
+public class DisposeAction : IDisposable, IAsyncDisposable
 {
-    private readonly Action _action;
+    private readonly Action? _action;
+    private readonly Task<Action>? _taskAction;
 
-    /// <summary>
-    /// Creates a new <see cref="DisposeAction"/> object.
-    /// </summary>
-    /// <param name="action">Action to be executed when this object is disposed.</param>
     public DisposeAction([NotNull] Action action)
     {
         _action = action;
     }
 
+    public DisposeAction([NotNull] Task<Action> action)
+    {
+        _taskAction = action;
+    }
+
     public void Dispose()
     {
-        _action();
+        _action?.Invoke();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _action?.Invoke();
+        if (_taskAction != null)
+        {
+            (await _taskAction)?.Invoke();
+        }
     }
 }
 

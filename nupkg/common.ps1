@@ -69,24 +69,6 @@ function Read-File {
 # List of solutions
 $solutions = (
     "./"
-    # "modules/account",
-    # "modules/audit-logging",
-    # "modules/background-jobs",
-    # "modules/basic-theme",
-    # "modules/blogging",
-    # "modules/client-simulation",
-    # "modules/docs",
-    # "modules/feature-management",
-    # "modules/identity",
-    # "modules/identityserver",
-    # "modules/openiddict",
-    # "modules/permission-management",
-    # "modules/setting-management",
-    # "modules/tenant-management",
-    # "modules/users",
-    # "modules/virtual-file-explorer",
-    # "modules/blob-storing-database",
-    # "modules/cms-kit"
 )
 
 # List of projects
@@ -110,5 +92,7 @@ $projects = (
     "src/Cike.Uow",
     "src/Cike.UniversalId",
     "src/Cike.Contracts",
-    "src/Cike.AspNetCore.Swagger"
+    "src/Cike.AspNetCore.Swagger",
+    "src/Locks/Cike.Locks",
+    "src/Locks/Cike.Locks.Distributed"
 )
