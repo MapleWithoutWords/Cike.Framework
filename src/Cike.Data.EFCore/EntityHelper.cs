@@ -67,19 +67,19 @@ internal class EntityHelper(ISnowflakeIdGenerator _snowflakeIdGenerator, IGuidGe
         if (item is IAuditedEntity<long> longAuditedEntity)
         {
             long.TryParse(_currentUser.Id, out var userId);
-            if (longAuditedEntity.CreateTime == default)
+            if (longAuditedEntity.CreatedAt == default)
             {
-                longAuditedEntity.CreateUserId = userId;
-                longAuditedEntity.CreateTime = DateTime.Now;
+                longAuditedEntity.CreatedBy = userId;
+                longAuditedEntity.CreatedAt = DateTime.Now;
             }
         }
         else if (item is IAuditedEntity<Guid> guidAuditedEntity)
         {
             Guid.TryParse(_currentUser.Id, out var userId);
-            if (guidAuditedEntity.CreateTime == default)
+            if (guidAuditedEntity.CreatedAt == default)
             {
-                guidAuditedEntity.CreateUserId = userId;
-                guidAuditedEntity.CreateTime = DateTime.Now;
+                guidAuditedEntity.CreatedBy = userId;
+                guidAuditedEntity.CreatedAt = DateTime.Now;
             }
         }
         SetUpdateAuditedProperty(entry);
@@ -91,14 +91,14 @@ internal class EntityHelper(ISnowflakeIdGenerator _snowflakeIdGenerator, IGuidGe
         if (item is IAuditedEntity<long> longUpdateAuditedEntity)
         {
             long.TryParse(_currentUser.Id, out var userId);
-            longUpdateAuditedEntity.UpdateTime = DateTime.Now;
-            longUpdateAuditedEntity.UpdateUserId = userId;
+            longUpdateAuditedEntity.UpdatedAt = DateTime.Now;
+            longUpdateAuditedEntity.UpdatedBy = userId;
         }
         else if (item is IAuditedEntity<Guid> guidUpdateAuditedEntity)
         {
             Guid.TryParse(_currentUser.Id, out var userId);
-            guidUpdateAuditedEntity.UpdateTime = DateTime.Now;
-            guidUpdateAuditedEntity.UpdateUserId = userId;
+            guidUpdateAuditedEntity.UpdatedAt = DateTime.Now;
+            guidUpdateAuditedEntity.UpdatedBy = userId;
         }
     }
 

@@ -2,7 +2,7 @@
 
 public interface IAuditedEntity<TUserId> : ICreateAuditedEntity<TUserId> where TUserId : struct
 {
-    DateTime UpdateTime { get; set; }
+    DateTime UpdatedAt { get; set; }
 
-    TUserId UpdateUserId { get; set; }
+    TUserId UpdatedBy { get; set; }
 }

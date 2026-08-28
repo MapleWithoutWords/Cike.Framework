@@ -45,22 +45,22 @@ public static class EntityTypeBuilderExtensions
     {
         if (b.Metadata.ClrType.IsAssignableTo<IAuditedEntity<Guid>>())
         {
-            b.Property(nameof(IAuditedEntity<Guid>.CreateTime))
+            b.Property(nameof(IAuditedEntity<Guid>.CreatedAt))
                 .IsRequired()
-                .HasColumnName(nameof(IAuditedEntity<Guid>.CreateTime))
-                .HasComment(nameof(IAuditedEntity<Guid>.CreateTime));
-            b.Property(nameof(IAuditedEntity<Guid>.CreateUserId))
+                .HasColumnName(nameof(IAuditedEntity<Guid>.CreatedAt))
+                .HasComment(nameof(IAuditedEntity<Guid>.CreatedAt));
+            b.Property(nameof(IAuditedEntity<Guid>.CreatedBy))
                 .IsRequired()
-                .HasColumnName(nameof(IAuditedEntity<Guid>.CreateUserId))
-                .HasComment(nameof(IAuditedEntity<Guid>.CreateUserId));
-            b.Property(nameof(IAuditedEntity<Guid>.UpdateUserId))
+                .HasColumnName(nameof(IAuditedEntity<Guid>.CreatedBy))
+                .HasComment(nameof(IAuditedEntity<Guid>.CreatedBy));
+            b.Property(nameof(IAuditedEntity<Guid>.UpdatedBy))
                 .IsRequired()
-                .HasColumnName(nameof(IAuditedEntity<Guid>.UpdateUserId))
-                .HasComment(nameof(IAuditedEntity<Guid>.UpdateUserId));
-            b.Property(nameof(IAuditedEntity<Guid>.UpdateTime))
+                .HasColumnName(nameof(IAuditedEntity<Guid>.UpdatedBy))
+                .HasComment(nameof(IAuditedEntity<Guid>.UpdatedBy));
+            b.Property(nameof(IAuditedEntity<Guid>.UpdatedAt))
                 .IsRequired()
-                .HasColumnName(nameof(IAuditedEntity<Guid>.UpdateTime))
-                .HasComment(nameof(IAuditedEntity<Guid>.UpdateTime));
+                .HasColumnName(nameof(IAuditedEntity<Guid>.UpdatedAt))
+                .HasComment(nameof(IAuditedEntity<Guid>.UpdatedAt));
         }
     }
 }
