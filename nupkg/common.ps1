@@ -94,5 +94,5 @@ $projects = (
     "src/Cike.Contracts",
     "src/Cike.AspNetCore.Swagger",
     "src/Locks/Cike.Locks",
-    "src/Locks/Cike.Locks.Distributed"
+    "src/Locks/Cike.Locks.DistributedRedis"
 )

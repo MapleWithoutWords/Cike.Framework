@@ -69,7 +69,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Locks", "Locks", "{6C9D7282
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cike.Locks", "src\Locks\Cike.Locks\Cike.Locks.csproj", "{47C7AB23-6F4C-794F-9ABB-312B78C46DE8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cike.Locks.DistributedRedis", "src\Locks\Cike.Locks.Distributed\Cike.Locks.DistributedRedis.csproj", "{BB8B2B67-2486-4009-93AD-0277A5E56E0B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cike.Locks.DistributedRedis", "src\Locks\Cike.Locks.DistributedRedis\Cike.Locks.DistributedRedis.csproj", "{BB8B2B67-2486-4009-93AD-0277A5E56E0B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
