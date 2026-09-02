@@ -31,25 +31,23 @@ public class ModularityFactory
                     serviceLifetime = ServiceLifetime.Singleton;
                 }
 
+                //添加自身
+                services.TryAdd(ServiceDescriptor.Describe(typeItem, typeItem, serviceLifetime));
+
+                //添加接口
+                var dependAttr = typeItem.GetCustomAttribute<DependencyInjection.DependencyAttribute>();
                 foreach (var interfaceType in typeItem.GetInterfaces().Concat(typeItem.GetBaseClasses()))
                 {
-                    switch (serviceLifetime)
-                    {
-                        case ServiceLifetime.Singleton:
-                            services.TryAddSingleton(typeItem);
-                            services.AddSingleton(interfaceType, typeItem);
-                            break;
-                        case ServiceLifetime.Scoped:
-                            services.TryAddScoped(typeItem);
-                            services.AddScoped(interfaceType, typeItem);
-                            break;
-                        case ServiceLifetime.Transient:
-                            services.TryAddTransient(typeItem);
-                            services.AddTransient(interfaceType, typeItem);
-                            break;
-                        default:
-                            break;
-                    }
+                    var descriptor = string.IsNullOrEmpty(dependAttr?.Key) ? ServiceDescriptor.Describe(interfaceType, typeItem, ServiceLifetime.Singleton) : ServiceDescriptor.DescribeKeyed(interfaceType, dependAttr.Key, typeItem, ServiceLifetime.Singleton);
+
+
+                    if (dependAttr?.ReplaceServices == true)
+                        services.Replace(descriptor);
+                    else
+                        if (dependAttr?.TryRegister == true)
+                            services.TryAdd(descriptor);
+                        else
+                            services.Add(descriptor);
                 }
             }
 

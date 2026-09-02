@@ -1,7 +1,7 @@
 namespace Cike.Core.Hashers;
 
 /// <inheritdoc />
-public class Hasher : IHasher
+public class Hasher : IHasher, ISingletonDependency
 {
     /// <inheritdoc />
     public string Hash(string value)
