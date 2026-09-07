@@ -4,9 +4,9 @@ namespace Cike.Auth.MultiTenant;
 
 public class CurrentTenant(ICurrentTenantAccessor _currentTenantAccessor) : ICurrentTenant, ITransientDependency
 {
-    public Guid? Id { get => _currentTenantAccessor.GetTenantId(); }
+    public long Id { get => _currentTenantAccessor.GetTenantId(); }
 
-    public IDisposable Change(Guid tenantId)
+    public IDisposable Change(long tenantId)
     {
         var currentTenantId = _currentTenantAccessor.GetTenantId();
 

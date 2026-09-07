@@ -2,7 +2,7 @@
 
 public interface ICurrentTenant
 {
-    Guid? Id { get; }
+    long Id { get; }
 
-    IDisposable Change(Guid tenantId);
+    IDisposable Change(long tenantId);
 }

@@ -2,6 +2,6 @@
 
 public interface ICurrentTenantAccessor
 {
-    Guid? GetTenantId();
-    void SetTenantId(Guid? tenantId);
+    long GetTenantId();
+    void SetTenantId(long tenantId);
 }
