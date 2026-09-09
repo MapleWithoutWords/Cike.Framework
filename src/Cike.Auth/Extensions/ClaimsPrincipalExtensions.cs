@@ -13,6 +13,7 @@ public static class ClaimsPrincipalExtensions
     {
         return claimsPrincipal.FindClaims(claimType).FirstOrDefault()?.Value;
     }
+
     public static Guid? GetGuidValue(this ClaimsPrincipal claimsPrincipal, string key)
     {
         var str = claimsPrincipal.GetValue(key);
@@ -21,5 +22,15 @@ public static class ClaimsPrincipalExtensions
             return result;
         }
         return null;
+    }
+
+    public static long GetLongValue(this ClaimsPrincipal claimsPrincipal, string key)
+    {
+        var str = claimsPrincipal.GetValue(key);
+        if (long.TryParse(str, out long result))
+        {
+            return result;
+        }
+        return 0;
     }
 }

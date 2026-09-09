@@ -28,6 +28,8 @@ public static class EntityTypeBuilderExtensions
             b.Property(nameof(ISoftDelete.IsDeleted))
                 .IsRequired()
                 .HasColumnName(nameof(ISoftDelete.IsDeleted));
+
+            b.HasIndex(nameof(ISoftDelete.IsDeleted));
         }
     }
 
@@ -38,12 +40,14 @@ public static class EntityTypeBuilderExtensions
             b.Property(nameof(IMultiTenant.TenantId))
                 .IsRequired(false)
                 .HasColumnName(nameof(IMultiTenant.TenantId));
+
+            b.HasIndex(nameof(IMultiTenant.TenantId));
         }
     }
 
     public static void TryConfigureAudited(this EntityTypeBuilder b)
     {
-        if (b.Metadata.ClrType.IsAssignableTo<IAuditedEntity<Guid>>())
+        if (b.Metadata.ClrType.IsAssignableTo<IAuditedEntity<Guid>>() || b.Metadata.ClrType.IsAssignableTo<IAuditedEntity<long>>())
         {
             b.Property(nameof(IAuditedEntity<Guid>.CreatedAt))
                 .IsRequired()
@@ -57,10 +61,9 @@ public static class EntityTypeBuilderExtensions
                 .IsRequired()
                 .HasColumnName(nameof(IAuditedEntity<Guid>.UpdatedBy))
                 .HasComment(nameof(IAuditedEntity<Guid>.UpdatedBy));
-            b.Property(nameof(IAuditedEntity<Guid>.UpdatedAt))
-                .IsRequired()
-                .HasColumnName(nameof(IAuditedEntity<Guid>.UpdatedAt))
-                .HasComment(nameof(IAuditedEntity<Guid>.UpdatedAt));
+
+            b.HasIndex(nameof(IAuditedEntity<long>.CreatedBy));
+            b.HasIndex(nameof(IAuditedEntity<long>.UpdatedBy));
         }
     }
 }

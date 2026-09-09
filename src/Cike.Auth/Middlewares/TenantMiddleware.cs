@@ -22,32 +22,32 @@ public class TenantMiddleware(ICurrentTenant _currentTenant) : IMiddleware, ITra
         }
     }
 
-    private Guid GetTenantId(HttpContext context)
+    private long GetTenantId(HttpContext context)
     {
-        var tenantId = context.User.GetGuidValue(CikeClaimTypes.TenantId);
-        if (tenantId.HasValue)
+        var tenantId = context.User.GetLongValue(CikeClaimTypes.TenantId);
+        if (tenantId > 0)
         {
-            return tenantId.Value;
+            return tenantId;
         }
 
         if (context.Request.Headers.TryGetValue(CikeClaimTypes.TenantId, out var tenantStrval)
-            && Guid.TryParse(tenantStrval.ToString(), out var headerTenantId))
+            && long.TryParse(tenantStrval.ToString(), out var headerTenantId))
         {
             return headerTenantId;
         }
 
         if (context.Request.Cookies.TryGetValue(CikeClaimTypes.TenantId, out var tenantStr)
-            && Guid.TryParse(tenantStr.ToString(), out var cookieTenantId))
+            && long.TryParse(tenantStr.ToString(), out var cookieTenantId))
         {
             return cookieTenantId;
         }
 
         if (context.Request.Query.TryGetValue(CikeClaimTypes.TenantId, out tenantStrval)
-            && Guid.TryParse(tenantStrval.ToString(), out var queryStringTenantId))
+            && long.TryParse(tenantStrval.ToString(), out var queryStringTenantId))
         {
             return queryStringTenantId;
         }
 
-        return Guid.Empty;
+        return 0;
     }
 }
