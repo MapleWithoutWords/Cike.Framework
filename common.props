@@ -10,6 +10,8 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 	<ItemGroup>
-		<None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+		<!-- 优先打包模块自己的 README.md（未写则回退到仓库根 README.md） -->
+		<None Include="README.md" Pack="true" PackagePath="\" Condition="Exists('README.md')"/>
+		<None Include="..\..\README.md" Pack="true" PackagePath="\" Condition="!Exists('README.md') and Exists('..\..\README.md')"/>
 	</ItemGroup>
 </Project>

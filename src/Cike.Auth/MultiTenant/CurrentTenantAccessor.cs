@@ -1,6 +1,6 @@
 ﻿namespace Cike.Auth.MultiTenant;
 
-public class CurrentTenantAccessor : ICurrentTenantAccessor, ISingletonDependency
+public class CurrentTenantAccessor : ICurrentTenantAccessor
 {
     protected AsyncLocal<long> AsyncLocalTenantId { get; set; } = new AsyncLocal<long>();
     public long GetTenantId()

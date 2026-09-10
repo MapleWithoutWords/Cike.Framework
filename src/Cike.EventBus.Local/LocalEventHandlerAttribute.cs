@@ -9,7 +9,7 @@ public class LocalEventHandlerAttribute : Attribute
 
     public int RetryCount { get; set; }
 
-    public FailureLevelEnum FailureLevel { get; set; }
+    public FailureLevelEnum FailureLevel { get; set; } = FailureLevelEnum.Throw;
 
     public LocalEventHandlerAttribute(int order = 100)
     {
