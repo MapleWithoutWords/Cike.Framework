@@ -7,30 +7,31 @@ public class ModuleLoader : IModuleLoader
     public CikeModuleContainer LoadCikeModules(Type startupType)
     {
         var cikeModules = new List<Type>();
-        ForModuleTypeTree(cikeModules, startupType);
-        cikeModules.Add(startupType);
+        var visitedModules = new HashSet<Type>();
+        CollectModules(cikeModules, visitedModules, startupType);
         var moduleContainer = new CikeModuleContainer(cikeModules);
         return moduleContainer;
     }
 
-    private void ForModuleTypeTree(List<Type> cikeModules, Type type)
+    /// <summary>
+    /// 后序遍历收集模块：一个模块只有在它依赖的所有模块都加入列表之后才加入，
+    /// 保证依赖模块始终排在依赖它的模块之前（被多个模块依赖时，也会先于所有依赖方初始化）。
+    /// </summary>
+    private void CollectModules(List<Type> cikeModules, HashSet<Type> visitedModules, Type type)
     {
-        var dependsOnAttries = type.GetCustomAttributes<DependsOnAttribute>();
-        if (!dependsOnAttries.Any())
+        if (!visitedModules.Add(type))
         {
             return;
         }
 
-        foreach (var attr in dependsOnAttries)
+        foreach (var attr in type.GetCustomAttributes<DependsOnAttribute>())
         {
             foreach (var dependModuleType in attr.GetDependedTypes())
             {
-                if (!cikeModules.Contains(dependModuleType))
-                {
-                    cikeModules.Insert(0, dependModuleType);
-                    ForModuleTypeTree(cikeModules, dependModuleType);
-                }
+                CollectModules(cikeModules, visitedModules, dependModuleType);
             }
         }
+
+        cikeModules.Add(type);
     }
 }

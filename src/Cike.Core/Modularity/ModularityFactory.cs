@@ -11,7 +11,7 @@ public class ModularityFactory
         var moduleContainer = moduleLoader.LoadCikeModules(typeof(TStartupModule));
         services.AddSingleton(moduleContainer);
 
-        foreach (var item in moduleContainer.CikeModules.Reverse<CikeModule>())
+        foreach (var item in moduleContainer.CikeModules)
         {
             //Add Service Register
             foreach (var typeItem in item.GetType().Assembly.GetTypes().Where(t => !t.IsAbstract && t.IsClass && typeof(IDependencyInjection).IsAssignableFrom(t)))
