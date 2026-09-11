@@ -1,5 +1,7 @@
 ﻿using Cike.EventBus;
 using System.Threading.Tasks;
+// 实体基类链实现的聚合根接口（领域层），与 Cike.Data.IAggregateRoot（契约层）是同名重复接口
+using DomainAggregateRoot = Cike.Data.Domain.AggregateRoots.IAggregateRoot;
 
 namespace Cike.Data.EFCore;
 
@@ -241,12 +243,16 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
         {
             return;
         }
-        foreach (var item in ChangeTracker.Entries().Where(e => e.Entity is IAggregateRoot))
+        // 注意：实体基类链实现的是 Cike.Data.Domain.AggregateRoots.IAggregateRoot（领域层），
+        // 与 Cike.Data.IAggregateRoot（契约层）是同名重复接口——这里必须判定领域层那份
+        foreach (var item in ChangeTracker.Entries().Where(e => e.Entity is DomainAggregateRoot))
         {
-            foreach (var eventItem in item.Entity.As<IAggregateRoot>().DomainEvents)
+            foreach (var eventItem in item.Entity.As<DomainAggregateRoot>().DomainEvents)
             {
                 await queueEventBus.EnqueueAsync(eventItem);
             }
+            // 入队后清空：否则工作单元提交时的后续 SaveChanges 会重复入队（甚至死循环）
+            item.Entity.As<DomainAggregateRoot>().ClearDomainEvents();
         }
     }
 }
