@@ -61,10 +61,10 @@ Work the **frontier**: any ticket whose blockers are all done. 依赖图 `1 → 
 
 **Blocked by:** 2. 只读仓储首条贯通线（按 Id 查询 + 默认注册）
 
-- [ ] `GetQueryableAsync` 扩展：从任意仓储接口实例取 IQueryable
-- [ ] `GetDbContextAsync<TDbContext>` 扩展：取强类型 DbContext
-- [ ] 测试：经 IQueryable 完成带 Include 的导航属性查询并物化结果；强类型 DbContext 获取后可执行原生 EF 操作
-- [ ] 全局查询过滤器（软删/多租户）在拿到的 IQueryable 上依然生效
+- [x] `GetQueryableAsync` 扩展：从任意仓储接口实例取 IQueryable
+- [x] `GetDbContextAsync<TDbContext>` 扩展：取强类型 DbContext
+- [x] 测试：经 IQueryable 完成带 Include 的导航属性查询并物化结果；强类型 DbContext 获取后可执行原生 EF 操作
+- [x] 全局查询过滤器（软删/多租户）在拿到的 IQueryable 上依然生效
 
 ## 6. 自定义仓储覆盖与文档收尾
 
