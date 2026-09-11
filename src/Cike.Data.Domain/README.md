@@ -44,15 +44,15 @@ IReadOnlyRepository<TEntity, TKey>    // 查询（方法面与 ABP 对齐，见�
 
 | 方法 | 说明 |
 |---|---|
-| `GetAsync(id, includeDetails = true)` | 未找到抛 `UserFriendlyException`；默认加载全部一级导航 |
-| `FindAsync(id, includeDetails = true)` | 未找到返回 null |
-| `GetListAsync(includeDetails = false)` / `GetListAsync(predicate, includeDetails = false)` | 全量 / 条件列表 |
-| `GetPagedListAsync(IPagedAndSortedRequest, predicate?)` | 请求对象形态分页，返回 `(Total, Items)` 元组 |
-| `GetPagedListAsync(skipCount, maxResultCount, sorting, predicate?)` | skip/take 形态分页（ABP 风格），返回当页列表 |
+| `BeginAsNoTracking()` | 查询侧关闭跟踪，Dispose 恢复跟踪 |
+| `GetAsync(id)` | 未找到抛 `UserFriendlyException` |
+| `FindAsync(id)` | 未找到返回 null |
+| `GetListAsync()` / `GetListAsync(predicate)` | 全量 / 条件列表 |
+| `GetPagedListAsync(IPagedAndSortedRequest, predicate?)` | 分页排序，返回 `(Total, Items)` 元组 |
 | `GetCountAsync()` / `GetCountAsync(predicate)` | 计数 |
 | `AnyAsync(predicate?)` | 存在性 |
-| `GetQueryableAsync()` | IQueryable 出口（软删/多租户过滤器生效） |
-| `WithDetailsAsync()` / `WithDetailsAsync(propertyPaths…)` | 预加载全部一级导航 / 指定导航的 IQueryable |
+| `GetQueryable()` | IQueryable 出口（同步，软删/多租户过滤器生效） |
+| `WithDetailsAsync(propertyPaths…)` | 指定导航预加载的 IQueryable |
 
 - **CQRS 查询侧**注入 `IReadOnlyRepository`——编译期即无写能力
 - **命令侧 / 常规业务**注入 `IRepository`

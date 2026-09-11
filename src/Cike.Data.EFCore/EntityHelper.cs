@@ -1,6 +1,6 @@
 ﻿namespace Cike.Data.EFCore;
 
-internal class EntityHelper(ISnowflakeIdGenerator _snowflakeIdGenerator, IGuidGenerator _guidGenerator, ICurrentUser _currentUser) : ISingletonDependency
+internal class EntityHelper(ISnowflakeIdGenerator _snowflakeIdGenerator, IGuidGenerator _guidGenerator, ICurrentUser _currentUser, ICurrentTenantAccessor currentTenantAccessor) : ISingletonDependency
 {
     //public void SetAuditedProperty(EntityEntry entry)
     //{
@@ -57,7 +57,7 @@ internal class EntityHelper(ISnowflakeIdGenerator _snowflakeIdGenerator, IGuidGe
 
         if (item is IMultiTenant multiTenant)
         {
-            multiTenant.TenantId = _currentUser.TenantId ?? 0;
+            multiTenant.TenantId = currentTenantAccessor.GetTenantId();
         }
     }
 

@@ -42,4 +42,17 @@ public static class IQueryablePaginationExtensions
         }
         return query;
     }
+
+    /// <summary>
+    /// 按开关应用跟踪行为。注意：不可带默认参数、不可裸调用同名的 EF 扩展——
+    /// 内部裸调用 query.AsNoTracking() 会重载决议到本方法自身（默认参数 false），形成自递归后落到 AsTracking。
+    /// </summary>
+    public static IQueryable<TEntity> AsNoTracking<TEntity>(this IQueryable<TEntity> query, bool asNoTracking) where TEntity : class
+    {
+        if (asNoTracking)
+        {
+            return EntityFrameworkQueryableExtensions.AsNoTracking(query);
+        }
+        return EntityFrameworkQueryableExtensions.AsTracking(query);
+    }
 }

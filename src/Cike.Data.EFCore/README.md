@@ -32,11 +32,14 @@ EF Core 集成核心：`CikeDbContext` 基类（一大堆自动化）、默认/�
 - **autoSave 语义**：默认 `true` 只负责立即 `SaveChanges`（含领域事件入队）；**事务提交是工作单元的职责**，配合 UoW 时传 `false` 由提交统一保存
 - **复杂查询出口**：仓储方法不够用时——
   ```csharp
-  var queryable = await repository.GetQueryableAsync();                    // 任意 LINQ，软删/多租户过滤器依然生效
-  var detailed  = await repository.WithDetailsAsync(o => o.Lines);         // 指定导航预加载
-  var dbContext = await repository.GetDbContextAsync<TDbContext, TEntity, TKey>();  // 原生 SQL 等（扩展方法）
+  var queryable = repository.GetQueryable();                  // 任意 LINQ，软删/多租户过滤器依然生效
+  var detailed  = await repository.WithDetailsAsync(o => o.Lines);  // 指定导航预加载
+  using (repository.BeginAsNoTracking())                      // 查询侧关闭跟踪，Dispose 恢复
+  {
+      var dto = await repository.GetListAsync();
+  }
   ```
-  `GetQueryableAsync` / `WithDetailsAsync` 是仓储接口成员；`GetDbContextAsync` 是 EFCore 层扩展（DbContext 属 EF 概念）。IQueryable 挂在 scoped DbContext 上，scope 释放后不可再物化；取消令牌在物化处传入
+  IQueryable 挂在 scoped DbContext 上，scope 释放后不可再物化；取消令牌在物化处传入
 - **自定义仓储**（覆盖默认，零配置）：
   ```csharp
   public interface IOrderRepository : IRepository<Order, long>

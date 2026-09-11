@@ -1,8 +1,8 @@
 namespace Cike.Data.EFCore.Tests;
 
 /// <summary>
-/// 工单 5 验收：IQueryable 出口——GetQueryableAsync 做 Include/复杂查询、
-/// GetDbContextAsync 取强类型 DbContext、全局过滤器（软删/多租户）在出口查询上依然生效。
+/// IQueryable 出口验收：GetQueryable 做 Include/复杂查询、BeginAsNoTracking 开关、
+/// 全局过滤器（软删/多租户）在出口查询上依然生效。
 /// </summary>
 public class QueryableExitTests : IClassFixture<CikeEfCoreTestHost>
 {
@@ -14,7 +14,7 @@ public class QueryableExitTests : IClassFixture<CikeEfCoreTestHost>
     }
 
     [Fact]
-    public async Task GetQueryableAsync_Include_LoadsNavigationProperties()
+    public async Task GetQueryable_Include_LoadsNavigationProperties()
     {
         var marker = Guid.NewGuid().ToString("N");
         var order = new Order { Title = $"order-{marker}" };
@@ -24,7 +24,7 @@ public class QueryableExitTests : IClassFixture<CikeEfCoreTestHost>
 
         using var scope = _host.CreateScope();
         var repository = scope.ServiceProvider.GetRequiredService<IReadOnlyRepository<Order, long>>();
-        var queryable = await repository.GetQueryableAsync();
+        var queryable = repository.GetQueryable();
 
         var loaded = await queryable
             .Include(o => o.Lines)
@@ -37,27 +37,35 @@ public class QueryableExitTests : IClassFixture<CikeEfCoreTestHost>
     }
 
     [Fact]
-    public async Task GetDbContextAsync_ReturnsTypedDbContext_ForRawEfOperations()
+    public async Task BeginAsNoTracking_QueriesReturnDetachedEntities()
     {
         var name = $"category-{Guid.NewGuid():N}";
-        await _host.SeedAsync(new Category { Name = name });
+        var category = new Category { Name = name };
+        await _host.SeedAsync(category);
 
         using var scope = _host.CreateScope();
-        var repository = scope.ServiceProvider.GetRequiredService<IRepository<Category, long>>();
+        var repository = scope.ServiceProvider.GetRequiredService<IReadOnlyRepository<Category, long>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<TestDbContext>();
 
-        var dbContext = await repository.GetDbContextAsync<TestDbContext, Category, long>();
+        // 默认跟踪：查询结果进 ChangeTracker
+        await repository.FindAsync(category.Id);
+        Assert.Single(dbContext.ChangeTracker.Entries());
+        dbContext.ChangeTracker.Clear();
 
-        Assert.IsType<TestDbContext>(dbContext);
-        // 原生 SQL：仓储方法覆盖不到的 EF 能力
-        var row = await dbContext.Categories
-            .FromSqlRaw($"SELECT * FROM Categories WHERE Name = '{name}'")
-            .SingleOrDefaultAsync();
-        Assert.NotNull(row);
-        Assert.Equal(name, row.Name);
+        // 显式关闭跟踪：查询结果不进 ChangeTracker
+        using (repository.BeginAsNoTracking())
+        {
+            await repository.FindAsync(category.Id);
+            Assert.Empty(dbContext.ChangeTracker.Entries());
+        }
+
+        // 释放后恢复跟踪
+        await repository.FindAsync(category.Id);
+        Assert.Single(dbContext.ChangeTracker.Entries());
     }
 
     [Fact]
-    public async Task GetQueryableAsync_AppliesSoftDeleteFilter()
+    public async Task GetQueryable_AppliesSoftDeleteFilter()
     {
         var title = $"order-{Guid.NewGuid():N}";
         var order = new Order { Title = title };
@@ -71,14 +79,14 @@ public class QueryableExitTests : IClassFixture<CikeEfCoreTestHost>
 
         using var verifyScope = _host.CreateScope();
         var verifyRepository = verifyScope.ServiceProvider.GetRequiredService<IReadOnlyRepository<Order, long>>();
-        var queryable = await verifyRepository.GetQueryableAsync();
+        var queryable = verifyRepository.GetQueryable();
 
         // 软删过滤器在出口 IQueryable 上依然生效：已删实体不可见
         Assert.Equal(0, await queryable.CountAsync(o => o.Id == order.Id));
     }
 
     [Fact]
-    public async Task GetQueryableAsync_AppliesMultiTenantFilter()
+    public async Task GetQueryable_AppliesMultiTenantFilter()
     {
         var marker = Guid.NewGuid().ToString("N");
         try
@@ -91,7 +99,7 @@ public class QueryableExitTests : IClassFixture<CikeEfCoreTestHost>
             _host.SetTenant(1);
             using var scope = _host.CreateScope();
             var repository = scope.ServiceProvider.GetRequiredService<IReadOnlyRepository<TenantOrder, long>>();
-            var queryable = await repository.GetQueryableAsync();
+            var queryable = repository.GetQueryable();
 
             var visible = await queryable.Where(o => o.Title.Contains(marker)).ToListAsync();
             Assert.Single(visible);

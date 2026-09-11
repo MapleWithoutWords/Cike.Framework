@@ -43,3 +43,5 @@ global using System.Reflection;
 global using System.Text;
 global using Cike.EventBus.Adaptive;
 global using System.Text.RegularExpressions;
+global using Cike.Contracts.Extensions;
+global using Cike.Core;

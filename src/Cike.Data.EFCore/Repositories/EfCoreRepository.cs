@@ -4,17 +4,23 @@ namespace Cike.Data.EFCore.Repositories;
 /// EF Core 默认仓储实现。不实现任何 DI 标记接口——默认仓储由 AddCikeDbContext 显式注册，
 /// 自定义仓储由业务方继承本类并标注 IScopedDependency 走约定注册。
 /// </summary>
-public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) : IRepository<TEntity, TKey>, IEfCoreRepositoryAccessor
+public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) : IRepository<TEntity, TKey>
     where TDbContext : CikeDbContext<TDbContext>
     where TEntity : class, IEntity<TKey>
 {
+    protected bool asNoTracking = false;
+
     public TDbContext DbContext { get; } = dbContext;
 
-    DbContext IEfCoreRepositoryAccessor.DbContext => DbContext;
-
-    public async Task<TEntity> GetAsync(TKey id, bool includeDetails = true, CancellationToken cancellationToken = default)
+    public IDisposable BeginAsNoTracking()
     {
-        var entity = await FindAsync(id, includeDetails, cancellationToken);
+        asNoTracking = true;
+        return new DisposeAction(() => asNoTracking = false);
+    }
+
+    public async Task<TEntity> GetAsync(TKey id, CancellationToken cancellationToken = default)
+    {
+        var entity = await FindAsync(id, cancellationToken);
         if (entity == null)
         {
             throw new UserFriendlyException($"Id {id} is NotFound.");
@@ -22,28 +28,24 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
         return entity;
     }
 
-    public async Task<TEntity?> FindAsync(TKey id, bool includeDetails = true, CancellationToken cancellationToken = default)
+    public async Task<TEntity?> FindAsync(TKey id, CancellationToken cancellationToken = default)
     {
-        return await ApplyIncludeDetails(DbContext.Set<TEntity>(), includeDetails)
-            .FirstOrDefaultAsync(e => e.Id!.Equals(id), cancellationToken);
+        return await GetQueryable().FirstOrDefaultAsync(e => e.Id!.Equals(id), cancellationToken);
     }
 
-    public async Task<List<TEntity>> GetListAsync(bool includeDetails = false, CancellationToken cancellationToken = default)
+    public async Task<List<TEntity>> GetListAsync(CancellationToken cancellationToken = default)
     {
-        return await ApplyIncludeDetails(DbContext.Set<TEntity>(), includeDetails)
-            .ToListAsync(cancellationToken);
+        return await GetQueryable().ToListAsync(cancellationToken);
     }
 
-    public async Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> predicate, bool includeDetails = false, CancellationToken cancellationToken = default)
+    public async Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        return await ApplyIncludeDetails(DbContext.Set<TEntity>(), includeDetails)
-            .Where(predicate)
-            .ToListAsync(cancellationToken);
+        return await GetQueryable().Where(predicate).ToListAsync(cancellationToken);
     }
 
     public async Task<(long Total, List<TEntity> Items)> GetPagedListAsync(IPagedAndSortedRequest request, Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default)
     {
-        IQueryable<TEntity> query = DbContext.Set<TEntity>();
+        IQueryable<TEntity> query = GetQueryable();
         if (predicate != null)
         {
             query = query.Where(predicate);
@@ -51,55 +53,38 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
         return await query.ToPaginationAsync(request, cancellationToken);
     }
 
-    public async Task<List<TEntity>> GetPagedListAsync(int skipCount, int maxResultCount, string sorting, Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default)
-    {
-        IQueryable<TEntity> query = DbContext.Set<TEntity>();
-        if (predicate != null)
-        {
-            query = query.Where(predicate);
-        }
-        if (!string.IsNullOrWhiteSpace(sorting))
-        {
-            query = query.OrderBy(sorting);
-        }
-        return await query
-            .Skip(skipCount)
-            .Take(maxResultCount)
-            .ToListAsync(cancellationToken);
-    }
-
     public async Task<long> GetCountAsync(CancellationToken cancellationToken = default)
     {
-        return await DbContext.Set<TEntity>().LongCountAsync(cancellationToken);
+        return await GetQueryable().LongCountAsync(cancellationToken);
     }
 
     public async Task<long> GetCountAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        return await DbContext.Set<TEntity>().LongCountAsync(predicate, cancellationToken);
+        return await GetQueryable().LongCountAsync(predicate, cancellationToken);
     }
 
     public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default)
     {
         if (predicate == null)
         {
-            return await DbContext.Set<TEntity>().AnyAsync(cancellationToken);
+            return await GetQueryable().AnyAsync(cancellationToken);
         }
-        return await DbContext.Set<TEntity>().AnyAsync(predicate, cancellationToken);
+        return await GetQueryable().AnyAsync(predicate, cancellationToken);
     }
 
-    public Task<IQueryable<TEntity>> GetQueryableAsync(CancellationToken cancellationToken = default)
+    public IQueryable<TEntity> GetQueryable()
     {
-        return Task.FromResult<IQueryable<TEntity>>(DbContext.Set<TEntity>());
+        return DbContext.Set<TEntity>().AsNoTracking(asNoTracking);
     }
 
     public Task<IQueryable<TEntity>> WithDetailsAsync(CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(ApplyIncludeDetails(DbContext.Set<TEntity>(), includeDetails: true));
+        return Task.FromResult(ApplyIncludeDetails(GetQueryable(), includeDetails: true));
     }
 
     public Task<IQueryable<TEntity>> WithDetailsAsync(params Expression<Func<TEntity, object?>>[] propertyPaths)
     {
-        IQueryable<TEntity> query = DbContext.Set<TEntity>();
+        IQueryable<TEntity> query = GetQueryable();
         foreach (var propertyPath in propertyPaths)
         {
             query = query.Include(propertyPath);
@@ -109,8 +94,7 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
 
     public async Task<TEntity> InsertAsync(TEntity entity, bool autoSave = true, CancellationToken cancellationToken = default)
     {
-        await DbContext.Set<TEntity>().AddAsync(entity, cancellationToken);
-        await SaveChangesIfAsync(autoSave, cancellationToken);
+        await InsertManyAsync(new[] { entity }, autoSave, cancellationToken);
         return entity;
     }
 
@@ -122,8 +106,7 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
 
     public async Task<TEntity> UpdateAsync(TEntity entity, bool autoSave = true, CancellationToken cancellationToken = default)
     {
-        DbContext.Set<TEntity>().Update(entity);
-        await SaveChangesIfAsync(autoSave, cancellationToken);
+        await UpdateManyAsync(new[] { entity }, autoSave, cancellationToken);
         return entity;
     }
 
@@ -135,14 +118,12 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
 
     public async Task DeleteAsync(TEntity entity, bool autoSave = true, CancellationToken cancellationToken = default)
     {
-        // 软删转换由 CikeDbContext 的 ChangeTracker 钩子完成，仓储只负责 Remove
-        DbContext.Set<TEntity>().Remove(entity);
-        await SaveChangesIfAsync(autoSave, cancellationToken);
+        await DeleteManyAsync(new[] { entity }, autoSave, cancellationToken);
     }
 
     public async Task DeleteAsync(TKey id, bool autoSave = true, CancellationToken cancellationToken = default)
     {
-        var entity = await FindAsync(id, includeDetails: false, cancellationToken);
+        var entity = await FindAsync(id, cancellationToken);
         if (entity == null)
         {
             // 幂等：实体不存在时静默返回
@@ -153,6 +134,7 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
 
     public async Task DeleteManyAsync(IEnumerable<TEntity> entities, bool autoSave = true, CancellationToken cancellationToken = default)
     {
+        // 软删转换由 CikeDbContext 的 ChangeTracker 钩子完成，仓储只负责 Remove
         DbContext.Set<TEntity>().RemoveRange(entities);
         await SaveChangesIfAsync(autoSave, cancellationToken);
     }
