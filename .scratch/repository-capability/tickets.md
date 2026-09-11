@@ -47,13 +47,13 @@ Work the **frontier**: any ticket whose blockers are all done. 依赖图 `1 → 
 
 **Blocked by:** 2. 只读仓储首条贯通线（按 Id 查询 + 默认注册）
 
-- [ ] `IBasicRepository`（继承只读 + 写方法）与 `IRepository`（合并标记）接口及实现：Insert/Update/Delete 及各自 Many 变体、按 Id 删除
-- [ ] autoSave 默认 true 立即落库；传 false 时不落库直到显式 SaveChanges/工作单元提交
-- [ ] 插入 long 主键自动生成（雪花）；审计实体 CreatedAt/CreatedBy/UpdatedAt/UpdatedBy 自动填充
-- [ ] 软删实体 DeleteAsync 后 IsDeleted=true、查询与计数自动排除、数据库行仍存在
-- [ ] 按 Id 删除时实体不存在静默返回（幂等）
-- [ ] 聚合根挂载的领域事件在保存后入队（可通过测试替身观察）
-- [ ] 默认注册补全到 IRepository / IBasicRepository 两个接口
+- [x] `IBasicRepository`（继承只读 + 写方法）与 `IRepository`（合并标记）接口及实现：Insert/Update/Delete 及各自 Many 变体、按 Id 删除
+- [x] autoSave 默认 true 立即落库；传 false 时不落库直到显式 SaveChanges/工作单元提交
+- [x] 插入 long 主键自动生成（雪花）；审计实体 CreatedAt/CreatedBy/UpdatedAt/UpdatedBy 自动填充
+- [x] 软删实体 DeleteAsync 后 IsDeleted=true、查询与计数自动排除、数据库行仍存在
+- [x] 按 Id 删除时实体不存在静默返回（幂等）
+- [x] 聚合根挂载的领域事件在保存后入队（可通过测试替身观察）
+- [x] 默认注册补全到 IRepository / IBasicRepository 两个接口
 
 ## 5. IQueryable 出口扩展
 

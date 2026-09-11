@@ -31,6 +31,8 @@ public static class IServiceCollectionDbContextExtensions
             }
 
             var implementationType = typeof(EfCoreRepository<,,>).MakeGenericType(typeof(TDbContext), entityType, primaryKeyType);
+            services.AddScoped(typeof(IRepository<,>).MakeGenericType(entityType, primaryKeyType), implementationType);
+            services.AddScoped(typeof(IBasicRepository<,>).MakeGenericType(entityType, primaryKeyType), implementationType);
             services.AddScoped(typeof(IReadOnlyRepository<,>).MakeGenericType(entityType, primaryKeyType), implementationType);
         }
     }
