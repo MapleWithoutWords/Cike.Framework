@@ -37,8 +37,8 @@ public static class EntityTypeBuilderExtensions
     {
         if (b.Metadata.ClrType.IsAssignableTo<IMultiTenant>())
         {
+            // IMultiTenant.TenantId 是非可空 long，不能标记 IsRequired(false)（EF Core 8 会抛异常）
             b.Property(nameof(IMultiTenant.TenantId))
-                .IsRequired(false)
                 .HasColumnName(nameof(IMultiTenant.TenantId));
 
             b.HasIndex(nameof(IMultiTenant.TenantId));
