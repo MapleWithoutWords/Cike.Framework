@@ -24,11 +24,11 @@ Work the **frontier**: any ticket whose blockers are all done. 依赖图 `1 → 
 
 **Blocked by:** 1. 仓储测试基座（容器组装 + SQLite in-memory）
 
-- [ ] `Cike.Data.Domain` 新增 `IReadOnlyRepository<TEntity, TKey>`（本票仅含 GetAsync/FindAsync）
-- [ ] `Cike.Data.EFCore` 新增 `EfCoreRepository<TDbContext, TEntity, TKey>` 实现 GetAsync/FindAsync，并暴露 DbContext 访问能力（访问器接口）
-- [ ] `AddCikeDbContext` 新增默认仓储注册参数（向后兼容），为每个实现了 `IEntity<TKey>` 的 DbSet 实体注册到只读仓储接口
-- [ ] 测试：从容器解析 `IReadOnlyRepository<TEntity, long>`，实现类型为 EfCoreRepository；GetAsync 命中返回实体；FindAsync 未找到返回 null；GetAsync 未找到抛 UserFriendlyException
-- [ ] 注意与项目内已有同名 EntityHelper 消歧
+- [x] `Cike.Data.Domain` 新增 `IReadOnlyRepository<TEntity, TKey>`（本票仅含 GetAsync/FindAsync）
+- [x] `Cike.Data.EFCore` 新增 `EfCoreRepository<TDbContext, TEntity, TKey>` 实现 GetAsync/FindAsync，并暴露 DbContext 访问能力（访问器接口）
+- [x] `AddCikeDbContext` 新增默认仓储注册参数（向后兼容），为每个实现了 `IEntity<TKey>` 的 DbSet 实体注册到只读仓储接口
+- [x] 测试：从容器解析 `IReadOnlyRepository<TEntity, long>`，实现类型为 EfCoreRepository；GetAsync 命中返回实体；FindAsync 未找到返回 null；GetAsync 未找到抛 UserFriendlyException
+- [x] 注意与项目内已有同名 EntityHelper 消歧
 
 ## 3. 条件列表、分页与计数查询
 

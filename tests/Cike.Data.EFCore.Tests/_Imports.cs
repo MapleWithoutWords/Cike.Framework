@@ -1,14 +1,17 @@
 global using Cike.Auth;
+global using Cike.Core.Exceptions;
 global using Cike.Core.Extensions;
 global using Cike.Core.Modularity;
 global using Cike.Data;
 global using Cike.Data.Domain.AggregateRoots;
 global using Cike.Data.Domain.Entities;
 global using Cike.Data.EFCore;
+global using Cike.Data.EFCore.Repositories;
 global using Cike.Data.EFCore.Tests.Infrastructure;
 global using Cike.Data.Extensions;
 global using Cike.EventBus.Local;
 global using Cike.Domain.Entities;
+global using Cike.Domain.Repositories;
 global using Cike.Uow;
 global using Cike.Uow.Enums;
 global using Microsoft.Data.Sqlite;
