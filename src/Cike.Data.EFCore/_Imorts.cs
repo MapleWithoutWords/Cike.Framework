@@ -1,4 +1,5 @@
 ﻿global using Cike.Auth;
+global using Cike.Contracts.Extensions;
 global using Cike.Auth.MultiTenant;
 global using Cike.Core.DependencyInjection;
 global using Cike.Core.Exceptions;

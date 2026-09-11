@@ -26,4 +26,43 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
     {
         return await DbContext.Set<TEntity>().FirstOrDefaultAsync(e => e.Id!.Equals(id), cancellationToken);
     }
+
+    public async Task<List<TEntity>> GetListAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Set<TEntity>().ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Set<TEntity>().Where(predicate).ToListAsync(cancellationToken);
+    }
+
+    public async Task<(long Total, List<TEntity> Items)> GetPagedListAsync(IPagedAndSortedRequest request, Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default)
+    {
+        IQueryable<TEntity> query = DbContext.Set<TEntity>();
+        if (predicate != null)
+        {
+            query = query.Where(predicate);
+        }
+        return await query.ToPaginationAsync(request, cancellationToken);
+    }
+
+    public async Task<long> GetCountAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Set<TEntity>().LongCountAsync(cancellationToken);
+    }
+
+    public async Task<long> GetCountAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Set<TEntity>().LongCountAsync(predicate, cancellationToken);
+    }
+
+    public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default)
+    {
+        if (predicate == null)
+        {
+            return await DbContext.Set<TEntity>().AnyAsync(cancellationToken);
+        }
+        return await DbContext.Set<TEntity>().AnyAsync(predicate, cancellationToken);
+    }
 }

@@ -36,10 +36,10 @@ Work the **frontier**: any ticket whose blockers are all done. 依赖图 `1 → 
 
 **Blocked by:** 2. 只读仓储首条贯通线（按 Id 查询 + 默认注册）
 
-- [ ] `IReadOnlyRepository` 增加 GetListAsync（无参/带谓词）、GetPagedListAsync（IPagedAndSortedRequest + 可选谓词）、GetCountAsync（无参/带谓词）、AnyAsync（可选谓词），EfCoreRepository 同步实现
-- [ ] 分页返回 (Total, Items) 元组，复用现有分页扩展；Sorting 字符串排序生效；PageSize/Page 边界行为正确
-- [ ] 谓词版本只返回匹配行；GetCountAsync/AnyAsync 不拉取全量数据
-- [ ] 多租户实体经仓储查询时按当前用户租户过滤（假当前用户切换租户验证）
+- [x] `IReadOnlyRepository` 增加 GetListAsync（无参/带谓词）、GetPagedListAsync（IPagedAndSortedRequest + 可选谓词）、GetCountAsync（无参/带谓词）、AnyAsync（可选谓词），EfCoreRepository 同步实现
+- [x] 分页返回 (Total, Items) 元组，复用现有分页扩展；Sorting 字符串排序生效；PageSize/Page 边界行为正确
+- [x] 谓词版本只返回匹配行；GetCountAsync/AnyAsync 不拉取全量数据
+- [x] 多租户实体经仓储查询时按当前用户租户过滤（假当前用户切换租户验证）
 
 ## 4. 写入路径与 autoSave 语义
 

@@ -54,4 +54,17 @@ public sealed class CikeEfCoreTestHost : IAsyncLifetime
     }
 
     public IServiceScope CreateScope() => _serviceProvider.CreateScope();
+
+    /// <summary>
+    /// 插入实体并提交。多租户实体在跟踪时按当前用户写入 TenantId，需在调用前设置 CurrentUser。
+    /// 类内测试共享数据库，种子数据用唯一值隔离。
+    /// </summary>
+    public async Task SeedAsync<TEntity>(params TEntity[] entities) where TEntity : class
+    {
+        using var scope = CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<TestDbContext>();
+        dbContext.AddRange(entities);
+        await dbContext.SaveChangesAsync();
+        await scope.ServiceProvider.GetRequiredService<IUnitOfWork>().CommitAsync();
+    }
 }

@@ -59,12 +59,8 @@ public class ReadOnlyRepositoryTests : IClassFixture<CikeEfCoreTestHost>
     /// <summary>插入一个唯一命名的 Category 并提交，返回生成的主键。</summary>
     private async Task<long> SeedCategoryAsync()
     {
-        using var scope = _host.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<TestDbContext>();
         var category = new Category { Name = $"category-{Guid.NewGuid():N}" };
-        dbContext.Categories.Add(category);
-        await dbContext.SaveChangesAsync();
-        await scope.ServiceProvider.GetRequiredService<IUnitOfWork>().CommitAsync();
+        await _host.SeedAsync(category);
         return category.Id;
     }
 }
