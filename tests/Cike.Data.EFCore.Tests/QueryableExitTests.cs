@@ -83,12 +83,12 @@ public class QueryableExitTests : IClassFixture<CikeEfCoreTestHost>
         var marker = Guid.NewGuid().ToString("N");
         try
         {
-            _host.CurrentUser.TenantId = 1;
+            _host.SetTenant(1);
             await _host.SeedAsync(new TenantOrder { Title = $"order-{marker}-a" });
-            _host.CurrentUser.TenantId = 2;
+            _host.SetTenant(2);
             await _host.SeedAsync(new TenantOrder { Title = $"order-{marker}-b" });
 
-            _host.CurrentUser.TenantId = 1;
+            _host.SetTenant(1);
             using var scope = _host.CreateScope();
             var repository = scope.ServiceProvider.GetRequiredService<IReadOnlyRepository<TenantOrder, long>>();
             var queryable = await repository.GetQueryableAsync();
@@ -99,7 +99,7 @@ public class QueryableExitTests : IClassFixture<CikeEfCoreTestHost>
         }
         finally
         {
-            _host.CurrentUser.TenantId = null;
+            _host.SetTenant(null);
         }
     }
 }

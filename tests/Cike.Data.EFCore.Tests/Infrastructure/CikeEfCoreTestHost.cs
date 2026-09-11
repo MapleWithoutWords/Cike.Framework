@@ -15,6 +15,16 @@ public sealed class CikeEfCoreTestHost : IAsyncLifetime
     /// <summary>当前用户替身：测试内可直接改写 Id / TenantId（注意复位，避免类内测试间泄漏）。</summary>
     public FakeCurrentUser CurrentUser => _serviceProvider.GetRequiredService<FakeCurrentUser>();
 
+    /// <summary>
+    /// 切换当前租户。实体写入的 TenantId 走 ICurrentTenantAccessor（AsyncLocal），
+    /// 查询过滤器走 ICurrentUser——两个源都设置；传 null 复位（租户 0）。
+    /// </summary>
+    public void SetTenant(long? tenantId)
+    {
+        CurrentUser.TenantId = tenantId;
+        _serviceProvider.GetRequiredService<ICurrentTenantAccessor>().SetTenantId(tenantId ?? 0);
+    }
+
     public async Task InitializeAsync()
     {
         _connection.Open();

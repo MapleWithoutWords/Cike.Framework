@@ -133,12 +133,12 @@ public class ListQueryTests : IClassFixture<CikeEfCoreTestHost>
         var marker = Guid.NewGuid().ToString("N");
         try
         {
-            _host.CurrentUser.TenantId = 1;
+            _host.SetTenant(1);
             await _host.SeedAsync(Enumerable.Range(0, 2).Select(i => new TenantOrder { Title = $"order-{marker}-1-{i}" }).ToArray());
-            _host.CurrentUser.TenantId = 2;
+            _host.SetTenant(2);
             await _host.SeedAsync(new TenantOrder { Title = $"order-{marker}-2-0" });
 
-            _host.CurrentUser.TenantId = 1;
+            _host.SetTenant(1);
             using (var scope = _host.CreateScope())
             {
                 var repository = scope.ServiceProvider.GetRequiredService<IReadOnlyRepository<TenantOrder, long>>();
@@ -146,7 +146,7 @@ public class ListQueryTests : IClassFixture<CikeEfCoreTestHost>
                 Assert.Equal(2, tenantAList.Count);
             }
 
-            _host.CurrentUser.TenantId = 2;
+            _host.SetTenant(2);
             using (var scope = _host.CreateScope())
             {
                 var repository = scope.ServiceProvider.GetRequiredService<IReadOnlyRepository<TenantOrder, long>>();
@@ -156,7 +156,7 @@ public class ListQueryTests : IClassFixture<CikeEfCoreTestHost>
         }
         finally
         {
-            _host.CurrentUser.TenantId = null;
+            _host.SetTenant(null);
         }
     }
 

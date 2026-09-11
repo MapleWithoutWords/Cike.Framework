@@ -12,9 +12,9 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
 
     DbContext IEfCoreRepositoryAccessor.DbContext => DbContext;
 
-    public async Task<TEntity> GetAsync(TKey id, CancellationToken cancellationToken = default)
+    public async Task<TEntity> GetAsync(TKey id, bool includeDetails = true, CancellationToken cancellationToken = default)
     {
-        var entity = await FindAsync(id, cancellationToken);
+        var entity = await FindAsync(id, includeDetails, cancellationToken);
         if (entity == null)
         {
             throw new UserFriendlyException($"Id {id} is NotFound.");
@@ -22,19 +22,23 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
         return entity;
     }
 
-    public async Task<TEntity?> FindAsync(TKey id, CancellationToken cancellationToken = default)
+    public async Task<TEntity?> FindAsync(TKey id, bool includeDetails = true, CancellationToken cancellationToken = default)
     {
-        return await DbContext.Set<TEntity>().FirstOrDefaultAsync(e => e.Id!.Equals(id), cancellationToken);
+        return await ApplyIncludeDetails(DbContext.Set<TEntity>(), includeDetails)
+            .FirstOrDefaultAsync(e => e.Id!.Equals(id), cancellationToken);
     }
 
-    public async Task<List<TEntity>> GetListAsync(CancellationToken cancellationToken = default)
+    public async Task<List<TEntity>> GetListAsync(bool includeDetails = false, CancellationToken cancellationToken = default)
     {
-        return await DbContext.Set<TEntity>().ToListAsync(cancellationToken);
+        return await ApplyIncludeDetails(DbContext.Set<TEntity>(), includeDetails)
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+    public async Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> predicate, bool includeDetails = false, CancellationToken cancellationToken = default)
     {
-        return await DbContext.Set<TEntity>().Where(predicate).ToListAsync(cancellationToken);
+        return await ApplyIncludeDetails(DbContext.Set<TEntity>(), includeDetails)
+            .Where(predicate)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<(long Total, List<TEntity> Items)> GetPagedListAsync(IPagedAndSortedRequest request, Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default)
@@ -45,6 +49,23 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
             query = query.Where(predicate);
         }
         return await query.ToPaginationAsync(request, cancellationToken);
+    }
+
+    public async Task<List<TEntity>> GetPagedListAsync(int skipCount, int maxResultCount, string sorting, Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default)
+    {
+        IQueryable<TEntity> query = DbContext.Set<TEntity>();
+        if (predicate != null)
+        {
+            query = query.Where(predicate);
+        }
+        if (!string.IsNullOrWhiteSpace(sorting))
+        {
+            query = query.OrderBy(sorting);
+        }
+        return await query
+            .Skip(skipCount)
+            .Take(maxResultCount)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<long> GetCountAsync(CancellationToken cancellationToken = default)
@@ -64,6 +85,26 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
             return await DbContext.Set<TEntity>().AnyAsync(cancellationToken);
         }
         return await DbContext.Set<TEntity>().AnyAsync(predicate, cancellationToken);
+    }
+
+    public Task<IQueryable<TEntity>> GetQueryableAsync(CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult<IQueryable<TEntity>>(DbContext.Set<TEntity>());
+    }
+
+    public Task<IQueryable<TEntity>> WithDetailsAsync(CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(ApplyIncludeDetails(DbContext.Set<TEntity>(), includeDetails: true));
+    }
+
+    public Task<IQueryable<TEntity>> WithDetailsAsync(params Expression<Func<TEntity, object?>>[] propertyPaths)
+    {
+        IQueryable<TEntity> query = DbContext.Set<TEntity>();
+        foreach (var propertyPath in propertyPaths)
+        {
+            query = query.Include(propertyPath);
+        }
+        return Task.FromResult(query);
     }
 
     public async Task<TEntity> InsertAsync(TEntity entity, bool autoSave = true, CancellationToken cancellationToken = default)
@@ -101,7 +142,7 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
 
     public async Task DeleteAsync(TKey id, bool autoSave = true, CancellationToken cancellationToken = default)
     {
-        var entity = await FindAsync(id, cancellationToken);
+        var entity = await FindAsync(id, includeDetails: false, cancellationToken);
         if (entity == null)
         {
             // 幂等：实体不存在时静默返回
@@ -114,6 +155,29 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
     {
         DbContext.Set<TEntity>().RemoveRange(entities);
         await SaveChangesIfAsync(autoSave, cancellationToken);
+    }
+
+    /// <summary>
+    /// includeDetails 为 true 时加载全部一级导航属性（ABP 的 IncludeDetails 语义）。
+    /// </summary>
+    protected virtual IQueryable<TEntity> ApplyIncludeDetails(IQueryable<TEntity> query, bool includeDetails)
+    {
+        if (!includeDetails)
+        {
+            return query;
+        }
+
+        var entityType = DbContext.Model.FindEntityType(typeof(TEntity));
+        if (entityType == null)
+        {
+            return query;
+        }
+
+        foreach (var navigation in entityType.GetNavigations())
+        {
+            query = query.Include(navigation.Name);
+        }
+        return query;
     }
 
     /// <summary>
