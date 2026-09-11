@@ -72,7 +72,7 @@ Work the **frontier**: any ticket whose blockers are all done. 依赖图 `1 → 
 
 **Blocked by:** 3. 条件列表、分页与计数查询；4. 写入路径与 autoSave 语义；5. IQueryable 出口扩展
 
-- [ ] 测试：自定义仓储（继承 EfCoreRepository + 业务接口 + IScopedDependency 约定）被自动注册，且解析同实体的 IRepository 返回自定义实现（覆盖默认）
-- [ ] Cike.Data.Domain README：三层接口说明、注入用法、读写分离注入建议
-- [ ] Cike.Data.EFCore README：默认注册参数、GetQueryableAsync/GetDbContextAsync 用法、自定义仓储写法、多 DbContext 同实体后注册覆盖语义
-- [ ] 文档不引用具体文件路径，示例与最终 API 签名一致
+- [x] 测试：自定义仓储（继承 EfCoreRepository + 业务接口 + IScopedDependency 约定）被自动注册，且解析同实体的 IRepository 返回自定义实现（覆盖默认）
+- [x] Cike.Data.Domain README：三层接口说明、注入用法、读写分离注入建议
+- [x] Cike.Data.EFCore README：默认注册参数、GetQueryableAsync/GetDbContextAsync 用法、自定义仓储写法、多 DbContext 同实体覆盖语义
+- [x] 文档不引用具体文件路径，示例与最终 API 签名一致

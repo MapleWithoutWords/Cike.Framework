@@ -56,7 +56,7 @@ labels: [ready-for-agent]
 - **autoSave 语义**：所有写方法带 `autoSave` 参数，默认 `true`（立即 SaveChanges）；配合工作单元时显式传 `false`，由事务提交统一保存
 - **查询语义约定**：`GetAsync` 未找到抛 `UserFriendlyException`（与框架现有 IQueryable 扩展的 "Id {id} is NotFound." 行为一致）；`FindAsync` 返回 null；`DeleteAsync(id)` 实体不存在时静默返回（幂等）
 - **分页返回**：`(long Total, List<TEntity> Items)` 元组，复用现有 `ToPaginationAsync`，不新造 PagedResult 类型
-- **默认仓储注册**：扩展 `AddCikeDbContext`（新增参数 `addDefaultRepositories`，默认 true，向后兼容），利用现有 `GetEntityTypes` + 领域层 `EntityHelper.FindPrimaryKeyType`，为每个实现了 `IEntity<TKey>` 的 DbSet 实体注册 closed-generic 实现到全部三个接口（Scoped）
+- **默认仓储注册**：扩展 `AddCikeDbContext`（新增参数 `addDefaultRepositories`，默认 true，向后兼容），利用现有 `GetEntityTypes` + 领域层 `EntityHelper.FindPrimaryKeyType`，为每个实现了 `IEntity<TKey>` 的 DbSet 实体注册 closed-generic 实现到全部三个接口（Scoped，TryAdd 语义——约定注册的自定义仓储先于默认注册执行，因此天然覆盖默认；多 DbContext 同实体时先注册者保留，需特定实现写自定义仓储）
 - **自定义仓储**：继承 `EfCoreRepository` + 实现业务接口 + 标注 `IScopedDependency`，由现有模块约定扫描（ModularityFactory）自动注册到其全部接口上，天然覆盖默认仓储，框架无需为此新增机制
 - **EfCoreRepository 不实现任何 DI 标记接口**，避免被约定扫描重复注册；默认仓储由注册扩展显式 AddScoped
 - **横切能力零重复实现**：软删转换、审计填充、主键生成、多租户过滤、领域事件入队全部由 `CikeDbContext` 现有 ChangeTracker 钩子完成；仓储的删除就是 `Remove`，软删由钩子自动转换

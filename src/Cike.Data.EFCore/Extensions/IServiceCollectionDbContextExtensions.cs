@@ -16,8 +16,9 @@ public static class IServiceCollectionDbContextExtensions
     }
 
     /// <summary>
-    /// 为 DbContext 中每个实现了 IEntity&lt;TKey&gt; 的 DbSet 实体注册默认仓储（Scoped）。
-    /// 多个 DbContext 含同一实体类型时，后注册者覆盖。
+    /// 为 DbContext 中每个实现了 IEntity&lt;TKey&gt; 的 DbSet 实体注册默认仓储（Scoped，TryAdd 语义）。
+    /// 模块加载的约定注册（自定义仓储）先于本方法执行，因此自定义仓储天然覆盖默认仓储；
+    /// 多个 DbContext 含同一实体类型时先注册者保留，需要特定实现请用自定义仓储。
     /// </summary>
     private static void AddDefaultRepositories<TDbContext>(IServiceCollection services) where TDbContext : CikeDbContext<TDbContext>
     {
@@ -31,9 +32,9 @@ public static class IServiceCollectionDbContextExtensions
             }
 
             var implementationType = typeof(EfCoreRepository<,,>).MakeGenericType(typeof(TDbContext), entityType, primaryKeyType);
-            services.AddScoped(typeof(IRepository<,>).MakeGenericType(entityType, primaryKeyType), implementationType);
-            services.AddScoped(typeof(IBasicRepository<,>).MakeGenericType(entityType, primaryKeyType), implementationType);
-            services.AddScoped(typeof(IReadOnlyRepository<,>).MakeGenericType(entityType, primaryKeyType), implementationType);
+            services.TryAddScoped(typeof(IRepository<,>).MakeGenericType(entityType, primaryKeyType), implementationType);
+            services.TryAddScoped(typeof(IBasicRepository<,>).MakeGenericType(entityType, primaryKeyType), implementationType);
+            services.TryAddScoped(typeof(IReadOnlyRepository<,>).MakeGenericType(entityType, primaryKeyType), implementationType);
         }
     }
 
