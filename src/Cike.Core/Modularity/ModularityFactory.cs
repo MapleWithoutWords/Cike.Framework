@@ -38,7 +38,7 @@ public class ModularityFactory
                 var dependAttr = typeItem.GetCustomAttribute<DependencyInjection.DependencyAttribute>();
                 foreach (var interfaceType in typeItem.GetInterfaces().Concat(typeItem.GetBaseClasses()))
                 {
-                    var descriptor = string.IsNullOrEmpty(dependAttr?.Key) ? ServiceDescriptor.Describe(interfaceType, typeItem, ServiceLifetime.Singleton) : ServiceDescriptor.DescribeKeyed(interfaceType, dependAttr.Key, typeItem, ServiceLifetime.Singleton);
+                    var descriptor = string.IsNullOrEmpty(dependAttr?.Key) ? ServiceDescriptor.Describe(interfaceType, sp => sp.GetRequiredService(typeItem), serviceLifetime) : ServiceDescriptor.DescribeKeyed(interfaceType, dependAttr.Key, (sp, key) => sp.GetRequiredService(typeItem), serviceLifetime);
 
 
                     if (dependAttr?.ReplaceServices == true)

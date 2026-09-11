@@ -205,15 +205,21 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
 
     protected async Task BeginUnitOfWorkAsync(params object[] entities)
     {
-        if (!UnitOfWorkOptions.Enable)
-        {
-            return;
-        }
         if (entities?.Any() != true)
         {
             return;
         }
-        var unitOfWork = CurrentServiceProvider?.GetService<IUnitOfWork>()!;
+        if (!UnitOfWorkOptions.Enable)
+        {
+            return;
+        }
+        var unitOfWork = CurrentServiceProvider?.GetService<IUnitOfWork>();
+        if (unitOfWork == null)
+        {
+            throw new InvalidOperationException(
+                "UnitOfWork is enabled (UnitOfWorkOptions.Enable = true), but IUnitOfWork is not registered. " +
+                "Please register the DbContext via 'services.AddCikeDbContext<TDbContext>()' instead of 'AddDbContext'.");
+        }
         if (!unitOfWork.IsTransactionBegun)
         {
             await unitOfWork.BeginTranscationAsync();

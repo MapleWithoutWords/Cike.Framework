@@ -8,7 +8,7 @@ SQL Server 方言 Provider，与 [Cike.Data.EFCore.MySql](../Cike.Data.EFCore.My
 1. `CikeSequentialGuidGeneratorOptions.DefaultSequentialGuidType` 默认设为 `SequentialAtEnd`（SQL Server 主键排序友好）
 2. `Configure<CikeDbContextOptions>(options => options.UseSqlServer())`——并默认启用 **SplitQuery**（`QuerySplittingBehavior.SplitQuery`）
 
-同 MySql 包的陷阱：应用模块里 `Configure<CikeDbContextOptions>` 会被本模块静默覆盖（单委托、框架模块后执行）。
+同 MySql 包的陷阱：`CikeDbContextOptions` 单委托、后设置者整体覆盖——应用模块里 `Configure<CikeDbContextOptions>(options => options.UseSqlServer(...))` 会整体替换本模块默认配置（须写完整配置），不写则用默认（框架模块先、应用模块后执行）。
 
 ## 模块信息
 

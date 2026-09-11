@@ -7,7 +7,7 @@
 ### 模块系统（`Cike.Core.Modularity`）
 | 类型 | 说明 |
 |---|---|
-| `CikeModule` | 模块基类，生命周期：`ConfigureServicesAsync`（注册服务）→ `InitializeAsync`（应用初始化）→ `ShutdownAsync`（停止）+ `Dispose` |
+| `CikeModule` | 模块基类，生命周期：`ConfigureServicesAsync`（注册服务）→ `InitializeAsync`（应用初始化）→ `ShutdownAsync`（停止） |
 | `[DependsOn]` | 声明模块依赖，递归收集、自动去重，可标注多次 |
 | `CikeModuleContainer` | 已加载模块容器（`ModuleTypes` + 实例列表） |
 | `ModuleLoader` / `ModularityFactory` | 模块树收集与加载入口 |
@@ -15,7 +15,7 @@
 | `ApplicationInitializationContext` | 初始化阶段上下文（`.ServiceProvider`；`GetApplicationBuilder()` 等扩展由 AspNetCore 包提供） |
 | `AddApplicationAsync<TStartupModule>()` | 宿主引导第一行：加载模块树 + DI 约定扫描 + 按序 ConfigureServices |
 
-模块执行顺序：`ConfigureServicesAsync` 从启动模块开始、由上层到底层串行执行；`InitializeAsync` 各模块并发（`Task.WhenAll`）。
+模块执行顺序：`CikeModuleContainer.CikeModules` 列表本身即执行顺序（被依赖的模块在前、启动模块在最后）；`ConfigureServicesAsync` 按列表串行执行（框架模块先、启动模块后），`InitializeAsync` 各模块并发（`Task.WhenAll`）。
 
 ### 依赖注入约定（`Cike.Core.DependencyInjection`）
 - 标记接口：`ISingletonDependency` / `IScopedDependency` / `ITransientDependency`（实现在所有已加载模块程序集内自动注册）

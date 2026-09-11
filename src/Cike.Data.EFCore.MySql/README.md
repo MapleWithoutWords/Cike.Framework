@@ -8,7 +8,7 @@ MySQL/Pomelo 方言 Provider。**依赖本模块即完成数据库方言配置**
 1. `CikeSequentialGuidGeneratorOptions.DefaultSequentialGuidType` 默认设为 `SequentialAsString`（MySQL 字符串主键排序友好）
 2. `Configure<CikeDbContextOptions>(options => options.UseMySQL())`——设置连接串解析后的 `UseMySql` 配置
 
-【陷阱】`CikeDbContextOptions` 内部是**单委托、后设置者整体覆盖**，而模块执行顺序是应用先、框架后——在应用模块里 `Configure<CikeDbContextOptions>` 会被本模块**静默覆盖**。自定义 options 时请勿依赖 Provider 模块的默认配置（详见 AI 指南 7.2）。
+【陷阱】`CikeDbContextOptions` 内部是**单委托、后设置者整体覆盖**。模块执行顺序是框架模块先、应用模块后——应用模块里 `Configure<CikeDbContextOptions>(options => options.UseMySQL(...))` 会**整体替换**本模块默认配置（替换时须写完整配置），不写则用本模块默认。（旧版包顺序相反：应用的 Configure 会被静默覆盖。）详见 AI 指南 7.2。
 
 ## 模块信息
 

@@ -17,7 +17,7 @@ context.Services.Configure<CikeRedisDistributedLockOptions>(options =>
 
 ## 陷阱
 
-【重要】`DistributedRedisLock` 和 `LocalLock` 都实现 `ILock` 且都走自动注册。框架的接口注册规则是**后注册者胜**，而模块加载顺序是"依赖在前、上层在后"——同时依赖本模块和 `Cike.Locks` 时，`ILock` 默认解析到 **`LocalLock`（本地锁）**，分布式锁**静默不生效**。需要分布式锁时用 `[Dependency(ReplaceServices = true)]` 或 keyed 注册显式选择实现。
+【重要】`DistributedRedisLock` 和 `LocalLock` 都实现 `ILock` 且都走自动注册，接口注册 `Add` **后注册者胜**。本模块依赖 `CikeLocksModule`、后执行后注册——同时依赖两个包时 `ILock` 解析到 **`DistributedRedisLock`**（且未配置连接串时解析即抛异常）。要强制使用本地锁：只依赖 `Cike.Locks`，或用 `[Dependency(ReplaceServices = true)]` / keyed 注册显式选择实现。（旧版包行为相反：默认解析到 LocalLock，分布式锁静默不生效。）
 
 ## 模块信息
 
