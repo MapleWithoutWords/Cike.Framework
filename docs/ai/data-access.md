@@ -233,6 +233,8 @@ IRepository<TEntity, TKey>             合并标记接口（命令侧 / 常规�
 
 `IRepository` 无新成员，注入它即获得全部读写能力。
 
+实现约定（`EfCoreRepository`）：单数写方法内部**委托批量方法**（`InsertAsync → InsertManyAsync(new[]{entity})`，Update/Delete 同理）——新增/更新/删除逻辑各自内聚在批量路径里，自定义仓储只需覆写批量方法，单数方法自动获得同样行为。
+
 ### 隐式行为
 
 - `CikeDomainModule` 无任何服务配置；继承基类即隐式实现全部契约接口，自动获得 Cike.Data 契约表中的所有自动化（Id / 审计 / 软删 / 租户 / 并发戳 / 领域事件入队，由 EF Core 层的 ChangeTracker 钩子执行）。
@@ -374,7 +376,8 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
     public TDbContext DbContext { get; }          // 直接暴露 DbContext（自定义仓储可用）
     protected bool asNoTracking;                  // = false
     protected virtual Task SaveChangesIfAsync(bool autoSave, CancellationToken ct = default);
-    // + IRepository 全部成员；GetAsync 未找到抛 UserFriendlyException；DeleteAsync(id) 先 Find 再删
+    // + IRepository 全部成员（所有公共方法均为 virtual，可被子类覆写）；
+    // GetAsync 未找到抛 UserFriendlyException；DeleteAsync(id) 先 Find 再删
 }
 ```
 

@@ -12,13 +12,13 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
 
     public TDbContext DbContext { get; } = dbContext;
 
-    public IDisposable BeginAsNoTracking()
+    public virtual IDisposable BeginAsNoTracking()
     {
         asNoTracking = true;
         return new DisposeAction(() => asNoTracking = false);
     }
 
-    public async Task<TEntity> GetAsync(TKey id, CancellationToken cancellationToken = default)
+    public virtual async Task<TEntity> GetAsync(TKey id, CancellationToken cancellationToken = default)
     {
         var entity = await FindAsync(id, cancellationToken);
         if (entity == null)
@@ -28,22 +28,22 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
         return entity;
     }
 
-    public async Task<TEntity?> FindAsync(TKey id, CancellationToken cancellationToken = default)
+    public virtual async Task<TEntity?> FindAsync(TKey id, CancellationToken cancellationToken = default)
     {
         return await GetQueryable().FirstOrDefaultAsync(e => e.Id!.Equals(id), cancellationToken);
     }
 
-    public async Task<List<TEntity>> GetListAsync(CancellationToken cancellationToken = default)
+    public virtual async Task<List<TEntity>> GetListAsync(CancellationToken cancellationToken = default)
     {
         return await GetQueryable().ToListAsync(cancellationToken);
     }
 
-    public async Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+    public virtual async Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
     {
         return await GetQueryable().Where(predicate).ToListAsync(cancellationToken);
     }
 
-    public async Task<(long Total, List<TEntity> Items)> GetPagedListAsync(IPagedAndSortedRequest request, Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default)
+    public virtual async Task<(long Total, List<TEntity> Items)> GetPagedListAsync(IPagedAndSortedRequest request, Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default)
     {
         IQueryable<TEntity> query = GetQueryable();
         if (predicate != null)
@@ -53,17 +53,17 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
         return await query.ToPaginationAsync(request, cancellationToken);
     }
 
-    public async Task<long> GetCountAsync(CancellationToken cancellationToken = default)
+    public virtual async Task<long> GetCountAsync(CancellationToken cancellationToken = default)
     {
         return await GetQueryable().LongCountAsync(cancellationToken);
     }
 
-    public async Task<long> GetCountAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+    public virtual async Task<long> GetCountAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
     {
         return await GetQueryable().LongCountAsync(predicate, cancellationToken);
     }
 
-    public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default)
+    public virtual async Task<bool> AnyAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default)
     {
         if (predicate == null)
         {
@@ -72,12 +72,12 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
         return await GetQueryable().AnyAsync(predicate, cancellationToken);
     }
 
-    public IQueryable<TEntity> GetQueryable()
+    public virtual IQueryable<TEntity> GetQueryable()
     {
         return DbContext.Set<TEntity>().AsNoTracking(asNoTracking);
     }
 
-    public IQueryable<TEntity> WithDetails(params Expression<Func<TEntity, object?>>[] propertyPaths)
+    public virtual IQueryable<TEntity> WithDetails(params Expression<Func<TEntity, object?>>[] propertyPaths)
     {
         IQueryable<TEntity> query = GetQueryable();
         foreach (var propertyPath in propertyPaths)
@@ -87,40 +87,37 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
         return query;
     }
 
-    public async Task<TEntity> InsertAsync(TEntity entity, bool autoSave = true, CancellationToken cancellationToken = default)
+    public virtual async Task<TEntity> InsertAsync(TEntity entity, bool autoSave = true, CancellationToken cancellationToken = default)
     {
-        await DbContext.Set<TEntity>().AddAsync(entity, cancellationToken);
-        await SaveChangesIfAsync(autoSave, cancellationToken);
+        await InsertManyAsync(new[] { entity }, autoSave, cancellationToken);
         return entity;
     }
 
-    public async Task InsertManyAsync(IEnumerable<TEntity> entities, bool autoSave = true, CancellationToken cancellationToken = default)
+    public virtual async Task InsertManyAsync(IEnumerable<TEntity> entities, bool autoSave = true, CancellationToken cancellationToken = default)
     {
         await DbContext.Set<TEntity>().AddRangeAsync(entities, cancellationToken);
         await SaveChangesIfAsync(autoSave, cancellationToken);
     }
 
-    public async Task<TEntity> UpdateAsync(TEntity entity, bool autoSave = true, CancellationToken cancellationToken = default)
+    public virtual async Task<TEntity> UpdateAsync(TEntity entity, bool autoSave = true, CancellationToken cancellationToken = default)
     {
-        DbContext.Set<TEntity>().Update(entity);
-        await SaveChangesIfAsync(autoSave, cancellationToken);
+        await UpdateManyAsync(new[] { entity }, autoSave, cancellationToken);
         return entity;
     }
 
-    public async Task UpdateManyAsync(IEnumerable<TEntity> entities, bool autoSave = true, CancellationToken cancellationToken = default)
+    public virtual async Task UpdateManyAsync(IEnumerable<TEntity> entities, bool autoSave = true, CancellationToken cancellationToken = default)
     {
         DbContext.Set<TEntity>().UpdateRange(entities);
         await SaveChangesIfAsync(autoSave, cancellationToken);
     }
 
-    public async Task DeleteAsync(TEntity entity, bool autoSave = true, CancellationToken cancellationToken = default)
+    public virtual async Task DeleteAsync(TEntity entity, bool autoSave = true, CancellationToken cancellationToken = default)
     {
         // 软删转换由 CikeDbContext 的 ChangeTracker 钩子完成，仓储只负责 Remove
-        DbContext.Set<TEntity>().Remove(entity);
-        await SaveChangesIfAsync(autoSave, cancellationToken);
+        await DeleteManyAsync(new[] { entity }, autoSave, cancellationToken);
     }
 
-    public async Task DeleteAsync(TKey id, bool autoSave = true, CancellationToken cancellationToken = default)
+    public virtual async Task DeleteAsync(TKey id, bool autoSave = true, CancellationToken cancellationToken = default)
     {
         var entity = await FindAsync(id, cancellationToken);
         if (entity == null)
@@ -130,7 +127,7 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
         await DeleteAsync(entity, autoSave, cancellationToken);
     }
 
-    public async Task DeleteManyAsync(IEnumerable<TEntity> entities, bool autoSave = true, CancellationToken cancellationToken = default)
+    public virtual async Task DeleteManyAsync(IEnumerable<TEntity> entities, bool autoSave = true, CancellationToken cancellationToken = default)
     {
         DbContext.Set<TEntity>().RemoveRange(entities);
         await SaveChangesIfAsync(autoSave, cancellationToken);
