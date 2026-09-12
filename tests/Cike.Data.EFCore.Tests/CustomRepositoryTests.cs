@@ -1,3 +1,5 @@
+using Cike.Core.DependencyInjection;
+
 namespace Cike.Data.EFCore.Tests;
 
 /// <summary>

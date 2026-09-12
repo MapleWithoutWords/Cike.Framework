@@ -25,7 +25,7 @@ public class ReadRepositoryAbpSurfaceTests : IClassFixture<CikeEfCoreTestHost>
         using var scope = _host.CreateScope();
         var repository = scope.ServiceProvider.GetRequiredService<IReadOnlyRepository<Order, long>>();
 
-        var queryable = await repository.WithDetailsAsync(o => o.Lines);
+        var queryable = repository.WithDetails(o => o.Lines);
 
         var loaded = await queryable.FirstOrDefaultAsync(o => o.Title == $"order-{marker}");
         Assert.NotNull(loaded);

@@ -1,0 +1,16 @@
+global using Cike.Core.Exceptions;
+global using Cike.Core.Extensions;
+global using CQRS.Application.Contracts.Buyers.Dtos;
+global using CQRS.Application.Contracts.Buyers.Queries;
+global using CQRS.Application.Contracts.Orders.Commands;
+global using CQRS.Application.Contracts.Orders.Dtos;
+global using CQRS.Application.Contracts.Orders.Queries;
+global using CQRS.Domain.Buyers;
+global using CQRS.Domain.Orders;
+global using CQRS.Domain.ValueObjects;
+global using Cike.Domain.Repositories;
+global using Cike.EventBus;
+global using Cike.EventBus.Local;
+global using Cike.Uow;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.DependencyInjection;

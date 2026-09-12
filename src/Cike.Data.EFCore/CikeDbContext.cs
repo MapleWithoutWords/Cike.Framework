@@ -32,6 +32,8 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
 
     protected ICurrentUser CurrentUser => CurrentServiceProvider.GetRequiredService<ICurrentUser>();
 
+    protected ICurrentTenant CurrentTenant => CurrentServiceProvider.GetRequiredService<ICurrentTenant>();
+
     public IDataFilter DataFilter => CurrentServiceProvider.GetRequiredService<IDataFilter>();
 
     internal EntityHelper EntityHelper => CurrentServiceProvider.GetRequiredService<EntityHelper>();
@@ -138,7 +140,7 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
 
         if (typeof(IMultiTenant).IsAssignableFrom(typeof(TEntity)))
         {
-            Expression<Func<TEntity, bool>> multiTenantFilter = e => !IsMultiTenantFilterEnabled || EF.Property<long>(e, "TenantId") == CurrentUser.TenantId;
+            Expression<Func<TEntity, bool>> multiTenantFilter = e => !IsMultiTenantFilterEnabled || EF.Property<long>(e, "TenantId") == CurrentTenant.Id;
             expression = expression == null ? multiTenantFilter : QueryFilterExpressionHelper.CombineExpressions(expression, multiTenantFilter);
         }
 
@@ -169,6 +171,13 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
                 UpdateConcurrencyStamp(entry);
             }
         }
+
+        // 软删除转换放在保存前统一做：级联状态修正此时已定型（StateChanged 钩子时机太早，
+        // OwnsOne 条目尚未被级联置为 Deleted；Reload 方案则与值对象不兼容）
+        foreach (var entry in ChangeTracker.Entries().Where(e => e.State == EntityState.Deleted).ToList())
+        {
+            EntityHelper.SetDeleteAuditedProperty(entry);
+        }
     }
 
     protected virtual void ChangeTracker_Tracked(object? sender, EntityTrackedEventArgs e)
@@ -198,7 +207,6 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
 
             case EntityState.Deleted:
                 AsyncContext.Run(() => BeginUnitOfWorkAsync(entry.Entity));
-                EntityHelper.SetDeleteAuditedProperty(entry);
                 break;
         }
     }

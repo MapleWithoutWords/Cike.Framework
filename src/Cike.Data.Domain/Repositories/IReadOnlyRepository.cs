@@ -25,5 +25,5 @@ public interface IReadOnlyRepository<TEntity, TKey>
 
     IQueryable<TEntity> GetQueryable();
 
-    Task<IQueryable<TEntity>> WithDetailsAsync(params Expression<Func<TEntity, object?>>[] propertyPaths);
+    IQueryable<TEntity> WithDetails(params Expression<Func<TEntity, object?>>[] propertyPaths);
 }

@@ -1,4 +1,6 @@
-﻿namespace Cike.AspNetCore.MinimalAPIs;
+﻿using Microsoft.Extensions.DependencyInjection.Extensions;
+
+namespace Cike.AspNetCore.MinimalAPIs;
 
 [DependsOn([typeof(CikeAuthModule)])]
 public class CikeAspNetCoreMinimalApiModule : CikeModule
@@ -6,6 +8,7 @@ public class CikeAspNetCoreMinimalApiModule : CikeModule
     public override async Task ConfigureServicesAsync(ServiceConfigurationContext context)
     {
         context.Services.AddHttpContextAccessor();
+        context.Services.TryAddSingleton<AutoValidationEndpointFilterProvider>();
         context.Services.Configure<GlobalMinimalApiRouteOptions>(options =>
         {
             options.Prefix = "api";

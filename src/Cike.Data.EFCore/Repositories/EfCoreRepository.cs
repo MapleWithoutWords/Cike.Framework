@@ -77,24 +77,20 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
         return DbContext.Set<TEntity>().AsNoTracking(asNoTracking);
     }
 
-    public Task<IQueryable<TEntity>> WithDetailsAsync(CancellationToken cancellationToken = default)
-    {
-        return Task.FromResult(ApplyIncludeDetails(GetQueryable(), includeDetails: true));
-    }
-
-    public Task<IQueryable<TEntity>> WithDetailsAsync(params Expression<Func<TEntity, object?>>[] propertyPaths)
+    public IQueryable<TEntity> WithDetails(params Expression<Func<TEntity, object?>>[] propertyPaths)
     {
         IQueryable<TEntity> query = GetQueryable();
         foreach (var propertyPath in propertyPaths)
         {
             query = query.Include(propertyPath);
         }
-        return Task.FromResult(query);
+        return query;
     }
 
     public async Task<TEntity> InsertAsync(TEntity entity, bool autoSave = true, CancellationToken cancellationToken = default)
     {
-        await InsertManyAsync(new[] { entity }, autoSave, cancellationToken);
+        await DbContext.Set<TEntity>().AddAsync(entity, cancellationToken);
+        await SaveChangesIfAsync(autoSave, cancellationToken);
         return entity;
     }
 
@@ -106,7 +102,8 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
 
     public async Task<TEntity> UpdateAsync(TEntity entity, bool autoSave = true, CancellationToken cancellationToken = default)
     {
-        await UpdateManyAsync(new[] { entity }, autoSave, cancellationToken);
+        DbContext.Set<TEntity>().Update(entity);
+        await SaveChangesIfAsync(autoSave, cancellationToken);
         return entity;
     }
 
@@ -118,7 +115,9 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
 
     public async Task DeleteAsync(TEntity entity, bool autoSave = true, CancellationToken cancellationToken = default)
     {
-        await DeleteManyAsync(new[] { entity }, autoSave, cancellationToken);
+        // 软删转换由 CikeDbContext 的 ChangeTracker 钩子完成，仓储只负责 Remove
+        DbContext.Set<TEntity>().Remove(entity);
+        await SaveChangesIfAsync(autoSave, cancellationToken);
     }
 
     public async Task DeleteAsync(TKey id, bool autoSave = true, CancellationToken cancellationToken = default)
@@ -126,7 +125,6 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
         var entity = await FindAsync(id, cancellationToken);
         if (entity == null)
         {
-            // 幂等：实体不存在时静默返回
             return;
         }
         await DeleteAsync(entity, autoSave, cancellationToken);
@@ -134,37 +132,10 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
 
     public async Task DeleteManyAsync(IEnumerable<TEntity> entities, bool autoSave = true, CancellationToken cancellationToken = default)
     {
-        // 软删转换由 CikeDbContext 的 ChangeTracker 钩子完成，仓储只负责 Remove
         DbContext.Set<TEntity>().RemoveRange(entities);
         await SaveChangesIfAsync(autoSave, cancellationToken);
     }
 
-    /// <summary>
-    /// includeDetails 为 true 时加载全部一级导航属性（ABP 的 IncludeDetails 语义）。
-    /// </summary>
-    protected virtual IQueryable<TEntity> ApplyIncludeDetails(IQueryable<TEntity> query, bool includeDetails)
-    {
-        if (!includeDetails)
-        {
-            return query;
-        }
-
-        var entityType = DbContext.Model.FindEntityType(typeof(TEntity));
-        if (entityType == null)
-        {
-            return query;
-        }
-
-        foreach (var navigation in entityType.GetNavigations())
-        {
-            query = query.Include(navigation.Name);
-        }
-        return query;
-    }
-
-    /// <summary>
-    /// autoSave 为 true 时立即保存；为 false 时变更挂起，由工作单元提交时统一保存。
-    /// </summary>
     protected virtual async Task SaveChangesIfAsync(bool autoSave, CancellationToken cancellationToken = default)
     {
         if (autoSave)

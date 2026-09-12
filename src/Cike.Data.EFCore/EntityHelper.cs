@@ -102,6 +102,12 @@ internal class EntityHelper(ISnowflakeIdGenerator _snowflakeIdGenerator, IGuidGe
         }
     }
 
+    /// <summary>
+    /// 软删除转换：在 SaveChanges 前统一执行（级联状态修正此时已定型）。
+    /// 不能在 ChangeTracker 钩子里做——Remove 的级联在钩子触发之后才把 OwnsOne 条目置为 Deleted；
+    /// 也不能用 entry.Reload()——Reload 会打散 OwnsOne 值对象的跟踪状态，导致值对象列被写成 NULL。
+    /// 转成 Modified 全量更新，ConcurrencyStamp 在保存前已刷新，乐观并发保护不受影响。
+    /// </summary>
     public void SetDeleteAuditedProperty(EntityEntry entry)
     {
         if (!(entry.Entity is ISoftDelete softDeleteEntity))
@@ -109,7 +115,15 @@ internal class EntityHelper(ISnowflakeIdGenerator _snowflakeIdGenerator, IGuidGe
             return;
         }
 
-        entry.Reload();
+        entry.State = EntityState.Modified;
+        // OwnsOne 值对象条目已被级联置为 Deleted（= 把值对象列写 NULL），恢复 Unchanged 随主体落库
+        foreach (var member in entry.Navigations)
+        {
+            if (member.CurrentValue is { } target && member.Metadata is INavigation { ForeignKey.IsOwnership: true })
+            {
+                entry.Context.Entry(target).State = EntityState.Unchanged;
+            }
+        }
         softDeleteEntity.IsDeleted = true;
         SetUpdateAuditedProperty(entry);
     }

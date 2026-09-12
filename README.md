@@ -5,6 +5,7 @@ A lightweight and fast.net core development framework
 
 ## 文档
 
-- [AI 开发指南](docs/AI-GUIDE.md)——面向 AI 编码助手的框架完整说明：模块系统、自动 DI、CQRS 事件派发、MinimalAPI 路由约定、数据访问自动化、隐式行为清单与反模式。基于本框架开发业务项目时，把它交给 AI 作为框架参考。
-- [项目 CLAUDE.md 模板](docs/CLAUDE-TEMPLATE.md)——新建项目时复制为解决方案根目录的 `CLAUDE.md`，填入项目硬事实与偏离点，与 AI 指南配合使用。
+- [AI 开发文档](docs/ai/README.md)——面向 AI 编码助手的框架参考大纲：能力域路由表、全局分层规范、隐式行为清单与反模式。
+- [接入指引](docs/ai/GETTING-STARTED.md)——基于本框架开发业务项目时，如何在项目 CLAUDE.md 中引用这套文档。
+- 完整示例见 [samples/cqrs](samples/cqrs/README.md)（CQRS + DDD + FluentValidation）。
 

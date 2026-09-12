@@ -21,13 +21,14 @@ public class QueueEventBus : EventBusAdaptive, IQueueEventBus, IScopedDependency
         return Task.CompletedTask;
     }
 
-    public Task PublishQueueAsync()
+    public async Task PublishQueueAsync()
     {
         while (_eventQueue.Any())
         {
             var @event = _eventQueue.Dequeue();
-            PublishAsync((dynamic)@event);
+            // 必须逐个 await：漏掉 await 会让 handler 变成 fire-and-forget，
+            // 与"工作单元提交前、同事务内消费领域事件"的语义冲突（竞态 + 异常被吞）
+            await PublishAsync((dynamic)@event);
         }
-        return Task.CompletedTask;
     }
 }
