@@ -184,7 +184,7 @@ void UnSubscribe<T>(string channel);   Task UnSubscribeAsync<T>(string channel);
 
 #### L2 存储与序列化
 
-- 每个 key 是一个 Redis Hash：`absexp`（绝对过期 ticks，-1=无）、`sldexp`（滑动过期 ticks）、`data`（值）。**redis-cli 里 data 字段不可直接读**：数值类型原样存储；`string` 存 GZip(UTF-8)；其他类型存 GZip(JSON)（System.Text.Json，启用 dynamic types 转换器）。
+- 每个 key 是一个 Redis Hash：`absexp`（绝对过期 ticks，-1=无）、`sldexp`（滑动过期 ticks）、`data`（值）。**redis-cli 里 data 字段不可直接读**：数值类型原样存储；`string` 存 GZip(UTF-8)；其他类型存 GZip(JSON)（System.Text.Json，启用 dynamic types 转换器）。三字段一次写入用的是变参 HSET，**要求服务端 Redis ≥ 4.0**（见「边界与反模式」）。
 - 每次 L2 读命中会按存储的过期元数据**重设 TTL**（滑动过期的 Redis 实现方式）；`Refresh` 同理——滑动 = 重设整个窗口，绝对 = 重设剩余时间。
 - `RedisConfig` 节本身继承 `CacheEntryOptions`，其 `AbsoluteExpiration` / `AbsoluteExpirationRelativeToNow` / `SlidingExpiration` 是 **L2 全局默认 TTL**（调用未传 options 的写入时生效）。
 
@@ -349,6 +349,7 @@ services.Configure<TypeAliasOptions>(o =>
 
 ### 边界与反模式
 
+- **Redis 服务端最低版本 4.0**：L2 全部写路径依赖**变参 HSET（Redis 4.0 引入，3.x 仅支持单对 field/value）**——`Set*` 经 HSET 命令一次写 `absexp`/`sldexp`/`data` 三字段，`SetList*`/`KeyExpire*` 在 Lua 脚本内同样多对写。3.x 服务端上 `SetList*` 抛 `Wrong number of args calling Redis command From Lua script`、`Set` 抛 `wrong number of arguments for 'hset' command`，报错均不提示版本原因（Windows 移植版 3.0.504 是经典踩坑点）。读/删/订阅类命令（HMGET、HGETALL、EXISTS、EXPIRE、PERSIST、PUBSUB、SCRIPT）无此限制，但版本低于 4.0 时写路径整体不可用。
 - **强一致场景不用两级缓存**：跨实例失效是 PubSub 尽力而为（无确认、无重放），广播丢失时 L1 旧值存活到自身 TTL；一致性敏感数据把 L1 TTL 配短，或直接用 `IDistributedCacheClient`（每次读写直达 Redis）。
 - **不要直接注入 `ICacheClient`**：两个实现都注册到该接口，解析结果取决于注册顺序；按需注入 `IMultilevelCacheClient` 或 `IDistributedCacheClient`。
 - **不要在 `MultilevelCacheClient.Remove/Refresh` 上期待 action 重载**：它们是 `params string[]` 且无 action，key 类型恒用全局配置；需要按 `None` 精确删 key 时用基类 `Remove<T>(key, action => action.CacheKeyType = CacheKeyType.None)` 或 distributed 的非泛型 `Remove`（原始 key）。
