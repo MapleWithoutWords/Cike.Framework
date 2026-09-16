@@ -18,7 +18,7 @@
 - CORS（`appsettings` → `CorsDomains`）
 - JSON：`long`/`long?` 序列化为字符串（防前端精度丢失）
 - 认证中间件（`GlobalMinimalApiRouteOptions.EnabledAuthorization`）
-- 【陷阱】端点**默认全部 `RequireAuthorization`**——没配 JWT 时会 401，开发期需显式关闭
+- 【陷阱】端点**默认全部 `RequireAuthorization`**——没配认证时会 500（缺中间件或缺认证方案），配置了 JWT 但缺 token 才是 401。开发期一步关闭：全局 `EnabledAuthorization = false`（总开关，同时关中间件与端点元数据）；个别服务免认证则在全局开启时设 `RouteOptions.EnabledAuthorization = false`
 
 ### 宿主引导扩展
 - `WebApplication.InitializeApplicationAsync()`：触发所有模块 `InitializeAsync` + 注册 Shutdown 钩子

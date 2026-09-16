@@ -115,7 +115,7 @@ public class CikeAspNetCoreMinimalApiModule : CikeModule
                 }
 
                 var routeBuilder = builder.MapMethods(route, httpMethods, CreateDelegate(methodInfo, instance));
-                if (instance.RouteOptions.EnabledAuthorization)
+                if (globalRouteOptions.EnabledAuthorization && instance.RouteOptions.EnabledAuthorization)
                 {
                     (instance.RouteOptions.RouteHandlerBuilder ?? globalRouteOptions.RouteHandlerBuilder)?.Invoke(routeBuilder);
                 }

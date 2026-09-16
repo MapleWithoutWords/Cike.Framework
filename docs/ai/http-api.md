@@ -122,7 +122,7 @@ public class MinimalApiRouteOptions
     public bool DisablePluralizeServiceName { get; set; } = false;   // 死配置：路由构建从不读取
     public Action<RouteHandlerBuilder>? RouteHandlerBuilder { get; set; }
         = routeHandlerBuilder => routeHandlerBuilder.RequireAuthorization();  // 端点级默认：要求认证
-    public bool EnabledAuthorization { get; set; } = true;           // 端点级认证开关
+    public bool EnabledAuthorization { get; set; } = true;           // 认证开关（全局实例为总开关，端点级在其上逐服务收紧）
     public List<string> IgnoredUrlSuffixesInServiceNames { get; set; } = ["AppService", "Service"];
     public Dictionary<string, string> HttpMethodPrefixMapDic { get; set; } = /* 上表 11 条 */;
     public string RootUrl => $"{Prefix}{(Version.IsNullOrEmpty() ? "" : $"/{Version}")}";
@@ -141,7 +141,7 @@ public class MinimalApiOptions { public List<Assembly> MinimalApiAsseblies { get
 **模块与全局行为**（模块类 `CikeAspNetCoreMinimalApiModule`，`[DependsOn(CikeAuthModule)]`）：
 
 - `ConfigureServicesAsync`：`AddHttpContextAccessor`；`TryAddSingleton<AutoValidationEndpointFilterProvider>()`；`Configure<GlobalMinimalApiRouteOptions>`（Prefix=api, Version=v1）；`AddObjectAccessor<IApplicationBuilder/IEndpointRouteBuilder>()`；注册 CORS 策略（名 `CikeAspNetCoreMinimalApiModule`）；`ConfigureHttpJsonOptions` 注册 `LongToStringConverter` + `NullableLongToStringConverter`。
-- `InitializeAsync` 按序装配中间件：`UseMiddleware<BusinessExceptionMiddleware>()` → `UseCors(...)` → 若 `GlobalMinimalApiRouteOptions.EnabledAuthorization` 则 `UseAuthentication()` + `UseAuthorization()` → 扫描映射全部端点。
+- `InitializeAsync` 按序装配中间件：`UseMiddleware<BusinessExceptionMiddleware>()` → `UseCors(...)` → 若 `GlobalMinimalApiRouteOptions.EnabledAuthorization` 则 `UseAuthentication()` + `UseAuthorization()` → 扫描映射全部端点（总开关同时门控端点级 `RequireAuthorization`，见隐式行为）。
 - 端点扫描范围：`CikeModuleContainer.CikeModules` 全部模块的程序集中所有非抽象、继承 `MinimalApiServiceBase` 的类。
 
 **宿主引导扩展**（`namespace Cike.AspNetCore.MinimalAPIs.Extensions`，`GetApplicationBuilder` 等在 `Cike.Core.Modularity`）：
@@ -180,7 +180,7 @@ app.Run();
 ### 隐式行为
 
 - **端点类是 Singleton**：`MinimalApiServiceBase : ISingletonDependency` → 自动注册为单例（自身+接口+基类）。
-- **认证双层开关，默认全开**：端点级 `RouteOptions.EnabledAuthorization`（默认 `true`）→ 对该服务全部端点调用 `RouteHandlerBuilder`（默认 `RequireAuthorization()`）；全局 `GlobalMinimalApiRouteOptions.EnabledAuthorization`（默认 `true`）→ 只控制 `UseAuthentication/UseAuthorization` 中间件是否挂载，**不影响**端点级 RequireAuthorization。
+- **认证双层开关，默认全开**：全局 `GlobalMinimalApiRouteOptions.EnabledAuthorization`（默认 `true`）是**总开关**——开时挂 `UseAuthentication/UseAuthorization` 中间件；关时不挂中间件**且**不给任何端点加认证元数据。总开关为开时再看端点级 `RouteOptions.EnabledAuthorization`（默认 `true`）→ 该服务全部端点调用 `RouteHandlerBuilder`（默认 `RequireAuthorization()`）；端点级置 `false` 可让单个服务免认证。
 - **业务异常转 400**：`BusinessExceptionMiddleware` 捕获 `BusinessException`（含子类 `UserFriendlyException`，异常体系见[框架内核](./framework-core.md)），按 `ex.LogLevel` 记日志后返回 `Results.BadRequest(ex.Message)`——**400 + 纯文本消息**（`text/plain`），非 ProblemDetails。其他异常不处理（走默认 500）。
 - **JSON long 序列化**（仅 HTTP 请求/响应的 `JsonOptions`，不影响其他序列化器）：响应中 `long` 与 `long?` 一律输出字符串（防前端精度丢失）；请求中 `long`/`long?` 接受字符串或数字字面量。**陷阱**：`long?` 为 null 时输出 `"0"` 而非 `null`（`NullableLongToStringConverter` 的 `value?.ToString() ?? "0"`）。
 - **CORS**：来源读配置节 `CorsDomains`（string 数组），缺省 `["localhost"]`；`AllowAnyHeader` + `AllowAnyMethod` + `AllowCredentials` + `SetPreflightMaxAge(2520 秒)`。
@@ -261,7 +261,7 @@ context.Services.Configure<GlobalMinimalApiRouteOptions>(options =>
 {
     options.Prefix = "api";
     options.Version = "v2";                               // 全局根 → api/v2
-    options.EnabledAuthorization = false;                 // 仅关闭 UseAuthentication/UseAuthorization 中间件
+    options.EnabledAuthorization = false;                 // 总开关：同时关闭认证中间件与全部端点的 RequireAuthorization
     options.IgnoredUrlSuffixesInServiceNames = ["AppService", "Service", "Endpoint"];
     options.RouteHandlerBuilder = b => b.RequireAuthorization("ApiPolicy"); // 端点级默认策略
     options.HttpMethodPrefixMapDic = new Dictionary<string, string>         // 全量替换（覆盖默认 11 条）
@@ -279,7 +279,7 @@ public class AdminService : MinimalApiServiceBase
     public AdminService()
     {
         RouteOptions.Prefix = "admin-api";                // 本服务根 → /admin-api/v1
-        RouteOptions.EnabledAuthorization = false;        // 本服务端点免认证（注意：必须逐服务关闭）
+        RouteOptions.EnabledAuthorization = false;        // 本服务端点免认证（总开关为开时逐服务收紧；总开关关了则全体已免认证）
         RouteOptions.RouteHandlerBuilder = b => b.RequireAuthorization("Admin");
         RouteOptions.IgnoredUrlSuffixesInServiceNames = ["AppService", "Service", "Controller"];
         // 非空列表全量替换全局列表；设为空数组 [] 则完全不剥后缀
@@ -304,7 +304,7 @@ public class HostModule : CikeModule { }
 
 ### 边界与反模式
 
-- 【陷阱】**端点默认全部 `RequireAuthorization`**：没配认证时请求失败（未注册认证方案通常直接 500 `InvalidOperationException`，配置了 JWT 但缺 token 才是 401）。开发期两步关闭：全局 `Configure<GlobalMinimalApiRouteOptions>(o => o.EnabledAuthorization = false)`（关中间件）**并且**每个端点类构造函数 `RouteOptions.EnabledAuthorization = false`（关端点级）——只关全局不会解除端点的 RequireAuthorization。
+- 【陷阱】**端点默认全部 `RequireAuthorization`**：没配认证时请求失败（未注册认证方案通常直接 500 `InvalidOperationException`，配置了 JWT 但缺 token 才是 401）。开发期一步关闭：全局 `Configure<GlobalMinimalApiRouteOptions>(o => o.EnabledAuthorization = false)`——总开关同时控制中间件与端点元数据。只想让个别服务免认证时，在全局开启的前提下于端点类构造函数设 `RouteOptions.EnabledAuthorization = false`。
 - 【陷阱】**Singleton 端点类不能构造注入 Scoped 服务**（仓储、DbContext、EventBus）：开发期（作用域校验）抛 `InvalidOperationException`，生产期形成 captive dependency。一律改为方法参数 `[FromServices]` 注入。
 - 【陷阱】**两种 400 响应形状并存**，前端分别处理：`[AutoValidation]` 校验失败 → `application/problem+json` ProblemDetails（`{"errors": {属性: [消息数组]}}`）；`UserFriendlyException`/`BusinessException` → `text/plain` 纯文本消息。详见 FluentValidation 章。
 - 不要手写 `app.MapGet/MapPost`、`AddControllers`——继承 `MinimalApiServiceBase` 走命名约定。

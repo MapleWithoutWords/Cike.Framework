@@ -110,7 +110,7 @@ Domain ──→ Cike.Data.Domain                                // 实体基类
 | 14 | Saga 补偿 | `[LocalEventHandler(IsCancel = true)]`：handler 失败（重试耗尽、非 Ignore）时按 Order **升序**执行 `Order ≤ 失败步骤`（Throw 为 `≤ Order-1`）的取消 handler，然后抛出原异常 | 事件与 CQRS |
 | 15 | Validator 自动注册 | 依赖 `CikeFluentValidationModule`：全部已加载模块程序集的 `AbstractValidator<T>` 自动注册 | HTTP 接口层 |
 | 16 | 缓存 key 格式化 | 默认 `TypeName` 模式：实际 key = `{类型简单名}.{key}`（如 `User.42`，不含命名空间）；L2 Redis 端为 GZip 压缩的 Hash，redis-cli 不可直读 | 缓存 |
-| 17 | 端点默认要求认证 | 端点级 `RouteOptions.EnabledAuthorization`（默认 true）给每个端点加 `RequireAuthorization`，且**全局配置不传播到端点级**——开发期需逐端点类显式关闭；未注册认证方案时是 500 而非 401 | HTTP 接口层 |
+| 17 | 端点默认要求认证 | 全局 `GlobalMinimalApiRouteOptions.EnabledAuthorization`（默认 true）是**总开关**：关 → 不挂认证中间件且所有端点不加 `RequireAuthorization`；开 → 端点级 `RouteOptions.EnabledAuthorization`（默认 true）逐服务决定是否加；未注册认证方案时是 500 而非 401 | HTTP 接口层 |
 
 ## 5. 跨模块最佳实践与反模式
 

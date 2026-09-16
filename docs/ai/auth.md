@@ -132,7 +132,7 @@ public static void UseMultiTenant(this IApplicationBuilder app);  // => app.UseM
 1. **DI 注册方式**：`CurrentUserContext`（→ `ICurrentUser`，singleton）、`CurrentTenant`（→ `ICurrentTenant`，transient）、`TenantMiddleware`（自类型 transient，满足 `IMiddleware` 模式的 `UseMiddleware<TenantMiddleware>()` 解析）走标记接口约定自动注册；`ICurrentTenantAccessor` 由模块手动注册 singleton（共享同一 `AsyncLocal`）。前提是 `CikeAuthModule` 在依赖图中（通常经 `CikeAspNetCoreMinimalApiModule`）——不在图中则本包**无任何**自动注册发生（模块系统见 [框架内核](./framework-core.md)）。
 2. **`IHttpContextAccessor` 不由本包注册**：注册点在 `CikeAspNetCoreMinimalApiModule.ConfigureServicesAsync`（`AddHttpContextAccessor()`）。宿主只引 `Cike.Auth`（非 Web 宿主）时必须自行 `services.AddHttpContextAccessor()`，否则解析 `ICurrentUser` 失败（`CurrentUserContext` 构造依赖它）。
 3. **`TenantMiddleware` 不自动挂载**：不调用 `app.UseMultiTenant()` 时 `ICurrentTenant.Id` 恒为 0。后果落在数据层（见 [数据访问](./data-access.md)）：`IMultiTenant` 实体的全局查询过滤（默认启用）按 `EF.Property<long>(e, "TenantId") == CurrentTenant.Id` 匹配——只会查到 `TenantId == 0` 的行；插入自动填 `TenantId = 0`。
-4. **中间件顺序由模块初始化顺序保证**：模块按依赖排序初始化（被依赖在前，宿主启动模块最后）。`CikeAspNetCoreMinimalApiModule.InitializeAsync` 在 `GlobalMinimalApiRouteOptions.EnabledAuthorization`（默认 true）时已挂 `UseAuthentication`/`UseAuthorization`，因此宿主模块 `InitializeAsync` 里调 `UseMultiTenant()` 自然位于认证之后，Claims 分支能读到 JWT。`EnabledAuthorization = false` 时不挂认证中间件——Claims 分支永远取不到值，租户只能靠 Header/Cookie/Query。
+4. **中间件顺序由模块初始化顺序保证**：模块按依赖排序初始化（被依赖在前，宿主启动模块最后）。`CikeAspNetCoreMinimalApiModule.InitializeAsync` 在 `GlobalMinimalApiRouteOptions.EnabledAuthorization`（默认 true）时已挂 `UseAuthentication`/`UseAuthorization`，因此宿主模块 `InitializeAsync` 里调 `UseMultiTenant()` 自然位于认证之后，Claims 分支能读到 JWT。`EnabledAuthorization = false` 时不挂认证中间件（总开关，端点也不再带认证要求）——Claims 分支永远取不到值，租户只能靠 Header/Cookie/Query。
 5. **两个租户来源互不影响**：`TenantMiddleware` 与 `Change()` 只写 `ICurrentTenant`（AsyncLocal），从不写 Claims；`ICurrentUser.TenantId` 始终只反映 JWT 的 `"tenantid"` claim（无 claim 即 null）。同一请求内两者可以合法地不同：无 JWT 但 Header 带 `tenantid=7` 时，`ICurrentTenant.Id == 7`、`ICurrentUser.TenantId == null`。
 6. **后台线程/非 HTTP 上下文**：`IHttpContextAccessor.HttpContext` 为 null 时 `ICurrentUser` 各 string 属性返回 null、`TenantId` null、`Roles` 空数组（`IsAuthorization` 例外，抛 `NullReferenceException`）。`ICurrentTenant` 的 AsyncLocal 值随异步调用链流动，但**不要假设**后台任务（Channel 后台消费、独立线程）继承发布时的租户——需要租户语义时把 `tenantId` 作为显式参数/事件字段传递，或用 `Change` 重新建立。
 7. **`CikeClaimTypes` 是可变静态属性**：启动早期改键名对全进程所有读取点即时生效（含 `TenantMiddleware` 的 Header/Cookie/Query 键）；运行期修改非线程安全，禁止。
@@ -227,7 +227,7 @@ public class OrderMaintenanceService(IRepository<Order, long> orderRepository, I
 | 框架 options / appsettings 绑定 | 无——本包不定义任何 options 类，不读任何配置节 |
 | `CikeClaimTypes`（静态可写属性） | 唯一配置点：启动早期改写 claim/请求键名（如 `CikeClaimTypes.UserId = "uid";`）。运行期禁改（见隐式行为 7） |
 | JWT 认证配置 | 宿主自写：`AddAuthentication().AddJwtBearer(...)` + `TokenValidationParameters`；token 的 claim 键名需与 `CikeClaimTypes` 默认值对齐（`UserId` → `ClaimTypes.NameIdentifier`、`TenantId` → `"tenantid"`、`Role` → `ClaimTypes.Role`），或反向改 `CikeClaimTypes` 适配既有 token |
-| `GlobalMinimalApiRouteOptions.EnabledAuthorization` | HTTP 域选项（默认 true）：控制 MinimalAPIs 模块是否自动挂 `UseAuthentication`/`UseAuthorization`，间接决定 `TenantMiddleware` 的 Claims 分支是否可用，见 [HTTP 接口层](./http-api.md) |
+| `GlobalMinimalApiRouteOptions.EnabledAuthorization` | HTTP 域选项（默认 true）**总开关**：控制 MinimalAPIs 模块是否自动挂 `UseAuthentication`/`UseAuthorization` 并给端点加 `RequireAuthorization`，间接决定 `TenantMiddleware` 的 Claims 分支是否可用，见 [HTTP 接口层](./http-api.md) |
 
 ### 边界与反模式
 
