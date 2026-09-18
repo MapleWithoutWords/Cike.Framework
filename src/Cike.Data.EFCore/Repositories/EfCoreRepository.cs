@@ -35,12 +35,17 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
 
     public virtual async Task<List<TEntity>> GetListAsync(CancellationToken cancellationToken = default)
     {
-        return await GetQueryable().ToListAsync(cancellationToken);
+        return await ToListAsync(GetQueryable(), cancellationToken);
     }
 
     public virtual async Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        return await GetQueryable().Where(predicate).ToListAsync(cancellationToken);
+        return await ToListAsync(GetQueryable().Where(predicate), cancellationToken);
+    }
+
+    public virtual async Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> predicate, string sorting = "Id asc", CancellationToken cancellationToken = default)
+    {
+        return await ToListAsync(GetQueryable().Where(predicate).OrderBy(sorting), cancellationToken);
     }
 
     public virtual async Task<(long Total, List<TEntity> Items)> GetPagedListAsync(IPagedAndSortedRequest request, Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default)
@@ -50,6 +55,16 @@ public class EfCoreRepository<TDbContext, TEntity, TKey>(TDbContext dbContext) :
         {
             query = query.Where(predicate);
         }
+        return await ToPagedListAsync(query, request, cancellationToken);
+    }
+
+    public virtual async Task<List<TEntity>> ToListAsync(IQueryable<TEntity> query, CancellationToken cancellationToken = default)
+    {
+        return await query.ToListAsync(cancellationToken);
+    }
+
+    public virtual async Task<(long Total, List<TEntity> Items)> ToPagedListAsync(IQueryable<TEntity> query, IPagedAndSortedRequest request, CancellationToken cancellationToken = default)
+    {
         return await query.ToPaginationAsync(request, cancellationToken);
     }
 

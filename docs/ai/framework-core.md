@@ -123,6 +123,7 @@ HTTP 行为：`BusinessExceptionMiddleware`（`Cike.AspNetCore.MinimalAPIs` 包�
 | `IHasher` / `Hasher` | `Cike.Core.Hashers` | `Hash(string)`：SHA256 → 大写 hex；`Hash(params string?[])`：非空白值以 `\|` 连接再哈希；`Hash(object?[], JsonSerializerOptions?)`：JSON 序列化后连接再哈希。`Hasher : IHasher, ISingletonDependency`，但见反模式节——**它不会被自动注册** |
 | `IRemoteService` | `Cike.Core` | 空标记接口，标记"可远程暴露"的服务类型 |
 | `DisposeAction` / `DisposeAction<T>` / `NullDisposable` | `Cike.Core` | Dispose 时执行回调；`NullDisposable.Instance` 为共享空实现 |
+| `ExpressionExtensions` | `Cike.Core.Extensions.Expressions` | `Expression<Func<T, bool>>` 组合扩展（**非 System 命名空间，需 using `Cike.Core.Extensions.Expressions`**）：`Or<T>(this expr1, expr2)` → `OrElse`、`And<T>(this expr1, expr2)` → `AndAlso`、`Not<T>(this expr)` → `Not` 取反；`expr2` 的 lambda 参数经内部 `RebindParameterVisitor` 重绑定到 `expr1` 的参数后合并，因此两表达式必须是同 `T` 的单参数 lambda，合并结果复用 `expr1` 的参数与签名 |
 | `ChangeTrackingDictionary<TKey, TValue>` | `Cike.Core` 与 `Cike.Core.Models` 各有一份（同名两类，`new` 隐藏基类成员） | `Dictionary` 子类，`Add`/`Remove`/索引器写操作触发 `onChange` 回调 |
 | `Brackets` | `Cike.Core.Models` | `Brackets.Angle`（`<>`）/ `Brackets.Square`（`[]`），配合 `GetFriendlyTypeName` |
 
@@ -235,6 +236,21 @@ throw new UserFriendlyException("购买数量必须大于 0");
 
 // 需要错误码 / 提高日志级别时（message 是第一个参数之外的第二参数）
 throw new BusinessException(code: "ORDER:Duplicated", message: "重复下单", logLevel: LogLevel.Error);
+```
+
+组合查询条件（`using Cike.Core.Extensions.Expressions;`，常与仓储 `GetListAsync(predicate)` / `GetQueryable()` 配合）：
+
+```csharp
+Expression<Func<Order, bool>> status = o => o.Status == OrderStatus.Paid;
+Expression<Func<Order, bool>> tenant  = o => o.Amount > 100;
+
+// 两个独立 lambda 直接 And/Or —— 参数自动重绑定，等价于 o => o.Status == Paid && o.Amount > 100
+var combined = status.And(tenant);
+
+// 取反：o => !(o.Status == Paid)
+var excluded = status.Not();
+
+var orders = await repository.GetListAsync(combined);
 ```
 
 ### 配置

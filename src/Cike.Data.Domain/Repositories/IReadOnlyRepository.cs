@@ -15,7 +15,13 @@ public interface IReadOnlyRepository<TEntity, TKey>
 
     Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
 
+    Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> predicate, string sorting = "Id asc", CancellationToken cancellationToken = default(CancellationToken));
+
     Task<(long Total, List<TEntity> Items)> GetPagedListAsync(IPagedAndSortedRequest request, Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default);
+
+    Task<List<TEntity>> ToListAsync(IQueryable<TEntity> query, CancellationToken cancellationToken = default);
+
+    Task<(long Total, List<TEntity> Items)> ToPagedListAsync(IQueryable<TEntity> query, IPagedAndSortedRequest request, CancellationToken cancellationToken = default);
 
     Task<long> GetCountAsync(CancellationToken cancellationToken = default);
 

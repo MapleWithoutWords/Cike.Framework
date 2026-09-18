@@ -42,20 +42,20 @@ public interface ILock
 // 命名空间：Cike.Locks.Options
 public class LockOptions
 {
-    public TimeSpan DefaultTimeout { get; set; }   // 未配置时为 TimeSpan.Zero（不等待）
+    public TimeSpan DefaultTimeout { get; set; }   // 框架默认 10 分钟（CikeLocksModule 设置，见配置节）
 }
 ```
 
 | 组件 | 说明 |
 |---|---|
 | `LocalLock` | internal（`Cike.Locks.Internals`），`ILock + ISingletonDependency` → 自动注册为 Singleton；key → `SemaphoreSlim(1,1)`，缓存在 `LazyManualMemoryCache<string, SemaphoreSlim>`（随单例存活整个进程） |
-| `CikeLocksModule` | 空模块类，命名空间 `Cike.Locks.Abstracts`；直接依赖仅 `Cike.Core` |
+| `CikeLocksModule` | 模块类，命名空间 `Cike.Locks.Abstracts`；`ConfigureServicesAsync` 中默认设 `LockOptions.DefaultTimeout = 10 分钟`；直接依赖仅 `Cike.Core` |
 | `DisposeAction` | 持锁句柄的运行时类型（来自 `Cike.Core`），同时实现 `IDisposable` 与 `IAsyncDisposable` |
 
 ### 隐式行为
 
 1. **自动注册**：`LocalLock` 实现标记接口即被程序集扫描注册为 `ILock`（Singleton）。模块图包含 `CikeLocksModule` 即可注入 `ILock`，无需手写注册。
-2. **timeout 回退规则**：`timeout == default` 时使用 `LockOptions.DefaultTimeout`。注意 `TimeSpan.Zero == default`——**显式传 `TimeSpan.Zero` 也会回退到 `DefaultTimeout`**，无法表达"零等待试一次"。要无限等待传 `Timeout.InfiniteTimeSpan`。框架自身从不给 `DefaultTimeout` 赋值，未配置时为 `TimeSpan.Zero`（单次尝试、不等待）。
+2. **timeout 回退规则**：`timeout == default` 时使用 `LockOptions.DefaultTimeout`。注意 `TimeSpan.Zero == default`——**显式传 `TimeSpan.Zero` 也会回退到 `DefaultTimeout`**，无法表达"零等待试一次"。要无限等待传 `Timeout.InfiniteTimeSpan`。`CikeLocksModule` 默认给 `DefaultTimeout` 赋 **10 分钟**——不覆盖时未传 timeout 的获取最多等 10 分钟（不再是过去的"立即失败"）；模块按依赖顺序先于应用模块执行 `ConfigureServices`，应用模块里再 `Configure<LockOptions>` 即可覆盖。
 3. **【陷阱】一次性锁缺陷（源码核实仍存在）**：`TryGet` 成功后返回 `new DisposeAction(semaphore.Dispose)`——释放时执行的是信号量的 **`Dispose()` 而非 `Release()`**，且 key→信号量的缓存条目不会移除（`LocalLock` 从不调用 `Remove`）。后果：
    - 同一 key 的第二次 `TryGet`/`TryGetAsync`（无论前次是否成功）会在 `Wait`/`WaitAsync` 上抛 `ObjectDisposedException`；
    - 并发场景更早暴露：线程 A 持锁、线程 B 在同 key 的 `Wait` 中阻塞，A 释放（Dispose）后 B 直接抛 `ObjectDisposedException`；
@@ -123,7 +123,7 @@ public class MyAppModule : CikeModule
 
 - 也可绑定配置节：`context.Services.Configure<LockOptions>(context.Services.GetConfiguration().GetSection("Lock"))`。
 - `LockOptions` 同时被 `LocalLock` 与 `DistributedRedisLock` 消费（后者读同一 `DefaultTimeout`）。
-- 框架不设默认值；未配置 = `TimeSpan.Zero`（不等待）。
+- `CikeLocksModule` 已默认设 `DefaultTimeout = 10 分钟`；应用模块（后序加载，Configure 回调晚于依赖模块注册）中按示例再 `Configure<LockOptions>` 会覆盖该默认值。
 
 ### 边界与反模式
 
@@ -202,7 +202,7 @@ public class CikeLockDistributedRedisModule : CikeModule
 1. **【陷阱】两实现共存时后注册者胜，DistributedRedis 胜出**。机制：接口注册一律 `services.Add`（追加），MS DI 解析取最后一条；模块按后序遍历加载（依赖在前）——`CikeLocksModule` 先处理（注册 `LocalLock` → `ILock`），`CikeLockDistributedRedisModule` 后处理（注册 `DistributedRedisLock` → `ILock`，追加在后）。因此同时依赖两个包时 `ILock` 解析到 **`DistributedRedisLock`**（机制详见[框架内核](./framework-core.md)的自动 DI 与模块加载）。
 2. **配置缺失延迟抛出（非模块初始化时）**：`IDistributedLockProvider` 以工厂单例注册，`ApplicationException("Please use Config<CikeRedisDistributedLockOptions>")` 在**首次解析 `ILock`（即首次构建 `DistributedRedisLock`）时**才抛出，启动阶段无任何报错。抛出条件：`IOptionsMonitor<CikeRedisDistributedLockOptions>` 不可解析、或 `CurrentValue` 为 null、或 `RedisConnectionString` 为 null/空串且 `RedisDatabase` 为 null。
 3. **连接懒创建且独立**：`ConnectionMultiplexer.Connect(RedisConnectionString)` 在首次解析时执行，仅创建一次；不复用 [缓存](./caching.md) 的连接（锁不读缓存模块的 `RedisConfig` 配置节，也不共享其 `IConnectionMultiplexer`）。`RedisDatabase` 非空时优先使用，跳过自建连接。
-4. **timeout 回退规则与 `LocalLock` 相同**：`timeout == default`（含显式 `TimeSpan.Zero`）→ `LockOptions.DefaultTimeout`（未配置 = `TimeSpan.Zero`，单次尝试不等待）；无限等待传 `Timeout.InfiniteTimeSpan`。
+4. **timeout 回退规则与 `LocalLock` 相同**：`timeout == default`（含显式 `TimeSpan.Zero`）→ `LockOptions.DefaultTimeout`（`CikeLocksModule` 默认 10 分钟）；无限等待传 `Timeout.InfiniteTimeSpan`。
 5. **key 校验 / 取消行为**：`null` 或空白 key 抛 `ArgumentNullException`；`cancellationToken` 触发抛 `OperationCanceledException`；超时返回 `null`。
 6. **锁以 key 为名存于目标 Redis database**：与业务缓存 key 共存于同一 database（若共用实例），注意 key 命名前缀避免碰撞。
 7. `DistributedRedisLock` 同时也把自身注册到 `ILock` 之外的接口（`ISingletonDependency` 等标记接口），对业务无意义，忽略即可。

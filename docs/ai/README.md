@@ -37,7 +37,7 @@ POST /api/v1/Orders
 
 | 能力域 | 文档 | 覆盖的包 | 解决什么问题 |
 |---|---|---|---|
-| 框架内核 | [framework-core.md](./framework-core.md) | Cike.Core、Cike.Contracts | 模块系统、自动 DI、异常体系、DTO/分页契约 |
+| 框架内核 | [framework-core.md](./framework-core.md) | Cike.Core、Cike.Contracts | 模块系统、自动 DI、异常体系、DTO/分页契约、常用工具与表达式组合扩展 |
 | HTTP 接口层 | [http-api.md](./http-api.md) | Cike.AspNetCore.MinimalAPIs、Cike.AspNetCore.Swagger、Cike.FluentValidation | 自动路由、全局 HTTP 行为、Swagger、参数校验 |
 | 数据访问 | [data-access.md](./data-access.md) | Cike.Data、Cike.Data.Domain、Cike.Data.EFCore、.MySql、.SqlServer、Cike.Uow | 实体基类、仓储、DbContext 自动化、事务边界、方言 |
 | 事件与 CQRS | [events-cqrs.md](./events-cqrs.md) | Cike.EventBus、.Local、.Adaptive、Cike.Cqrs | Command/Query 用例、本地事件、领域事件、Saga 补偿、后台事件 |
@@ -119,6 +119,8 @@ Domain ──→ Cike.Data.Domain                                // 实体基类
 - 服务注册一律走标记接口 / `[Dependency]`，让框架机制发现你的类
 - 命令侧 Handler 注入 `IRepository`，查询侧注入 `IReadOnlyRepository`（编译期隔离读写）
 - 查询只读场景用 `repository.BeginAsNoTracking()` 包裹，复杂查询走 `GetQueryable()` / `WithDetailsAsync()`
+- 动态组合 `Expression<Func<T, bool>>` 查询条件用 `ExpressionExtensions.And/Or/Not`（`using Cike.Core.Extensions.Expressions;`，参数自动重绑定），不要手写 ExpressionVisitor
+- 仓储 `GetListAsync` / `GetPagedListAsync` 内部统一汇入虚方法 `ToListAsync` / `ToPagedListAsync` 提交——自定义仓储重写这两个出口即可影响全部列表/分页查询
 - `autoSave` 默认 true 立即保存；配合工作单元统一提交时传 false
 - 业务校验失败抛 `UserFriendlyException`，HTTP 层自动转 400 + 消息文本
 - 端点类是 Singleton：Scoped 依赖（EventBus/仓储/DbContext）用 `[FromServices]` 方法参数注入，不要构造函数注入
