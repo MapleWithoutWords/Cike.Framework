@@ -73,26 +73,25 @@ $solutions = (
 
 # List of projects
 $projects = (
-
     # framework
     "src/Cike.AspNetCore.MinimalAPIs",
+    "src/Cike.AspNetCore.Swagger",
     "src/Cike.Auth",
     "src/Cike.Caching",
+    "src/Cike.Contracts",
     "src/Cike.Core",
     "src/Cike.Cqrs",
     "src/Cike.Data",
+    "src/Cike.Data.Domain",
     "src/Cike.Data.EFCore",
     "src/Cike.Data.EFCore.MySql",
     "src/Cike.Data.EFCore.SqlServer",
-    "src/Cike.Data.Domain",
     "src/Cike.EventBus",
     "src/Cike.EventBus.Adaptive",
     "src/Cike.EventBus.Local",
     "src/Cike.FluentValidation",
-    "src/Cike.Uow",
     "src/Cike.UniversalId",
-    "src/Cike.Contracts",
-    "src/Cike.AspNetCore.Swagger",
+    "src/Cike.Uow",
     "src/Locks/Cike.Locks",
     "src/Locks/Cike.Locks.DistributedRedis"
 )
