@@ -1,4 +1,4 @@
-﻿namespace Cike.Core.Thireading;
+﻿namespace Cike.Core.Threading;
 
 /// <summary>
 /// Provides some helper methods to work with async methods.

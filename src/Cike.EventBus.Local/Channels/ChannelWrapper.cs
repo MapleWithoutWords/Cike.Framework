@@ -2,11 +2,11 @@
 
 namespace Cike.EventBus.Local.Channels;
 
-internal class ChannelWarpper<T> : IChannelWarpper<T> where T : IEvent
+internal class ChannelWrapper<T> : IChannelWrapper<T> where T : IEvent
 {
     private readonly IServiceProvider _serviceProvider;
 
-    private readonly ILogger<ChannelWarpper<T>>? _logger;
+    private readonly ILogger<ChannelWrapper<T>>? _logger;
 
     private readonly LocalEventBusOptions _options;
 
@@ -14,7 +14,7 @@ internal class ChannelWarpper<T> : IChannelWarpper<T> where T : IEvent
 
     private Task? _subscribeTask = null;
 
-    public ChannelWarpper(IOptions<LocalEventBusOptions> options, IServiceProvider serviceProvider, ILogger<ChannelWarpper<T>>? logger = null)
+    public ChannelWrapper(IOptions<LocalEventBusOptions> options, IServiceProvider serviceProvider, ILogger<ChannelWrapper<T>>? logger = null)
     {
         _options = options.Value;
         _serviceProvider = serviceProvider;

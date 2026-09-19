@@ -1,4 +1,5 @@
 ﻿using Cike.EventBus;
+using System.Data.Common;
 
 namespace Cike.Data.EFCore.Uow;
 
@@ -20,20 +21,32 @@ public class EFCoreUnitOfWork<TDbContext>(IServiceProvider _serviceProvider) : I
         }
     }
 
-    public bool IsTransactionBegun { get; set; }
+    public bool IsTransactionBegun => DbContext.Database.CurrentTransaction is not null;
 
-    public IDbTransaction DbTransaction { get => DbContext.Database.CurrentTransaction!.GetDbTransaction(); }
+    public IsolationLevel? IsolationLevel { get; set; }
+
+    public DbTransaction DbTransaction
+    {
+        get
+        {
+            if (IsTransactionBegun)
+                return DbContext.Database.CurrentTransaction!.GetDbTransaction();
+
+            IDbContextTransaction transaction = IsolationLevel == null ? DbContext.Database.BeginTransaction() : DbContext.Database.BeginTransaction(IsolationLevel.Value);
+            TransactionId = transaction.TransactionId;
+            return transaction.GetDbTransaction();
+        }
+    }
 
     public UnitOfWorkCommitState CommitState { get; set; }
 
-    public async Task BeginTranscationAsync(IsolationLevel? isolationLevel, CancellationToken cancellationToken = default)
+    public async Task BeginTransactionAsync(IsolationLevel? isolationLevel, CancellationToken cancellationToken = default)
     {
         if (IsTransactionBegun)
         {
             return;
         }
         IDbContextTransaction transaction = isolationLevel.HasValue ? await DbContext.Database.BeginTransactionAsync(isolationLevel.Value, cancellationToken) : await DbContext.Database.BeginTransactionAsync(cancellationToken);
-        IsTransactionBegun = true;
         TransactionId = transaction.TransactionId;
         CommitState = UnitOfWorkCommitState.Uncommitted;
     }

@@ -230,7 +230,7 @@ public abstract class CikeDbContext<TDbContext> : DbContext, IScopedDependency w
         }
         if (!unitOfWork.IsTransactionBegun)
         {
-            await unitOfWork.BeginTranscationAsync();
+            await unitOfWork.BeginTransactionAsync();
         }
     }
 

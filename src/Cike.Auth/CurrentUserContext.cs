@@ -1,4 +1,4 @@
-﻿namespace Cike.Auth;
+namespace Cike.Auth;
 
 public class CurrentUserContext : ICurrentUser, ISingletonDependency
 {
@@ -60,5 +60,5 @@ public class CurrentUserContext : ICurrentUser, ISingletonDependency
 
     public virtual string[] Roles => FindClaims(CikeClaimTypes.Role).Select(c => c.Value).Distinct().ToArray();
 
-    public virtual bool IsAuthorization => _httpContextAccessor.HttpContext.User.Identity?.IsAuthenticated ?? true;
+    public virtual bool IsAuthorization => _httpContextAccessor.HttpContext.User.Identity?.IsAuthenticated ?? false;
 }

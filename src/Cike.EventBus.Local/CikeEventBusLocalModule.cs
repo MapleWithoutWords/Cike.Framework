@@ -12,13 +12,13 @@ public class CikeEventBusLocalModule : CikeModule
             var cikeModuleContainer = context.Services.GetSingletonInstance<CikeModuleContainer>();
             var eventHandlerRelationContainer = new LocalEventHandlerRelationContainer(cikeModuleContainer);
             context.Services.AddSingleton(eventHandlerRelationContainer);
-            foreach (var item in eventHandlerRelationContainer.EventHanlderClassTypeList)
+            foreach (var item in eventHandlerRelationContainer.EventHandlerClassTypeList)
             {
                 context.Services.AddScoped(item);
             }
             context.Services.AddSingleton(typeof(CikeEventBusLocalModuleDenpency));
 
-            context.Services.TryAddEnumerable(new ServiceDescriptor(typeof(IChannelWarpper<>), typeof(ChannelWarpper<>), ServiceLifetime.Singleton));
+            context.Services.TryAddEnumerable(new ServiceDescriptor(typeof(IChannelWrapper<>), typeof(ChannelWrapper<>), ServiceLifetime.Singleton));
 
             context.Services.TryAddEnumerable(new ServiceDescriptor(typeof(ILocalEventMiddleware<>), typeof(DbTransactionLocalEventMiddleware<>), ServiceLifetime.Transient));
             context.Services.TryAddEnumerable(new ServiceDescriptor(typeof(ILocalEventMiddleware<>), typeof(ExceptionLocalEventMiddleware<>), ServiceLifetime.Transient));

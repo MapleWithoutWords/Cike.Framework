@@ -29,7 +29,7 @@ public class CikeEfCoreTestHostTests : IClassFixture<CikeEfCoreTestHost>
         using var scope = _host.CreateScope();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-        await unitOfWork.BeginTranscationAsync();
+        await unitOfWork.BeginTransactionAsync();
         Assert.True(unitOfWork.IsTransactionBegun);
 
         await unitOfWork.CommitAsync();

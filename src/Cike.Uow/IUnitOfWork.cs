@@ -10,7 +10,7 @@ public interface IUnitOfWork
 
     UnitOfWorkCommitState CommitState { get; }
 
-    Task BeginTranscationAsync(IsolationLevel? isolationLevel = default, CancellationToken cancellationToken = default);
+    Task BeginTransactionAsync(IsolationLevel? isolationLevel = default, CancellationToken cancellationToken = default);
 
     Task CommitAsync(CancellationToken cancellationToken = default);
 

@@ -1,4 +1,4 @@
-﻿namespace Cike.AspNetCore.MinimalAPIs.JsonConverts;
+namespace Cike.AspNetCore.MinimalAPIs.JsonConverts;
 
 public class LongToStringConverter : JsonConverter<long>
 {
@@ -6,8 +6,10 @@ public class LongToStringConverter : JsonConverter<long>
     {
         if (reader.TokenType == JsonTokenType.String)
         {
-            long.TryParse(reader.GetString(), out var result);
-            return result;
+            var str = reader.GetString();
+            if (long.TryParse(str, out var result))
+                return result;
+            throw new JsonException($"The value '{str}' is not a valid Int64.");
         }
         return reader.GetInt64();
     }
@@ -25,8 +27,9 @@ public class NullableLongToStringConverter : JsonConverter<long?>
         if (reader.TokenType == JsonTokenType.String)
         {
             var str = reader.GetString();
-            long.TryParse(str, out var result);
-            return result;
+            if (long.TryParse(str, out var result))
+                return result;
+            throw new JsonException($"The value '{str}' is not a valid Int64.");
         }
         if (reader.TokenType == JsonTokenType.Number)
         {

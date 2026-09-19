@@ -10,7 +10,7 @@ public class LocalEventExecutor(IServiceProvider _serviceProvider,
 {
     public async Task ExecuteAsync<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : IEvent
     {
-        if (!_localEventHandlerRelationContainer.EventHanlderRelations.ContainsKey(@event.GetType()))
+        if (!_localEventHandlerRelationContainer.EventHandlerRelations.ContainsKey(@event.GetType()))
         {
             return;
         }
@@ -26,7 +26,7 @@ public class LocalEventExecutor(IServiceProvider _serviceProvider,
 
     public async Task CancelAsync<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : IEvent
     {
-        var eventHandlers = _localEventHandlerRelationContainer.EventHanlderRelations[@event.GetType()];
+        var eventHandlers = _localEventHandlerRelationContainer.EventHandlerRelations[@event.GetType()];
 
         var cancelHandlerResult = await ExecuteCancelHandlerAsync(eventHandlers.CancelHandlers, @event, cancellationToken);
         if (cancelHandlerResult.IsSucceed)
@@ -44,7 +44,7 @@ public class LocalEventExecutor(IServiceProvider _serviceProvider,
 
     private async Task ExecuteHandlerAsync<TEvent>(TEvent @event, CancellationToken cancellationToken = default) where TEvent : IEvent
     {
-        var eventHanlderDto = _localEventHandlerRelationContainer.EventHanlderRelations[@event.GetType()];
+        var eventHanlderDto = _localEventHandlerRelationContainer.EventHandlerRelations[@event.GetType()];
         var isCancel = false;
         foreach (var item in eventHanlderDto.Handlers)
         {

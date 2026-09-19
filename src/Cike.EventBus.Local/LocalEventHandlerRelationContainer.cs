@@ -2,8 +2,8 @@
 
 public class LocalEventHandlerRelationContainer
 {
-    public Dictionary<Type, LocalEventHandlerDto> EventHanlderRelations { get; } = new();
-    public HashSet<Type> EventHanlderClassTypeList { get; } = new();
+    public Dictionary<Type, LocalEventHandlerDto> EventHandlerRelations { get; } = new();
+    public HashSet<Type> EventHandlerClassTypeList { get; } = new();
 
     public LocalEventHandlerRelationContainer(CikeModuleContainer cikeModuleContainer)
     {
@@ -30,15 +30,15 @@ public class LocalEventHandlerRelationContainer
                 {
                     throw new ArgumentException($"Method '{classType.FullName}.{item.Name}' must have only one parameter of type LocalEvent.");
                 }
-                if (!EventHanlderClassTypeList.Contains(classType))
+                if (!EventHandlerClassTypeList.Contains(classType))
                 {
-                    EventHanlderClassTypeList.Add(classType);
+                    EventHandlerClassTypeList.Add(classType);
                 }
                 var eventParameter = parameters.First();
 
-                if (!EventHanlderRelations.ContainsKey(eventParameter.ParameterType))
+                if (!EventHandlerRelations.ContainsKey(eventParameter.ParameterType))
                 {
-                    EventHanlderRelations[eventParameter.ParameterType] = new LocalEventHandlerDto();
+                    EventHandlerRelations[eventParameter.ParameterType] = new LocalEventHandlerDto();
                 }
 
                 attribute.InstanceType = classType;
@@ -49,16 +49,16 @@ public class LocalEventHandlerRelationContainer
 
                 if (attribute.IsCancel)
                 {
-                    EventHanlderRelations[eventParameter.ParameterType].CancelHandlers.Add(attribute);
+                    EventHandlerRelations[eventParameter.ParameterType].CancelHandlers.Add(attribute);
                 }
                 else
                 {
-                    EventHanlderRelations[eventParameter.ParameterType].Handlers.Add(attribute);
+                    EventHandlerRelations[eventParameter.ParameterType].Handlers.Add(attribute);
                 }
             }
         });
 
-        foreach (var item in EventHanlderRelations.Values)
+        foreach (var item in EventHandlerRelations.Values)
         {
             item.Handlers = item.Handlers.OrderBy(e => e.Order).ToList();
             item.CancelHandlers = item.CancelHandlers.OrderBy(e => e.Order).ToList();
